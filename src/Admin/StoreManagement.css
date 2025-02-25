@@ -1,0 +1,177 @@
+/* Reset và font chung */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Container: chia 2 cột trái (sidebar) - phải (content) */
+  .store-management-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+  }
+  
+  /* Sidebar bên trái */
+  .sidebar {
+    width: 240px;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  
+  .brand {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  /* Nội dung bên phải */
+  .content {
+    flex: 1;
+    padding: 2rem;
+    position: relative; /* Giúp ta có thể định vị con bên trong nếu muốn */
+  }
+  
+  /* Nút Logout ở góc trên bên phải */
+  .logout-container {
+    display: flex;
+    justify-content: flex-end; /* đẩy nút logout sang phải */
+    margin-bottom: 1rem;       /* chừa khoảng cách phía dưới */
+  }
+  
+  .logout-btn {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .logout-btn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Tiêu đề Store Management */
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Khu vực tìm kiếm và nút create */
+  .search-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-container input {
+    flex: 1;
+    min-width: 180px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .create-btn {
+    background-color: #4e6ef2;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .create-btn:hover {
+    background-color: #3b54b6;
+  }
+  
+  /* Bảng store */
+  .store-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  }
+  
+  .store-table thead {
+    background-color: #f9f9f9;
+  }
+  
+  .store-table th,
+  .store-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .store-table tbody tr:hover {
+    background-color: #fafafa;
+  }
+  
+  /* Action buttons (Edit, Delete) */
+  .action-btn {
+    padding: 0.4rem 0.8rem;
+    margin-right: 0.3rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .action-btn.edit {
+    background-color: #4e6ef2;
+    color: #fff;
+  }
+  
+  .action-btn.delete {
+    background-color: #ff5b5b;
+    color: #fff;
+  }
+  
+  /* Phân trang */
+  .pagination {
+    display: flex;
+    justify-content: space-between; /* tách trái và phải */
+    align-items: center;
+    margin-top: 1rem;
+    background-color: #fff;
+    padding: 0.75rem;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  }
+  
+  /* Bên trái: nút Back/Next */
+  .pagination-left {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  /* Bên phải: Page x of y */
+  .pagination-right {
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .pagination-btn {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .pagination-btn:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
