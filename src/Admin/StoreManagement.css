@@ -150,6 +150,7 @@
   .pagination-left {
     display: flex;
     gap: 0.5rem;
+    margin-left: 10px;
   }
   
   /* Bên phải: Page x of y */
@@ -164,6 +165,7 @@
     padding: 0.4rem 1rem;
     cursor: pointer;
     border-radius: 4px;
+    
   }
   
   .pagination-btn:hover {
@@ -175,3 +177,37 @@
     cursor: not-allowed;
   }
   
+  .import-btn {
+  background-color: green;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.import-btn:hover {
+  background-color: darkgreen; /* Màu xẫm hơn khi hover */
+}
+
+/* Nút Export */
+.export-btn {
+  background-color: orange;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.export-btn:hover {
+  background-color: #cc8400; /* Màu xẫm hơn khi hover */
+}
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
