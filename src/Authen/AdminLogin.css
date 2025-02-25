@@ -1,0 +1,138 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.admin-login-box {
+  display: flex;
+  background-color: #fff;
+  max-width: 800px;  
+  width: 100%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.login-illustration {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative; 
+}
+
+.login-illustration::after {
+  content: "";
+  position: absolute;
+  top: 5rem;           /* Khoảng trống phía trên */
+  bottom: 5rem;        /* Khoảng trống phía dưới */
+  right: 0;            /* Canh vạch ở sát biên phải cột illustration */
+  width: 2px;          /* Độ dày vạch */
+  background-color: #ddd;
+}
+
+.login-illustration img {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-form-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 3rem;
+}
+
+.company-logo {
+  width: 60px;
+  height: 60px;
+  background-color: #b2b2b2;
+  margin: 0 auto 1rem auto;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.login-title {
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-size: 1.25rem;
+  text-align: center; 
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.login-btn {
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #4e6ef2;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  background-color: #3b54b6;
+}
+
+.extra-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.extra-links a {
+  color: #4e6ef2;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.footer-links {
+  margin-top: 2rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.footer-links a {
+  color: #666;
+  text-decoration: none;
+}
+
