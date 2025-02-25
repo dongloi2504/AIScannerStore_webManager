@@ -10,10 +10,23 @@ export function createStore({ storeName, storeLocation }) {
 }
 
 // Hàm lấy danh sách store
-export function getStores() {
-  return instance.get("/api/store");
+export function getStores({
+  storeId,
+  storeName,
+  storeLocation,
+  pageNumber = 1,
+  pageSize = 8
+} = {}) {
+  return instance.get("/api/store", {
+    params: {
+      StoreId: storeId,
+      StoreNameQuery: storeName,
+      StoreAddressQuery: storeLocation,
+      PageNumber: pageNumber,
+      PageSize: pageSize,
+    }
+  });
 }
-
 // Hàm xoá store
 export function deleteStore(id) {
   return instance.delete(`/api/store/${id}`);

@@ -1,4 +1,3 @@
-// AdminLogin.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
@@ -11,22 +10,21 @@ function AdminLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      // Gọi API đăng nhập
       const data = await loginAdmin({ UserEmail, password });
-      console.log('Login success:', data);
+      console.log('Login response:', data);
 
-      // Giả sử backend trả về accessToken trong data.accessToken
-      if (data && data.accessToken) {
-        // Lưu token vào localStorage
+      if (data && data.isSuccess && data.accessToken) {
         localStorage.setItem('token', data.accessToken);
+        navigate('/store-management');
+      } else {
+        // Thay vì hiển thị lỗi lên console, dùng alert
+        alert(data?.message || 'Login failed. Please try again.');
       }
-
-      // Chuyển sang trang StoreManagement
-      navigate('/store-management');
     } catch (error) {
       console.error('Login failed:', error);
-      // Hiển thị thông báo lỗi (nếu cần)
+      alert('An error occurred while logging in. Please try again.');
     }
   };
 
@@ -42,6 +40,7 @@ function AdminLogin() {
         <div className="login-form-container">
           <div className="company-logo">company</div>
           <h2 className="login-title">Login</h2>
+
           <form onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="email">Email</label>
