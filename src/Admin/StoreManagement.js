@@ -3,6 +3,7 @@
   import './StoreManagement.css';
   import { getStores, deleteStore } from '../ServiceApi/apiAdmin';
   import Button from 'react-bootstrap/Button';
+  import SideBar from './SideBar';
   import CreateStoreModal from './CreateStoreModal';
   import EditStoreModal from './EditStoreModal';
 
@@ -179,10 +180,7 @@
     return (
       <div className="store-management-container">
         {/* Sidebar bên trái */}
-        <aside className="sidebar">
-          <div className="brand">SMARTSTORE</div>
-          <div className="name_after_brand">Admin Page</div>
-        </aside>
+        <SideBar/>
 
         {/* Nội dung bên phải */}
         <div className="content">
