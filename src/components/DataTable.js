@@ -60,7 +60,7 @@ const DataTable = ({
       </div>
 
       {/* Data Table */}
-      <table className="data-table">
+      <table className="data-table ">
         <thead>
           <tr>
             <th>

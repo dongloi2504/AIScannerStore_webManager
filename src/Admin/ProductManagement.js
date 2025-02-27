@@ -1,24 +1,42 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom"; // Dùng để chuyển trang
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import GenericModal from "../components/GenericModal";
 
+// Giả sử bạn import hàm uploadfile từ apiAdmin
+import { uploadfile } from "../ServiceApi/apiAdmin";
+
 function ProductManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate(); // Khởi tạo biến navigate để chuyển hướng
 
-  // Dữ liệu mock ban đầu (giả lập toàn bộ sản phẩm)
+  // Dữ liệu mock ban đầu (giả lập toàn bộ sản phẩm), giống ProductDetail
   const initialProducts = [
-    { productId: "P001", productName: "Product 1", basePrice: 100, category: "Category A" },
-    { productId: "P002", productName: "Product 2", basePrice: 200, category: "Category B" },
-    { productId: "P003", productName: "Product 3", basePrice: 150, category: "Category A" },
-    { productId: "P004", productName: "Product 4", basePrice: 250, category: "Category C" },
-    { productId: "P005", productName: "Product 5", basePrice: 300, category: "Category B" },
-    { productId: "P006", productName: "Product 6", basePrice: 120, category: "Category A" },
-    { productId: "P007", productName: "Product 7", basePrice: 220, category: "Category B" },
-    { productId: "P008", productName: "Product 8", basePrice: 180, category: "Category C" },
-    { productId: "P009", productName: "Product 9", basePrice: 190, category: "Category A" },
-    { productId: "P010", productName: "Product 10", basePrice: 260, category: "Category B" },
+    {
+      productId: "P001",
+      productName: "Product 1",
+      category: "Category A",
+      imageUrl: "",
+      description: "bột, đường, sữa",
+      stores: [
+        { storeId: "S001", storeName: "KFC", price: 110 },
+        { storeId: "S002", storeName: "LOTTE", price: 105 },
+        { storeId: "S003", storeName: "HighLand", price: 115 },
+      ],
+    },
+    {
+      productId: "P002",
+      productName: "Product 2",
+      category: "Category B",
+      imageUrl: "",
+      description: "trà xanh, kem, đá xay",
+      stores: [
+        { storeId: "S001", storeName: "KFC", price: 210 },
+        { storeId: "S002", storeName: "LOTTE", price: 190 },
+      ],
+    },
   ];
 
   // State chứa toàn bộ dữ liệu (để mô phỏng CRUD)
@@ -33,10 +51,10 @@ function ProductManagement() {
 
   // Các state cho tạo mới sản phẩm
   const [productName, setProductName] = useState("");
-  const [productBasePrice, setProductBasePrice] = useState("");
   const [productCategory, setProductCategory] = useState("");
+  const [productImageFile, setProductImageFile] = useState(null); // lưu file ảnh
 
-  // State cho search filters (theo các trường: productName, productId, productCategory)
+  // State cho search filters
   const [filters, setFilters] = useState({
     productName: "",
     productId: "",
@@ -46,7 +64,6 @@ function ProductManagement() {
   // State cho modal chỉnh sửa (Edit)
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingProductName, setEditingProductName] = useState("");
-  const [editingProductBasePrice, setEditingProductBasePrice] = useState("");
   const [editingProductCategory, setEditingProductCategory] = useState("");
 
   // Hàm load dữ liệu (mô phỏng call API) với filter và phân trang
@@ -70,14 +87,17 @@ function ProductManagement() {
     const totalItems = filtered.length;
     const totalPg = Math.ceil(totalItems / pageSize) || 1;
     setTotalPages(totalPg);
+
     // Nếu currentPage vượt quá tổng số trang sau khi filter thì quay lại trang 1
     const page = currentPage > totalPg ? 1 : currentPage;
     setCurrentPage(page);
+
     const startIndex = (page - 1) * pageSize;
     const paginatedItems = filtered.slice(startIndex, startIndex + pageSize);
     setProducts(paginatedItems);
   };
 
+  // Mỗi khi currentPage, filters hoặc allProducts thay đổi => load lại danh sách
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,9 +112,7 @@ function ProductManagement() {
 
   const handleCheckOne = (productId) => {
     setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
@@ -104,27 +122,50 @@ function ProductManagement() {
       `Are you sure you want to delete ${selectedProducts.length} product(s)?`
     );
     if (!confirmDelete) return;
+
     setAllProducts((prev) => prev.filter((p) => !selectedProducts.includes(p.productId)));
     setSelectedProducts([]);
   };
 
-  const handleCreateProduct = () => {
-    // Giả lập tạo product với productId tự động tăng
-    const newId = "P" + (allProducts.length + 1).toString().padStart(3, "0");
-    const newProduct = {
-      productId: newId,
-      productName,
-      basePrice: parseFloat(productBasePrice),
-      category: productCategory,
-    };
-    setAllProducts([...allProducts, newProduct]);
-    console.log("Product created successfully", newProduct);
-    setShowModal(false);
-    setProductName("");
-    setProductBasePrice("");
-    setProductCategory("");
+  // Tạo mới product (có upload file)
+  const handleCreateProduct = async () => {
+    try {
+      // Giả lập tạo product với productId tự động tăng
+      const newId = "P" + (allProducts.length + 1).toString().padStart(3, "0");
+
+      let uploadedImageUrl = "";
+      // Nếu có chọn file ảnh, tiến hành upload
+      if (productImageFile) {
+        const uploadRes = await uploadfile(productImageFile);
+        // Giả sử API trả về { url: "https://..." } trong uploadRes.data
+        uploadedImageUrl = uploadRes?.data?.url || "";
+      }
+
+      const newProduct = {
+        productId: newId,
+        productName,
+        category: productCategory,
+        imageUrl: uploadedImageUrl, // lưu URL ảnh
+        // Bổ sung description và stores mặc định nếu muốn
+        description: "Mặc định: chưa nhập",
+        stores: [],
+      };
+
+      // Cập nhật vào allProducts
+      setAllProducts([...allProducts, newProduct]);
+      console.log("Product created successfully", newProduct);
+
+      // Đóng modal, reset form
+      setShowModal(false);
+      setProductName("");
+      setProductCategory("");
+      setProductImageFile(null);
+    } catch (error) {
+      console.error("Error uploading file or creating product:", error);
+    }
   };
 
+  // Các trường trong modal tạo product
   const productFields = [
     {
       label: "Product Name",
@@ -133,13 +174,7 @@ function ProductManagement() {
       value: productName,
       onChange: (e) => setProductName(e.target.value),
     },
-    {
-      label: "Base Price",
-      controlId: "productBasePrice",
-      type: "number",
-      value: productBasePrice,
-      onChange: (e) => setProductBasePrice(e.target.value),
-    },
+
     {
       label: "Category",
       controlId: "productCategory",
@@ -147,16 +182,23 @@ function ProductManagement() {
       value: productCategory,
       onChange: (e) => setProductCategory(e.target.value),
     },
+    {
+      label: "Product Image",
+      controlId: "productImage",
+      type: "file",
+      // Không set value cho file, chỉ cần onChange
+      onChange: (e) => setProductImageFile(e.target.files[0]),
+    },
   ];
 
   const handleCreateNewProduct = () => {
     setShowModal(true);
   };
 
+  // Xử lý Edit
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setEditingProductName(product.productName);
-    setEditingProductBasePrice(product.basePrice);
     setEditingProductCategory(product.category);
   };
 
@@ -167,8 +209,10 @@ function ProductManagement() {
           ? {
               ...p,
               productName: editingProductName,
-              basePrice: parseFloat(editingProductBasePrice),
               category: editingProductCategory,
+              // Giữ lại description, stores cũ (nếu có)
+              description: p.description,
+              stores: p.stores,
             }
           : p
       )
@@ -177,8 +221,9 @@ function ProductManagement() {
     setEditingProduct(null);
   };
 
+  // Xử lý Detail => chuyển sang trang /product-detail/:id
   const handleDetailProduct = (product) => {
-    console.log("Detail product:", product);
+    navigate(`/product-detail/${product.productId}`);
   };
 
   return (
@@ -191,7 +236,6 @@ function ProductManagement() {
           columns={[
             { key: "productId", label: "Product ID" },
             { key: "productName", label: "Product" },
-            { key: "basePrice", label: "Base Price" },
             { key: "category", label: "Category" },
           ]}
           selectedItems={selectedProducts}
@@ -223,7 +267,7 @@ function ProductManagement() {
               label: "Detail",
               className: "detail",
               variant: "secondary",
-              onClick: handleDetailProduct,
+              onClick: handleDetailProduct, // gọi hàm navigate
             },
           ]}
           extraButtons={[
@@ -267,13 +311,7 @@ function ProductManagement() {
               value: editingProductName,
               onChange: (e) => setEditingProductName(e.target.value),
             },
-            {
-              label: "Base Price",
-              controlId: "editProductBasePrice",
-              type: "number",
-              value: editingProductBasePrice,
-              onChange: (e) => setEditingProductBasePrice(e.target.value),
-            },
+        
             {
               label: "Category",
               controlId: "editProductCategory",

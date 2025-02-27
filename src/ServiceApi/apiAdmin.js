@@ -44,3 +44,17 @@ export function updateStore({ storeId, storeName, storeLocation }) {
     storeLocation,
   });
 }
+
+// Hàm úp ảnh (POST /api/upload)
+export function uploadfile(file) {
+  // Tạo một đối tượng FormData để chứa file upload
+  const formData = new FormData();
+  formData.append("file", file);
+
+  // Gửi request POST kèm formData
+  return instance.post("/api/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}

@@ -117,13 +117,14 @@
 /* =============================== */
 .data-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background-color: #fff;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
 }
 
 .data-table thead {
-    background-color: #f9f9f9;
+    background-color: #f2f2f2;
 }
 
 .data-table th,
@@ -131,11 +132,36 @@
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #eee;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .data-table tbody tr:hover {
     background-color: #fafafa;
 }
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  /* Đặt cột đầu (checkbox) rộng 60px */
+.data-table th:first-child,
+.data-table td:first-child {
+  width: 60px;
+  text-align: center; /* canh giữa checkbox */
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+  padding-left: 4rem; /* tuỳ chỉnh khoảng cách */
+}
+/* Đặt cột cuối (action) rộng 120px */
+.data-table th:last-child,
+.data-table td:last-child {
+  width: 200px;
+}
+
 
 /* =============================== */
 /* 🔹 Action buttons (Edit, Delete) */

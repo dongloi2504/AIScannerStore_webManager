@@ -1,0 +1,18 @@
+.table-wrapper {
+    width: 70%;       /* hoặc 100%, 80%, v.v. */
+    margin: 1rem auto;
+  }
+  
+  /* Bảng chiếm 100% khối cha */
+  .table-wrapper .data-table {
+    width: 100%;
+    table-layout: fixed;
+    /* ... các style khác ... */
+  }
+  
+  /* Pagination cũng chiếm 100% khối cha */
+  .table-wrapper .pagination {
+    width: 100%;
+    /* Nếu muốn chữ, nút bấm nhỏ, điều chỉnh font-size, padding ở đây */
+  }
+  
