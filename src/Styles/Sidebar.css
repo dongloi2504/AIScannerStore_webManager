@@ -1,0 +1,85 @@
+/* ========== Cấu hình chung cho sidebar ========== */
+.sidebar {
+  width: 220px;
+  background-color: #191919; /* nền tối */
+  color: #ffffff; /* chữ trắng */
+  height: 100vh;
+  padding: 1rem 0; /* padding top và bottom */
+  box-sizing: border-box;
+  position: fixed;
+  transition: width 0.3s ease;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Dịch chuyển nội dung bên trong sidebar sang phải */
+.sidebar-menu {
+  padding-left: 10px; /* khoảng hở bên trái cho toàn bộ menu */
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch; 
+}
+
+.sidebar-logo {
+  margin-left: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+/* ========== Menu items ========== */
+.sidebar-item {
+  position: relative;
+  width: 100%;
+}
+
+/* Điều chỉnh đường kẻ sao cho căn lề trùng với nội dung */
+.sidebar-item::after {
+  content: "";
+  position: absolute;
+  left: 10px;   /* cách mép trái 10px */
+  right: 20px;  /* cách mép phải 10px */
+  bottom: 0;
+  border-bottom: 1px solid #333;
+}
+.sidebar-item:last-child {
+  border-bottom: none; /* item cuối không cần đường kẻ */
+}
+
+/* Link bên trong item */
+.sidebar-link {
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 0.75rem 1rem; /* có thể điều chỉnh nếu cần */
+  transition: color 0.2s ease;
+}
+
+.sidebar-link:hover {
+  color: #f7b731; /* màu vàng khi hover */
+}
+
+.sidebar-item.active .sidebar-link {
+  color: #f7b731;
+}
+
+/* ========== Toggle ========== */
+.sidebar-toggle {
+  position: fixed;
+  top: 1rem;
+  left: 230px;
+  cursor: pointer;
+  transition: left 0.3s ease;
+}
+
+.sidebar.closed ~ .sidebar-toggle {
+  left: 20px;
+}
+.sidebar-link.active {
+  color: #f7b731;
+}

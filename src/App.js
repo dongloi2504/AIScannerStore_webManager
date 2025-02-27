@@ -2,16 +2,18 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AdminLogin from './Authen/AdminLogin';
 import StoreManagement from './Admin/StoreManagement';
-import ManagerManagement from './Admin/ManagerManagement';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import ProductDetail from './Admin/ProductDetail';
+import ProductManagement from './Admin/ProductManagement';
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<AdminLogin />} />
         <Route path="/store-management" element={<StoreManagement />} />
-        <Route path="/manager-management" element={<ManagerManagement />} />
+        <Route path="/product-management" element={<ProductManagement />} />
+        <Route path="/product-detail/:id" element={<ProductDetail />} />
+        <Route path="/blank" element={<blank />} />
       </Routes>
     </BrowserRouter>
   );

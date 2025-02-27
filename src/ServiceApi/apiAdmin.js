@@ -15,7 +15,7 @@ export function getStores({
   storeName,
   storeLocation,
   pageNumber = 1,
-  pageSize = 8
+  pageSize,
 } = {}) {
   return instance.get("/api/store", {
     params: {
@@ -28,9 +28,13 @@ export function getStores({
   });
 }
 // Hàm xoá store
-export function deleteStore(id) {
-  return instance.delete(`/api/store/${id}`);
+export function deleteStore(ids) {
+  return instance.delete(`/api/store`, {
+    data: { items: ids },
+    headers: { "Content-Type": "application/json" }, 
+  });
 }
+
 
 // Hàm cập nhật store (PUT /api/store/{id})
 export function updateStore({ storeId, storeName, storeLocation }) {
