@@ -7,13 +7,12 @@ import ProductDetail from './Admin/ProductDetail';
 import ProductManagement from './Admin/ProductManagement';
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter  basename="/AIScannerStore_build">
       <Routes>
         <Route path="/" element={<AdminLogin />} />
         <Route path="/store-management" element={<StoreManagement />} />
         <Route path="/product-management" element={<ProductManagement />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
-        <Route path="/blank" element={<blank />} />
       </Routes>
     </BrowserRouter>
   );
