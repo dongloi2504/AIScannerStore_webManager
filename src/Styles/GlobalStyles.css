@@ -130,7 +130,7 @@
 .data-table th,
 .data-table td {
     padding: 0.75rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #eee;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -152,14 +152,14 @@
   text-align: center; /* canh giữa checkbox */
 }
 
-.data-table th:nth-child(3),
+/* .data-table th:nth-child(3),
 .data-table td:nth-child(3) {
-  padding-left: 4rem; /* tuỳ chỉnh khoảng cách */
-}
+  padding-left: 2rem; tuỳ chỉnh khoảng cách
+} */
 /* Đặt cột cuối (action) rộng 120px */
 .data-table th:last-child,
 .data-table td:last-child {
-  width: 200px;
+  width: 100px;
 }
 
 
