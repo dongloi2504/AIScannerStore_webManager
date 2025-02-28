@@ -1,66 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../Styles/GlobalStyles.css";
 import GenericDetail from "../components/GenericDetail";
 import "../Styles/Detail.css";
+import { getProducts } from "../ServiceApi/apiAdmin";
 
 function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Tạm mock data
-  const [allProducts] = useState([
-    {
-      productId: "P001",
-      productName: "Product 1",
-      basePrice: 100,
-      category: "Category A",
-      imageUrl: "",
-      description: "bột, đường, sữa",
-      stores: [
-        { storeId: "S001", storeName: "KFC", price: 110 },
-        { storeId: "S002", storeName: "LOTTE", price: 105 },
-        { storeId: "S003", storeName: "HighLand", price: 115 },
-        { storeId: "S004", storeName: "Starbucks", price: 120 },
-      ],
-    },
-    {
-      productId: "P002",
-      productName: "Product 2",
-      basePrice: 200,
-      category: "Category B",
-      imageUrl: "",
-      description: "trà xanh, kem, đá xay",
-      stores: [
-        { storeId: "S001", storeName: "KFC", price: 210 },
-        { storeId: "S002", storeName: "LOTTE", price: 190 },
-      ],
-    },
-  ]);
+  // Log id để kiểm tra
+  console.log("Product ID from URL:", id);
 
-  // ---- Các state liên quan đến phân trang (PHẢI gọi trước khi return sớm) ----
+  // State lưu trữ thông tin product lấy từ API
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Các state phân trang cho danh sách store của product
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 2;
 
-  // Tìm product
-  const product = allProducts.find((p) => p.productId === id);
+  // Gọi API lấy thông tin product theo id (chỉ tìm theo productId)
+  useEffect(() => {
+    async function loadProduct() {
+      try {
+        setLoading(true);
+        const response = await getProducts({
+          productId: id, // sử dụng id từ URL
+          pageNumber: 1,
+          pageSize: 1,
+        });
+        if (response?.items && response.items.length > 0) {
+          setProduct(response.items[0]);
+        } else {
+          setError("Product not found!");
+          setProduct(null);
+        }
+      } catch (err) {
+        console.error("Error loading product:", err);
+        setError("Error loading product.");
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProduct();
+  }, [id]);
 
-  // Nếu không có product, return sớm
+  // Nếu đang loading, hiển thị Loading...
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Nếu không có product (hoặc lỗi), render GenericDetail với thông báo lỗi
   if (!product) {
     return (
-        
       <GenericDetail
         onBack={() => navigate(-1)}
         notFound={true}
-        notFoundMessage="Product not found!"
+        notFoundMessage={error || "Product not found!"}
       />
     );
   }
 
-  // Tính totalPages
-  const totalPages = Math.ceil(product.stores.length / pageSize);
+  // Sử dụng trường inventories thay vì product.stores (vì API trả về trường inventories)
+  const productStores = product.inventories || [];
+  const totalPages = Math.ceil(productStores.length / pageSize);
 
-  // Hàm xử lý Back
   const handleBack = () => {
     navigate(-1);
   };
@@ -76,7 +83,7 @@ function ProductDetail() {
     alert("Delete product");
   };
 
-  // Xử lý Prev/Next
+  // Xử lý phân trang cho danh sách store
   const handlePrev = () => {
     setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
   };
@@ -84,43 +91,44 @@ function ProductDetail() {
     setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   };
 
-  // Cắt dữ liệu theo trang
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentStores = product.stores.slice(startIndex, endIndex);
+  const currentStores = productStores.slice(startIndex, endIndex);
 
-  // Tạo infoRows
+  // Tạo infoRows hiển thị thông tin chi tiết của product
   const infoRows = [
     { label: "Product", value: product.productName },
     { label: "ID", value: product.productId },
-    { label: "Category", value: product.category },
-    { label: "Base Price", value: product.basePrice },
+    { label: "Category", value: product.categoryName },
     { label: "Description", value: product.description },
   ];
 
-  // Tạo dữ liệu bảng
+  // Tạo dữ liệu bảng cho danh sách store
   const tableColumns = ["Store ID", "Store", "Price"];
-  const tableRows = currentStores.map((s) => [s.storeId, s.storeName, s.price]);
+  const tableRows = currentStores.map((s) => [
+    s.storeId,
+    s.storeName || "N/A",
+    s.price,
+  ]);
 
   return (
     <div className="product-detail-container">
-    <GenericDetail
-      onBack={handleBack}
-      title="Product Detail"
-      imageUrl={product.imageUrl}
-      infoRows={infoRows}
-      tableData={{ columns: tableColumns, rows: tableRows }}
-     
-      extraButtons={[
-        { label: "Create", variant: "success", onClick: handleCreate },
-        { label: "Delete", variant: "danger", onClick: handleDelete },
-        { label: "Edit", variant: "primary", onClick: handleEdit },
-      ]}
-      currentPage={currentPage}
-      totalPages={totalPages}
-      handlePrev={handlePrev}
-      handleNext={handleNext}
-    />
+      <GenericDetail
+        onBack={handleBack}
+        title="Product Detail"
+        imageUrl={product.imageUrl}
+        infoRows={infoRows}
+        tableData={{ columns: tableColumns, rows: tableRows }}
+        extraButtons={[
+          { label: "Create", variant: "success", onClick: handleCreate },
+          { label: "Delete", variant: "danger", onClick: handleDelete },
+          { label: "Edit", variant: "primary", onClick: handleEdit },
+        ]}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handlePrev={handlePrev}
+        handleNext={handleNext}
+      />
     </div>
   );
 }

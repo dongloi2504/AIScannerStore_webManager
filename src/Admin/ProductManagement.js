@@ -1,109 +1,72 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom"; // Dùng để chuyển trang
+import { useNavigate } from "react-router-dom";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import GenericModal from "../components/GenericModal";
-
-// Giả sử bạn import hàm uploadfile từ apiAdmin
-import { uploadfile } from "../ServiceApi/apiAdmin";
+import { uploadfile , getProducts} from "../ServiceApi/apiAdmin";
 
 function ProductManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const navigate = useNavigate(); // Khởi tạo biến navigate để chuyển hướng
+  const navigate = useNavigate();
 
-  // Dữ liệu mock ban đầu (giả lập toàn bộ sản phẩm), giống ProductDetail
-  const initialProducts = [
-    {
-      productId: "P001",
-      productName: "Product 1",
-      category: "Category A",
-      imageUrl: "",
-      description: "bột, đường, sữa",
-      stores: [
-        { storeId: "S001", storeName: "KFC", price: 110 },
-        { storeId: "S002", storeName: "LOTTE", price: 105 },
-        { storeId: "S003", storeName: "HighLand", price: 115 },
-      ],
-    },
-    {
-      productId: "P002",
-      productName: "Product 2",
-      category: "Category B",
-      imageUrl: "",
-      description: "trà xanh, kem, đá xay",
-      stores: [
-        { storeId: "S001", storeName: "KFC", price: 210 },
-        { storeId: "S002", storeName: "LOTTE", price: 190 },
-      ],
-    },
-  ];
-
-  // State chứa toàn bộ dữ liệu (để mô phỏng CRUD)
-  const [allProducts, setAllProducts] = useState(initialProducts);
-  // State chứa dữ liệu đang hiển thị (theo phân trang, search, …)
+  // State chứa danh sách product được trả về từ API
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+
+  // Phân trang
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
+
   const [showModal, setShowModal] = useState(false);
 
-  // Các state cho tạo mới sản phẩm
+  // State cho tạo mới sản phẩm
   const [productName, setProductName] = useState("");
-  const [productCategory, setProductCategory] = useState("");
-  const [productImageFile, setProductImageFile] = useState(null); // lưu file ảnh
+  const [categoryName, setcategoryName] = useState("");
+  const [productImageFile, setProductImageFile] = useState(null);
 
   // State cho search filters
   const [filters, setFilters] = useState({
     productName: "",
     productId: "",
-    productCategory: "",
   });
 
-  // State cho modal chỉnh sửa (Edit)
+  // State cho modal chỉnh sửa
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingProductName, setEditingProductName] = useState("");
-  const [editingProductCategory, setEditingProductCategory] = useState("");
+  const [editingcategoryName, setEditingcategoryName] = useState("");
 
-  // Hàm load dữ liệu (mô phỏng call API) với filter và phân trang
-  const loadProducts = () => {
-    let filtered = allProducts;
-    if (filters.productName) {
-      filtered = filtered.filter((p) =>
-        p.productName.toLowerCase().includes(filters.productName.toLowerCase())
-      );
+  // ============================
+  // HÀM LOAD PRODUCTS TỪ API
+  // ============================
+  const loadProducts = async () => {
+    try {
+      // Gọi hàm getProducts kèm filters & phân trang
+      const response = await getProducts({
+        productNameQuery: filters.productName,
+        productId: filters.productId,
+        // categoryName: filters.categoryName,
+        pageNumber: currentPage,
+        pageSize: pageSize,
+      });
+console.log(filters.productName);
+      const { items, totalPages } = response;
+      // Cập nhật state
+      setProducts(items || []);
+      setTotalPages(totalPages || 1);
+    } catch (error) {
+      console.error("Error loading products:", error);
     }
-    if (filters.productId) {
-      filtered = filtered.filter((p) =>
-        p.productId.toLowerCase().includes(filters.productId.toLowerCase())
-      );
-    }
-    if (filters.productCategory) {
-      filtered = filtered.filter((p) =>
-        p.category.toLowerCase().includes(filters.productCategory.toLowerCase())
-      );
-    }
-    const totalItems = filtered.length;
-    const totalPg = Math.ceil(totalItems / pageSize) || 1;
-    setTotalPages(totalPg);
-
-    // Nếu currentPage vượt quá tổng số trang sau khi filter thì quay lại trang 1
-    const page = currentPage > totalPg ? 1 : currentPage;
-    setCurrentPage(page);
-
-    const startIndex = (page - 1) * pageSize;
-    const paginatedItems = filtered.slice(startIndex, startIndex + pageSize);
-    setProducts(paginatedItems);
   };
 
-  // Mỗi khi currentPage, filters hoặc allProducts thay đổi => load lại danh sách
+  // Mỗi khi currentPage hoặc filters thay đổi => gọi loadProducts
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, filters, allProducts]);
+  }, [currentPage]);
 
-  // Dùng để lấy danh sách id của các sản phẩm hiển thị
+  // Lấy danh sách id của products
   const allProductIds = useMemo(() => products.map((p) => p.productId), [products]);
 
   const handleCheckAll = (e) => {
@@ -116,6 +79,7 @@ function ProductManagement() {
     );
   };
 
+  // Xoá nhiều sản phẩm (tạm thời mình để ví dụ xóa cục bộ, tuỳ API)
   const handleDeleteSelectedProducts = () => {
     if (selectedProducts.length === 0) return;
     const confirmDelete = window.confirm(
@@ -123,49 +87,44 @@ function ProductManagement() {
     );
     if (!confirmDelete) return;
 
-    setAllProducts((prev) => prev.filter((p) => !selectedProducts.includes(p.productId)));
+    // TODO: Gọi API xóa bên server (DELETE /api/product?ids=...)
+    // Rồi load lại danh sách
+    console.log("Deleting products from server...", selectedProducts);
     setSelectedProducts([]);
+    loadProducts();
   };
 
   // Tạo mới product (có upload file)
   const handleCreateProduct = async () => {
     try {
-      // Giả lập tạo product với productId tự động tăng
-      const newId = "P" + (allProducts.length + 1).toString().padStart(3, "0");
-
       let uploadedImageUrl = "";
-      // Nếu có chọn file ảnh, tiến hành upload
       if (productImageFile) {
         const uploadRes = await uploadfile(productImageFile);
-        // Giả sử API trả về { url: "https://..." } trong uploadRes.data
         uploadedImageUrl = uploadRes?.data?.url || "";
       }
 
-      const newProduct = {
-        productId: newId,
+      // TODO: Gọi API tạo sản phẩm
+      // const createRes = await createProduct({ productName, categoryName, imageUrl: uploadedImageUrl, ... })
+      console.log("Creating product with data:", {
         productName,
-        category: productCategory,
-        imageUrl: uploadedImageUrl, // lưu URL ảnh
-        // Bổ sung description và stores mặc định nếu muốn
-        description: "Mặc định: chưa nhập",
-        stores: [],
-      };
+        categoryName,
+        imageUrl: uploadedImageUrl,
+      });
 
-      // Cập nhật vào allProducts
-      setAllProducts([...allProducts, newProduct]);
-      console.log("Product created successfully", newProduct);
+      // Load lại danh sách sau khi tạo
+      await loadProducts();
 
       // Đóng modal, reset form
       setShowModal(false);
       setProductName("");
-      setProductCategory("");
+      setcategoryName("");
       setProductImageFile(null);
     } catch (error) {
       console.error("Error uploading file or creating product:", error);
     }
   };
 
-  // Các trường trong modal tạo product
+  // Cấu hình các trường trong modal tạo product
   const productFields = [
     {
       label: "Product Name",
@@ -174,19 +133,17 @@ function ProductManagement() {
       value: productName,
       onChange: (e) => setProductName(e.target.value),
     },
-
     {
       label: "Category",
-      controlId: "productCategory",
+      controlId: "categoryName",
       type: "text",
-      value: productCategory,
-      onChange: (e) => setProductCategory(e.target.value),
+      value: categoryName,
+      onChange: (e) => setcategoryName(e.target.value),
     },
     {
       label: "Product Image",
       controlId: "productImage",
       type: "file",
-      // Không set value cho file, chỉ cần onChange
       onChange: (e) => setProductImageFile(e.target.files[0]),
     },
   ];
@@ -199,31 +156,29 @@ function ProductManagement() {
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setEditingProductName(product.productName);
-    setEditingProductCategory(product.category);
+    setEditingcategoryName(product.category);
   };
 
-  const handleUpdateProduct = () => {
-    setAllProducts((prev) =>
-      prev.map((p) =>
-        p.productId === editingProduct.productId
-          ? {
-              ...p,
-              productName: editingProductName,
-              category: editingProductCategory,
-              // Giữ lại description, stores cũ (nếu có)
-              description: p.description,
-              stores: p.stores,
-            }
-          : p
-      )
-    );
-    console.log("Product updated successfully");
-    setEditingProduct(null);
+  const handleUpdateProduct = async () => {
+    try {
+      
+      console.log("Product updated with data:", {
+        productId: editingProduct.productId,
+        productName: editingProductName,
+        categoryName: editingcategoryName,
+      });
+
+      // Load lại danh sách
+      await loadProducts();
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
   };
 
   // Xử lý Detail => chuyển sang trang /product-detail/:id
   const handleDetailProduct = (product) => {
-    navigate(`/product-detail/${product.productId}`);
+    navigate(`/product-detail/${product.productId}`, { state: { product } });
   };
 
   return (
@@ -236,7 +191,7 @@ function ProductManagement() {
           columns={[
             { key: "productId", label: "Product ID" },
             { key: "productName", label: "Product" },
-            { key: "category", label: "Category" },
+            { key: "categoryName", label: "Category" },
           ]}
           selectedItems={selectedProducts}
           handleCheckAll={handleCheckAll}
@@ -246,10 +201,10 @@ function ProductManagement() {
           filters={[
             { label: "Product Name", value: filters.productName },
             { label: "Product ID", value: filters.productId },
-            { label: "Category", value: filters.productCategory },
+            { label: "Category", value: filters.categoryName },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["productName", "productId", "productCategory"];
+            const filterKeys = ["productName", "productId", "categoryName"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -267,7 +222,7 @@ function ProductManagement() {
               label: "Detail",
               className: "detail",
               variant: "secondary",
-              onClick: handleDetailProduct, // gọi hàm navigate
+              onClick: handleDetailProduct,
             },
           ]}
           extraButtons={[
@@ -311,13 +266,12 @@ function ProductManagement() {
               value: editingProductName,
               onChange: (e) => setEditingProductName(e.target.value),
             },
-        
             {
               label: "Category",
-              controlId: "editProductCategory",
+              controlId: "editcategoryName",
               type: "text",
-              value: editingProductCategory,
-              onChange: (e) => setEditingProductCategory(e.target.value),
+              value: editingcategoryName,
+              onChange: (e) => setEditingcategoryName(e.target.value),
             },
           ]}
           onSave={handleUpdateProduct}

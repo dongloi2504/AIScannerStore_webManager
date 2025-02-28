@@ -58,3 +58,35 @@ export function uploadfile(file) {
     },
   });
 }
+// Lấy sản phẩm thông qua các giá trị của sản phẩm
+export function getProducts({
+  pageNumber = 0,
+  pageSize = 8,
+  productNameQuery,
+  descriptionQuery,
+  categoryIds = [],
+  productId = null, // Thêm productId vào
+  minPrice = null,
+  maxPrice = null,
+  isSuspended = false,
+} = {}) {
+  const query = {
+    productNameQuery,
+    descriptionQuery,
+    categoryIds,
+    minPrice,
+    maxPrice,
+    isSuspended,
+  };
+
+  // Nếu có productId, chỉ tìm theo productId
+  if (productId) {
+    query.productId = productId;
+  }
+
+  return instance.post("/api/product/get", {
+    pageNumber,
+    pageSize,
+    query,
+  });
+}
