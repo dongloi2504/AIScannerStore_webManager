@@ -28,7 +28,7 @@ function StoreManagement() {
 
   useEffect(() => {
     loadStores();
-  }, [currentPage, filters]);
+  }, [currentPage]);
 
   const loadStores = async () => {
     try {
