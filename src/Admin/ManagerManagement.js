@@ -184,7 +184,6 @@ function ManagerManagement() {
             { key: "managerId", label: "Manager ID" },
             { key: "managerName", label: "Name" },
             { key: "managerPhone", label: "Phone" },
-            { key: "managerEmail", label: "Email" },
             { key: "storeName", label: "Store Name" },
           ]}
           selectedItems={selectedManagers}
