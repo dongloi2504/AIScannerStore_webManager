@@ -42,19 +42,16 @@ function ProductManagement() {
   // ============================
   const loadProducts = async () => {
     try {
-      // Gọi hàm getProducts kèm filters & phân trang
       const response = await getProducts({
         productNameQuery: filters.productName,
         productId: filters.productId,
-        // categoryName: filters.categoryName,
         pageNumber: currentPage,
         pageSize: pageSize,
       });
-console.log(filters.productName);
-      const { items, totalPages } = response;
-      // Cập nhật state
+  
+      const { items, totalItem } = response;
       setProducts(items || []);
-      setTotalPages(totalPages || 1);
+      setTotalPages(Math.ceil((totalItem ?? 0) / pageSize));
     } catch (error) {
       console.error("Error loading products:", error);
     }

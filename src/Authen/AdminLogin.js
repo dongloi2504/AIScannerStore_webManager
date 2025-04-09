@@ -17,6 +17,7 @@ function AdminLogin() {
 
       if (data && data.isSuccess && data.accessToken) {
         localStorage.setItem('token', data.accessToken);
+        localStorage.setItem("staffId", data.userInfo.staffId);
         navigate('/store-management');
       } else {
         // Thay vì hiển thị lỗi lên console, dùng alert

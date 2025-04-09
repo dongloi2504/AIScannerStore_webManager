@@ -1,13 +1,19 @@
 import React from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import Select from "react-select";
 
 function GenericModal({ show, title, fields, onSave, onClose }) {
+  const [saving, setSaving] = React.useState(false);
+
   const handleSaveChanges = async () => {
     try {
-      await onSave?.(); 
-      onClose?.(); // Đóng modal sau khi lưu thành công
+      setSaving(true);
+      await onSave?.();
+      onClose?.();
     } catch (error) {
       console.error("Error saving data:", error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -21,22 +27,17 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
           {fields.map((field, index) => (
             <Form.Group className="mb-3" key={index} controlId={field.controlId}>
               <Form.Label>{field.label}</Form.Label>
-              <Form.Control
-                type={field.type || "text" }
-                placeholder={field.placeholder || ""}
-                value={field.value}
-                onChange={field.onChange}
-              />
+
             </Form.Group>
           ))}
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose} disabled={saving}>
           Close
         </Button>
-        <Button variant="primary" onClick={handleSaveChanges}>
-          Save Changes
+        <Button variant="primary" onClick={handleSaveChanges} disabled={saving}>
+          {saving ? "Saving..." : "Save Changes"}
         </Button>
       </Modal.Footer>
     </Modal>
