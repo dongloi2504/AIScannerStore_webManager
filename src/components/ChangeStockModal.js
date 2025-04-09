@@ -11,7 +11,7 @@ function ChangeStockModal({
   products,
   imageFile,
   setImageFile,
-  loading, // 👉 thêm prop này để hiển thị trạng thái loading
+  loading,
 }) {
   const handleProductChange = (index, value) => {
     const updated = [...productChanges];
@@ -29,18 +29,31 @@ function ChangeStockModal({
     setProductChanges([...productChanges, { productId: "", changeAmount: 0 }]);
   };
 
+  const handleRemoveRow = (index) => {
+    const updated = [...productChanges];
+    updated.splice(index, 1);
+    setProductChanges(updated);
+  };
+
+  const handleClose = () => {
+    // reset product list and image
+    setProductChanges([{ productId: "", changeAmount: 0 }]);
+    setImageFile(null);
+    onClose();
+  };
+
   const isSaveDisabled =
     productChanges.length === 0 ||
     productChanges.some((p) => !p.productId || Number(p.changeAmount) === 0);
 
   return (
-    <Modal show={show} onHide={onClose} centered size="lg">
+    <Modal show={show} onHide={handleClose} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Change Stock</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          {/* Row 1: Image Upload */}
+          {/* Image Upload */}
           <div className="d-flex gap-3 mb-3">
             <Form.Group style={{ flex: 1 }}>
               <Form.Label>I/O Report Image</Form.Label>
@@ -51,9 +64,10 @@ function ChangeStockModal({
             </Form.Group>
           </div>
 
-          {/* Product change list */}
+          {/* Product change rows */}
           {productChanges.map((change, index) => (
             <div key={index} className="d-flex gap-3 mb-3 align-items-end">
+              {/* Select product */}
               <Form.Group style={{ flex: 1 }}>
                 <Form.Label>{index === 0 ? "Product" : ""}</Form.Label>
                 <Select
@@ -83,6 +97,7 @@ function ChangeStockModal({
                 />
               </Form.Group>
 
+              {/* Change amount input */}
               <Form.Group style={{ flex: 1 }}>
                 <Form.Label>{index === 0 ? "Change Amount" : ""}</Form.Label>
                 <Form.Control
@@ -91,15 +106,26 @@ function ChangeStockModal({
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === "" || val === "-" || !isNaN(Number(val))) {
-                      handleAmountChange(index, val); // giữ dạng string
+                      handleAmountChange(index, val);
                     }
                   }}
                   placeholder="Enter quantity"
                 />
               </Form.Group>
+
+              {/* Remove row button */}
+              {productChanges.length > 1 && (
+                <Button
+                  variant="outline-danger"
+                  onClick={() => handleRemoveRow(index)}
+                >
+                  ✕
+                </Button>
+              )}
             </div>
           ))}
 
+          {/* Add row */}
           <div className="mb-3">
             <Button variant="outline-secondary" onClick={handleAddRow}>
               + Add Product
@@ -109,7 +135,7 @@ function ChangeStockModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={onClose} disabled={loading}>
+        <Button variant="secondary" onClick={handleClose} disabled={loading}>
           Close
         </Button>
         <Button

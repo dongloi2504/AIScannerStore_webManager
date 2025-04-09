@@ -214,7 +214,7 @@ function StoreDetail() {
         variant: "secondary",
         onClick: () =>
           navigate(`/inventory-history/${item.inventoryNoteId}`, {
-            state: { store }, 
+            state: { store },
           }),
       },
     ]),
@@ -302,7 +302,11 @@ function StoreDetail() {
       {showChangeStockModal && (
         <ChangeStockModal
           show={showChangeStockModal}
-          onClose={() => setShowChangeStockModal(false)}
+          onClose={() => {
+            setShowChangeStockModal(false);
+            setProductChanges([{ productId: "", changeAmount: 0 }]); 
+            setImageFile(null); 
+          }}
           onSave={handleSubmitChangeStock}
           products={products}
           productChanges={productChanges}
