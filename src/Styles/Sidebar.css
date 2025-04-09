@@ -3,7 +3,7 @@
   width: 220px;
   background-color: #191919; /* nền tối */
   color: #ffffff; /* chữ trắng */
-  height: 100vh;
+  height: 100%;
   padding: 1rem 0; /* padding top và bottom */
   box-sizing: border-box;
   position: fixed;
