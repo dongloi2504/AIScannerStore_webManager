@@ -49,7 +49,7 @@ function AdminLogin() {
                 type="text"
                 value={UserEmail}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Nhập email"
+                placeholder="Enter email"
                 required
               />
             </div>
@@ -60,7 +60,7 @@ function AdminLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nhập mật khẩu"
+                placeholder="Enter Password"
                 required
               />
             </div>

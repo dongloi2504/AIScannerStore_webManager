@@ -7,6 +7,7 @@ import ProductDetail from './Admin/ProductDetail';
 import ManagerManagement from './Admin/ManagerManagement';
 import CategoryManagement from './Admin/CategoryManagement';
 import ProductManagement from './Admin/ProductManagement';
+import OrderManagement from './Admin/OrderManagement';
 function App() {
   return (
     <BrowserRouter  basename="/AIScannerStore_build">
@@ -16,6 +17,7 @@ function App() {
         <Route path="/product-management" element={<ProductManagement />} />
         <Route path="/manager-management" element={<ManagerManagement />} />
         <Route path="/category-management" element={<CategoryManagement />} />
+        <Route path="/order-management" element={<OrderManagement />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
       </Routes>
     </BrowserRouter>

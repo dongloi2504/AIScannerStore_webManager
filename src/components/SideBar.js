@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../Styles/Sidebar.css";
 
+
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
@@ -66,6 +67,16 @@ const Sidebar = ({ onToggle }) => {
               }
             >
               Category
+            </NavLink>
+          </div>
+          <div className="sidebar-item">
+            <NavLink
+              to="/order-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Order
             </NavLink>
           </div>
           {/* Sidebar link cho Logout */}

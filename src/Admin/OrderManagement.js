@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getManager, updateManager, createManager, deleteManager} from "../ServiceApi/apiManager";
+import { getOrder, updateManager, createManager, deleteManager} from "../ServiceApi/apiOrder";
 import GenericModal from "../components/GenericModal";  
 
 function ManagerManagement() {
@@ -30,6 +30,17 @@ function ManagerManagement() {
   const [editingManagerPhone, setEditingManagerPhone] = useState("");
   const [editingManagerEmail, setEditingManagerEmail] = useState("");
   const [editingStoreId, setEditingStoreId] = useState("");
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   const day = String(date.getDate()).padStart(2, '0');
+  //   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  //   const year = date.getFullYear();
+  //   const hours = String(date.getHours()).padStart(2, '0');
+  //   const minutes = String(date.getMinutes()).padStart(2, '0');
+  //   const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+  //   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+  // };
 
   useEffect(() => {
     loadManagers();
@@ -37,7 +48,7 @@ function ManagerManagement() {
 
   const loadManagers = async () => {
     try {
-      const response = await getManager({
+      const response = await getOrder({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
@@ -178,13 +189,13 @@ function ManagerManagement() {
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
-          title="Manager Management"
+          title="Order Management"
           data={managers}
           columns={[
-            { key: "managerId", label: "Manager ID" },
-            { key: "managerName", label: "Name" },
-            { key: "managerPhone", label: "Phone" },
-            { key: "storeName", label: "Store Name" },
+            { key: "orderId", label: "Order ID" },
+            { key: "total", label: "Total Price" },
+            { key: "status", label: "Status" },
+            { key: "createdDate", label: "Create Date"},
           ]}
           selectedItems={selectedManagers}
           handleCheckAll={handleCheckAll}
@@ -192,9 +203,9 @@ function ManagerManagement() {
           handleDeleteSelected={handleDeleteSelectedManagers}
           handleSearch={loadManagers}
           filters={[
-            { label: "Manager Name", value: filters.managerName },
-            { label: "Manager ID", value: filters.managerId },
-            { label: "Manager Phone", value: filters.managerPhone },
+            { label: "Total Price", value: filters.managerName },
+            { label: "Status", value: filters.managerId },
+            { label: "Date", value: filters.managerPhone },
           ]}
           setFilters={(index, value) => {
             const filterKeys = ["managerName", "managerId", "managerPhone"];

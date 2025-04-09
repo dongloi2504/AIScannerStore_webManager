@@ -1,33 +1,52 @@
 import instance from "./Customize-Axios";
 
   
-  // Hàm lấy danh sách Manager
-  export function getManager({
-    pageNumber = 1,
+  // Hàm lấy danh sách order
+  export function getOrder({
+    pageNumber = 0,
     pageSize,
-    managerId,
+    sortBy = "",
+    isDescending = true,
+    customerId,
+    customerCode,
+    deviceCode,
+    storeCode,
     storeId,
-    managerName,
-    managerPhone,
-    managerEmail,
+    statuses = [],
+    minTotalAmount = 0,
+    maxTotalAmount = 0,
+    isCorrection = true,
+    isFlagged = true,
   } = {}) {
-    return instance.get("/api/store-manager", {
-      params: {
+    const query = {
+      customerId,
+      customerCode,
+      deviceCode,
+      storeCode,
+      storeId,
+      statuses,
+    };
 
-      ManagerId: managerId,
-      StoreId: storeId,
-      ManagerNameQuery: managerName,
-      ManagerPhoneQuery: managerPhone,
-      ManagerEmailQuery: managerEmail,
-      PageNumber: pageNumber,
-      PageSize: pageSize,
-      }
+    // if (managerId) {
+    //   query.managerId = managerId;
+    // }
+
+    return instance.post("/api/order/get",{
+      pageNumber,
+      pageSize,
+      sortBy,
+      isDescending,
+      query,
+      minTotalAmount,
+      maxTotalAmount,
+      isCorrection,
+      isFlagged,
     });
   }
   
   // Hàm cập nhật Manager
   export function updateManager({ managerId, storeId, managerName, managerPhone, managerEmail }) {
-    return instance.put("/api/category", {
+    return instance.put("/api/store-manager", {
       managerId,
       // isSuspended: true,
       storeId,

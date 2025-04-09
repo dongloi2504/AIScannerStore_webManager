@@ -9,7 +9,7 @@
 /* Container chính chứa Sidebar + Content */
 .page-container {
     display: flex;
-    min-height: 100vh;
+    min-height: 100%;
     background-color: #f5f7fa;
     position: relative;
 }
@@ -268,3 +268,65 @@ input[type="checkbox"] {
     cursor: pointer;
     accent-color: #007bff; /* Thay đổi màu tick (Chrome/Edge) */
   }
+
+/* 🔹 Responsive adjustments for mobile devices =============================== */
+@media (max-width: 768px) {
+    .page-container {
+        flex-direction: column;
+    }
+
+    .content {
+        padding: 1rem;
+    }
+    .page-container.sidebar-open .content {
+        margin-left: 0px;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 10%;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        margin-left: 0;
+    }
+
+    .button-group {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+        gap: 5px;
+    }
+
+    .create-btn {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .search-container {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem;
+    }
+    .data-table th:first-child,
+    .data-table td:first-child {
+        width: 40px;
+        text-align: center;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .pagination-left,
+    .pagination-right {
+        margin-left: 0;
+    }
+}

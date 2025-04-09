@@ -22,7 +22,7 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
             <Form.Group className="mb-3" key={index} controlId={field.controlId}>
               <Form.Label>{field.label}</Form.Label>
               <Form.Control
-                type={field.type || "text"}
+                type={field.type || "text" }
                 placeholder={field.placeholder || ""}
                 value={field.value}
                 onChange={field.onChange}
