@@ -89,4 +89,104 @@ export function getProducts({
     pageSize,
     query,
   });
+  
+}
+
+export function getInventoryByStoreId(storeId, PageNumber = 1, PageSize = 8) {
+  return instance.get(`/api/inventory/store/${storeId}`, {
+    params: { PageNumber, PageSize },
+  });
+}
+
+export function updateProductPricesInStore(storeId, prices) {
+  return instance.post("/api/inventory/store-price", {
+    storeId,
+    prices,
+  });
+}
+
+export function ChangeInventory({
+  storeId,
+  staffId,
+  imageUrl = "",
+  description = "",
+  items = [],
+}) {
+  return instance.post("/api/inventory/change", {
+    storeId,
+    staffId,
+    imageUrl,
+    description,
+    items,
+  });
+}
+
+function generateUUIDv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+export function uploadfileIO(file) {
+  const uuid = generateUUIDv4();
+  const extension = file.name.split(".").pop();
+  const newFileName = `${uuid}.${extension}`;
+
+  const renamedFile = new File([file.slice()], newFileName, {
+    type: file.type,
+    lastModified: new Date(),
+  });
+
+
+  const formData = new FormData();
+  formData.append("file", renamedFile);
+
+  return instance.post("/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+export function getStoreManagers({ storeId, pageNumber = 1, pageSize = 8 } = {}) {
+  return instance.post("/api/store-manager/get", {
+    pageNumber,
+    pageSize,
+    sortBy: "string", // Hoặc thay bằng cột bạn muốn sort
+    isDescending: true,
+    query: {
+      storeId,
+      managerId: "",
+      managerName: "",
+      managerPhone: "",
+      managerEmail: ""
+    }
+  });
+}
+export function AuditInventory({
+  storeId,
+  staffId,
+  imageUrl = "",
+  description = "",
+  items = [],
+}) {
+  return instance.post("/api/inventory/audit", {
+    storeId,
+    staffId,
+    imageUrl,
+    description,
+    items,
+  });
+}
+
+export function getInventoryHistoryByStoreId({ storeId, PageNumber = 1, PageSize = 8 }) {
+  return instance.get(`/api/inventory/history/store/${storeId}`, {
+    params: { PageNumber, PageSize },
+  });
+}
+
+export function getInventoryDetailById({ id, PageNumber = 1, PageSize = 8 }) {
+  return instance.get(`/api/inventory/history/${id}`, {
+    params: { PageNumber, PageSize },
+  });
 }

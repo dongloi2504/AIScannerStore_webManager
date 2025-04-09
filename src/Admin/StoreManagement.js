@@ -2,10 +2,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getStores, deleteStore, createStore, updateStore } from "../ServiceApi/apiAdmin";
+import { useNavigate } from "react-router-dom";
+import {
+  getStores,
+  deleteStore,
+  createStore,
+  updateStore,
+} from "../ServiceApi/apiAdmin";
 import GenericModal from "../components/GenericModal";
 
 function StoreManagement() {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stores, setStores] = useState([]);
   const [selectedStores, setSelectedStores] = useState([]);
@@ -21,7 +28,6 @@ function StoreManagement() {
     storeLocation: "",
   });
 
-  // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
   const [editingStore, setEditingStore] = useState(null);
   const [editingStoreName, setEditingStoreName] = useState("");
   const [editingStoreLocation, setEditingStoreLocation] = useState("");
@@ -34,9 +40,10 @@ function StoreManagement() {
     try {
       const response = await getStores({
         pageNumber: currentPage,
-        pageSize: pageSize,
+        pageSize,
         ...filters,
       });
+
       setStores(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
@@ -44,7 +51,9 @@ function StoreManagement() {
     }
   };
 
-  const allStoreIds = useMemo(() => stores.map((store) => store.storeId), [stores]);
+  const handleDetailStore = (store) => {
+    navigate(`/store-detail/${store.storeId}`, { state: { store } });
+  };
 
   const handleCheckAll = (e) => {
     setSelectedStores(e.target.checked ? allStoreIds : []);
@@ -60,6 +69,7 @@ function StoreManagement() {
 
   const handleDeleteSelectedStores = async () => {
     if (selectedStores.length === 0) return;
+
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${selectedStores.length} store(s)?`
     );
@@ -68,26 +78,22 @@ function StoreManagement() {
     try {
       const deletePromises = selectedStores.map((id) => deleteStore(id));
       const results = await Promise.allSettled(deletePromises);
+      const failed = results.filter((r) => r.status === "rejected");
 
-      const failedDeletes = results.filter(
-        (result) => result.status === "rejected"
-      );
-
-      if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} store(s).`);
+      if (failed.length > 0) {
+        console.error(`❌ Failed to delete ${failed.length} store(s).`);
       }
 
       setSelectedStores([]);
       loadStores();
-    } catch (error) {
-      console.error("Error deleting stores:", error);
+    } catch (err) {
+      console.error("Error deleting stores:", err);
     }
   };
 
   const handleCreateStore = async () => {
     try {
       await createStore({ storeName, storeLocation });
-      console.log("Store created successfully");
       setShowModal(false);
       loadStores();
       setStoreName("");
@@ -96,6 +102,32 @@ function StoreManagement() {
       console.error("Error creating store:", error);
     }
   };
+
+  const handleEditStore = (store) => {
+    setEditingStore(store);
+    setEditingStoreName(store.storeName);
+    setEditingStoreLocation(store.storeLocation);
+  };
+
+  const handleUpdateStore = async () => {
+    try {
+      await updateStore({
+        storeId: editingStore.storeId,
+        storeName: editingStoreName,
+        storeLocation: editingStoreLocation,
+      });
+      setEditingStore(null);
+      loadStores();
+    } catch (error) {
+      console.error("Error updating store:", error);
+    }
+  };
+
+  const handleCreateNewStore = () => {
+    setShowModal(true);
+  };
+
+  const allStoreIds = useMemo(() => stores.map((s) => s.storeId), [stores]);
 
   const storeFields = [
     {
@@ -114,34 +146,12 @@ function StoreManagement() {
     },
   ];
 
-  const handleCreateNewStore = () => {
-    setShowModal(true);
-  };
-
-  // Khi bấm "Edit", lưu store cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditStore = (store) => {
-    setEditingStore(store);
-    setEditingStoreName(store.storeName);
-    setEditingStoreLocation(store.storeLocation);
-  };
-
-  const handleUpdateStore = async () => {
-    try {
-      await updateStore({
-        storeId: editingStore.storeId,
-        storeName: editingStoreName,
-        storeLocation: editingStoreLocation,
-      });
-      console.log("Store updated successfully");
-      setEditingStore(null);
-      loadStores();
-    } catch (error) {
-      console.error("Error updating store:", error);
-    }
-  };
-
   return (
-    <div className={`page-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+    <div
+      className={`page-container ${
+        isSidebarOpen ? "sidebar-open" : "sidebar-closed"
+      }`}
+    >
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
@@ -166,8 +176,12 @@ function StoreManagement() {
             const filterKeys = ["storeName", "storeId", "storeLocation"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
-          handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          handleNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          handlePrev={() =>
+            setCurrentPage((prev) => Math.max(prev - 1, 1))
+          }
+          handleNext={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           currentPage={currentPage}
           totalPages={totalPages}
           actions={[
@@ -175,7 +189,13 @@ function StoreManagement() {
               label: "Edit",
               className: "edit",
               variant: "info",
-              onClick: handleEditStore,
+              onClick: (item) => handleEditStore(item),
+            },
+            {
+              label: "Detail",
+              className: "detail",
+              variant: "secondary",
+              onClick: (item) => handleDetailStore(item),
             },
           ]}
           extraButtons={[
@@ -195,6 +215,7 @@ function StoreManagement() {
         />
       </div>
 
+      {/* Create Modal */}
       {showModal && (
         <GenericModal
           show={showModal}
@@ -205,6 +226,7 @@ function StoreManagement() {
         />
       )}
 
+      {/* Edit Modal */}
       {editingStore && (
         <GenericModal
           show={true}

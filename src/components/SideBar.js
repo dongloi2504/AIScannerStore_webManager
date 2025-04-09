@@ -16,6 +16,7 @@ const Sidebar = ({ onToggle }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("staffId");
     navigate("/");
     console.log("logged out");
   };
