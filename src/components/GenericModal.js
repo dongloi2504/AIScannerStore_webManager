@@ -30,7 +30,8 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
 
               {field.type === "select" ? (
                 <Select
-                  options={field.options}
+                  options={Array.from(new Set(field.options.map(opt => opt.value)))
+                    .map(value => field.options.find(opt => opt.value === value))}
                   value={field.options.find((opt) => opt.value === field.value)}
                   onChange={(selected) =>
                     field.onChange({ target: { value: selected?.value } })

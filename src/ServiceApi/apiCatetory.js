@@ -1,56 +1,49 @@
 import instance from "./Customize-Axios";
 
   
-  // Hàm lấy danh sách Manager
-  export function getManager({
-    pageNumber = 1,
+  // Hàm lấy danh sách Category
+  export function getCategory({
+    pageNumber = 0,
     pageSize,
-    managerId,
-    storeId,
-    managerName,
-    managerPhone,
-    managerEmail,
+    sortBy,
+    categoryId,
+    categoryNameQuery,
+    descriptionQuery,
   } = {}) {
-    return instance.get("/api/store-manager", {
-      params: {
-
-      ManagerId: managerId,
-      StoreId: storeId,
-      ManagerNameQuery: managerName,
-      ManagerPhoneQuery: managerPhone,
-      ManagerEmailQuery: managerEmail,
-      PageNumber: pageNumber,
-      PageSize: pageSize,
-      }
+    const query = {
+      categoryId,
+      categoryNameQuery,
+      descriptionQuery,
+  };
+    return instance.post("/api/category/get", {
+      pageNumber, 
+      pageSize,
+      sortBy,
+      query,
     });
   }
   
-  // Hàm cập nhật Manager
-  export function updateManager({ managerId, storeId, managerName, managerPhone, managerEmail }) {
+  // Hàm cập nhật Category
+  export function updateCategory({ categoryId, categoryName, description, isSuspended = true, }) {
     return instance.put("/api/category", {
-      managerId,
-      // isSuspended: true,
-      storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
+      categoryId,
+      isSuspended,
+      categoryName,
+      description,
     });
   }
 
-  // Hàm tạo Manager
-export function createManager({ storeId, managerName, managerPhone, managerEmail, password }) {
-    return instance.post("/api/store-manager", {
-      storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
-      password,
+  // Hàm tạo Category
+export function createCategory({ categoryName, description }) {
+    return instance.post("/api/category", {
+      categoryName,
+      description,
     });
   }
 
-  // Hàm xoá Manager
-  export function deleteManager(ids) {
-    return instance.delete(`/api/store-manager`, {
+  // Hàm xoá Category
+  export function deleteCategory(ids) {
+    return instance.delete(`/api/category`, {
       data: ids ,
       headers: { "Content-Type": "application/json" }, 
     });
