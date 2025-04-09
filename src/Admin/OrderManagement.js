@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getManager, updateManager, createManager, deleteManager} from "../ServiceApi/apiManager";
+import { getOrder, updateManager, createManager, deleteManager} from "../ServiceApi/apiOrder";
 import GenericModal from "../components/GenericModal";  
 
-function ManagerManagement() {
+function OrderManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [managers, setManagers] = useState([]);
   const [selectedManagers, setSelectedManagers] = useState([]);
@@ -19,9 +19,10 @@ function ManagerManagement() {
   const [managerEmail, setManagerEmail] = useState("");
   const [password, setPassword] = useState("");
   const [filters, setFilters] = useState({
-    managerName:"",
-    managerId: "",
-    managerPhone: "",
+    orderId:"",
+    total: "",
+    status: "",
+    createdDate: "",
   });
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
@@ -32,12 +33,12 @@ function ManagerManagement() {
   const [editingStoreId, setEditingStoreId] = useState("");
 
   useEffect(() => {
-    loadManagers();
+    loadOrders();
   }, [currentPage]);
 
-  const loadManagers = async () => {
+  const loadOrders = async () => {
     try {
-      const response = await getManager({
+      const response = await getOrder({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
@@ -45,28 +46,28 @@ function ManagerManagement() {
       setManagers(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
-      console.error("Error fetching managers:", error);
+      console.error("Error fetching orders:", error);
     }
   };
 
-  const allManagerIds = useMemo(() => managers.map((m) => m.managerId), [managers]);
+  const allOrderIds = useMemo(() => managers.map((m) => m.orderId), [managers]);
 
   const handleCheckAll = (e) => {
-    setSelectedManagers(e.target.checked ? allManagerIds : []);
+    setSelectedManagers(e.target.checked ? allOrderIds : []);
   };
 
-  const handleCheckOne = (managerId) => {
+  const handleCheckOne = (orderId) => {
     setSelectedManagers((prev) =>
-      prev.includes(managerId)
-        ? prev.filter((id) => id !== managerId)
-        : [...prev, managerId]
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
     );
   };
 
   const handleDeleteSelectedManagers = async () => {
     if (selectedManagers.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedManagers.length} manager(s)?`
+      `Are you sure you want to delete ${selectedManagers.length} order(s)?`
     );
     if (!confirmDelete) return;
 
@@ -79,13 +80,13 @@ function ManagerManagement() {
       );
 
       if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} manager(s).`);
+        console.error(`Failed to delete ${failedDeletes.length} order(s).`);
       }
 
       setSelectedManagers([]);
-      loadManagers();
+      loadOrders();
     } catch (error) {
-      console.error("Error deleting managers:", error);
+      console.error("Error deleting orders:", error);
     }
   };
 
@@ -94,7 +95,7 @@ function ManagerManagement() {
       await createManager({ storeId, managerName, managerPhone, managerEmail, password });
       console.log("Created successfully");
       setShowModal(false);
-      loadManagers();
+      loadOrders();
       setStoreId("");
       setManagerName("");
       setManagerPhone("");
@@ -105,6 +106,43 @@ function ManagerManagement() {
     }
   };
 
+  const managerFields = [
+    {
+      label: "Store Id",
+      controlId: "storeId",
+      type: "text",
+      value: storeId,
+      onChange: (e) => setStoreId(e.target.value),
+    },
+    {
+      label: "Manager Name",
+      controlId: "managerName",
+      type: "text",
+      value: managerName,
+      onChange: (e) => setManagerName(e.target.value),
+    },
+    {
+      label: "Manager Phone",
+      controlId: "managerPhone",
+      type: "text",
+      value: managerPhone,
+      onChange: (e) => setManagerPhone(e.target.value),
+    },
+    {
+      label: "Manager Email",
+      controlId: "managerEmail",
+      type: "text",
+      value: managerEmail,
+      onChange: (e) => setManagerEmail(e.target.value),
+    },
+    {
+      label: "Password",
+      controlId: "password",
+      type: "text",
+      value: password,
+      onChange: (e) => setPassword(e.target.value),
+    },
+  ];
 
   const handleCreateNewManager = () => {
     setShowModal(true);
@@ -130,7 +168,7 @@ function ManagerManagement() {
       });
       console.log("Updated successfully");
       setEditingManager(null);
-      loadManagers();
+      loadOrders();
     } catch (error) {
       console.error("Error updating :", error);
     }
@@ -141,26 +179,27 @@ function ManagerManagement() {
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
-          title="Manager Management"
+          title="Order Management"
           data={managers}
           columns={[
-            { key: "managerId", label: "Manager ID" },
-            { key: "managerName", label: "Name" },
-            { key: "managerPhone", label: "Phone" },
-            { key: "storeName", label: "Store Name" },
+            { key: "orderId", label: "Order ID" },
+            { key: "total", label: "Total Price" },
+            { key: "status", label: "Status" },
+            { key: "createdDate", label: "Create Date"},
           ]}
           selectedItems={selectedManagers}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
           handleDeleteSelected={handleDeleteSelectedManagers}
-          handleSearch={loadManagers}
+          handleSearch={loadOrders}
           filters={[
-            { label: "Manager Name", value: filters.managerName },
-            { label: "Manager ID", value: filters.managerId },
-            { label: "Manager Phone", value: filters.managerPhone },
+            { label: "Order Id", value: filters.orderId },
+            { label: "Total Price", value: filters.total },
+            { label: "Status", value: filters.status },
+            { label: "Date", value: filters.createdDate },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["managerName", "managerId", "managerPhone"];
+            const filterKeys = ["orderId", "total", "status", "createdDate"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -184,7 +223,7 @@ function ManagerManagement() {
             {
               label: "Delete",
               variant: "danger",
-              onClick: handleDeleteSelectedManagers,
+              // onClick: handleDeleteSelectedManagers,
               className: "delete-btn",
               disabled: selectedManagers.length === 0,
             },
@@ -192,48 +231,11 @@ function ManagerManagement() {
         />
       </div>
 
-      {showModal && (
+      {/* {showModal && (
         <GenericModal
           show={showModal}
           title="Create New Manager"
-          fields={[
-            {
-              label: "Store Name",
-              controlId: "storeId",
-              type: "select",
-              value: storeId,
-              onChange: (e) => setStoreId(e.target.value),
-              options: managers.map((p) => ({ label: p.storeName, value: p.storeId })),
-            },
-            {
-              label: "Manager Name",
-              controlId: "managerName",
-              type: "text",
-              value: managerName,
-              onChange: (e) => setManagerName(e.target.value),
-            },
-            {
-              label: "Manager Phone",
-              controlId: "managerPhone",
-              type: "text",
-              value: managerPhone,
-              onChange: (e) => setManagerPhone(e.target.value),
-            },
-            {
-              label: "Manager Email",
-              controlId: "managerEmail",
-              type: "text",
-              value: managerEmail,
-              onChange: (e) => setManagerEmail(e.target.value),
-            },
-            {
-              label: "Password",
-              controlId: "password",
-              type: "text",
-              value: password,
-              onChange: (e) => setPassword(e.target.value),
-            },
-          ]}
+          fields={managerFields}
           onSave={handleCreateManager}
           onClose={() => setShowModal(false)}
         />
@@ -245,12 +247,11 @@ function ManagerManagement() {
           title="Edit Manager"
           fields={[
             {
-              label: "Store Name",
+              label: "Store Id",
               controlId: "editStoreId",
-              type: "select",
+              type: "text",
               value: editingStoreId,
               onChange: (e) => setEditingStoreId(e.target.value),
-              options: managers.map((p) => ({ label: p.storeName, value: p.storeId })),
             },
             {
               label: "Manager Name",
@@ -277,9 +278,9 @@ function ManagerManagement() {
           onSave={handleUpdateManager}
           onClose={() => setEditingManager(null)}
         />
-      )}
+      )} */}
     </div>
   );
 }
 
-export default ManagerManagement;
+export default OrderManagement;

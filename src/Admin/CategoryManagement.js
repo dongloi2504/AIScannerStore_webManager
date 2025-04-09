@@ -2,71 +2,71 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getStores, deleteStore, createStore, updateStore } from "../ServiceApi/apiAdmin";
+import { getCategory, createCategory, updateCategory, deleteCategory } from "../ServiceApi/apiCatetory";
 import GenericModal from "../components/GenericModal";
 
-function StoreManagement() {
+function CategoryManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [stores, setStores] = useState([]);
-  const [selectedStores, setSelectedStores] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [storeName, setStoreName] = useState("");
-  const [storeLocation, setStoreLocation] = useState("");
+  const [categoryName, setCategoryName] = useState("");
+  const [description, setDescription] = useState("");
   const [filters, setFilters] = useState({
-    storeName: "",
-    storeId: "",
-    storeLocation: "",
+    categoryId: "",
+    categoryNameQuery: "",
+    descriptionQuery: "",
   });
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
-  const [editingStore, setEditingStore] = useState(null);
-  const [editingStoreName, setEditingStoreName] = useState("");
-  const [editingStoreLocation, setEditingStoreLocation] = useState("");
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState("");
+  const [editingDescription, setEditingDescription] = useState("");
 
   useEffect(() => {
-    loadStores();
-  }, [currentPage, filters]);
+    loadCategories();
+  }, [currentPage]);
 
-  const loadStores = async () => {
+  const loadCategories = async () => {
     try {
-      const response = await getStores({
+      const response = await getCategory({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
       });
-      setStores(response.items ?? []);
+      setCategories(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
-      console.error("Error fetching stores:", error);
+      console.error("Error fetching categories:", error);
     }
   };
 
-  const allStoreIds = useMemo(() => stores.map((store) => store.storeId), [stores]);
+  const allCategoriesIds = useMemo(() => categories.map((category) => category.categoryId), [categories]);
 
   const handleCheckAll = (e) => {
-    setSelectedStores(e.target.checked ? allStoreIds : []);
+    setSelectedCategories(e.target.checked ? allCategoriesIds : []);
   };
 
-  const handleCheckOne = (storeId) => {
-    setSelectedStores((prev) =>
-      prev.includes(storeId)
-        ? prev.filter((id) => id !== storeId)
-        : [...prev, storeId]
+  const handleCheckOne = (categoryId) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
     );
   };
 
-  const handleDeleteSelectedStores = async () => {
-    if (selectedStores.length === 0) return;
+  const handleDeleteSelectedCategories = async () => {
+    if (selectedCategories.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedStores.length} store(s)?`
+      `Are you sure you want to delete ${selectedCategories.length} categori(es)?`
     );
     if (!confirmDelete) return;
 
     try {
-      const deletePromises = selectedStores.map((id) => deleteStore(id));
+      const deletePromises = selectedCategories.map((id) => deleteCategory(id));
       const results = await Promise.allSettled(deletePromises);
 
       const failedDeletes = results.filter(
@@ -74,69 +74,69 @@ function StoreManagement() {
       );
 
       if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} store(s).`);
+        console.error(`Failed to delete ${failedDeletes.length} categori(es).`);
       }
 
-      setSelectedStores([]);
-      loadStores();
+      setSelectedCategories([]);
+      loadCategories();
     } catch (error) {
-      console.error("Error deleting stores:", error);
+      console.error("Error deleting categories:", error);
     }
   };
 
-  const handleCreateStore = async () => {
+  const handleCreateCategory = async () => {
     try {
-      await createStore({ storeName, storeLocation });
-      console.log("Store created successfully");
+      await createCategory({ categoryName, description });
+      console.log("Category created successfully");
       setShowModal(false);
-      loadStores();
-      setStoreName("");
-      setStoreLocation("");
+      loadCategories();
+      setCategoryName("");
+      setDescription("");
     } catch (error) {
-      console.error("Error creating store:", error);
+      console.error("Error creating category:", error);
     }
   };
 
-  const storeFields = [
+  const categoryFields = [
     {
-      label: "Store Name",
-      controlId: "storeName",
+      label: "Category Name",
+      controlId: "categoryName",
       type: "text",
-      value: storeName,
-      onChange: (e) => setStoreName(e.target.value),
+      value: categoryName,
+      onChange: (e) => setCategoryName(e.target.value),
     },
     {
-      label: "Store Location",
-      controlId: "storeLocation",
+      label: "Category Description",
+      controlId: "description",
       type: "text",
-      value: storeLocation,
-      onChange: (e) => setStoreLocation(e.target.value),
+      value: description,
+      onChange: (e) => setDescription(e.target.value),
     },
   ];
 
-  const handleCreateNewStore = () => {
+  const handleCreateNewCategory = () => {
     setShowModal(true);
   };
 
-  // Khi bấm "Edit", lưu store cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditStore = (store) => {
-    setEditingStore(store);
-    setEditingStoreName(store.storeName);
-    setEditingStoreLocation(store.storeLocation);
+  // Khi bấm "Edit", lưu category cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
+  const handleEditCategory = (category) => {
+    setEditingCategory(category);
+    setEditingCategoryName(category.categoryName);
+    setEditingDescription(category.description);
   };
 
-  const handleUpdateStore = async () => {
+  const handleUpdateCategory = async () => {
     try {
-      await updateStore({
-        storeId: editingStore.storeId,
-        storeName: editingStoreName,
-        storeLocation: editingStoreLocation,
+      await updateCategory({
+        categoryId: editingCategory.categoryId,
+        categoryName: editingCategoryName,
+        description: editingDescription,
       });
-      console.log("Store updated successfully");
-      setEditingStore(null);
-      loadStores();
+      console.log("Category updated successfully");
+      setEditingCategory(null);
+      loadCategories();
     } catch (error) {
-      console.error("Error updating store:", error);
+      console.error("Error updating Category:", error);
     }
   };
 
@@ -146,24 +146,24 @@ function StoreManagement() {
       <div className="content">
         <DataTable
           title="Category Management"
-          data={stores}
+          data={categories}
           columns={[
-            { key: "storeId", label: "Store ID" },
-            { key: "storeName", label: "Store Name" },
-            { key: "storeLocation", label: "Location" },
+            { key: "categoryId", label: "Category ID" },
+            { key: "categoryName", label: "Category Name" },
+            { key: "description", label: "Category Description" },
           ]}
-          selectedItems={selectedStores}
+          selectedItems={selectedCategories}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
-          handleDeleteSelected={handleDeleteSelectedStores}
-          handleSearch={loadStores}
+          handleDeleteSelected={handleDeleteSelectedCategories}
+          handleSearch={loadCategories}
           filters={[
-            { label: "Store Name", value: filters.storeName },
-            { label: "Store ID", value: filters.storeId },
-            { label: "Location", value: filters.storeLocation },
+            { label: "Category Name", value: filters.categoryNameQuery },
+            { label: "Category ID", value: filters.categoryId },
+            { label: "Category Description", value: filters.descriptionQuery },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["storeName", "storeId", "storeLocation"];
+            const filterKeys = ["categoryNameQuery", "categoryId", "descriptionQuery"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -175,21 +175,21 @@ function StoreManagement() {
               label: "Edit",
               className: "edit",
               variant: "info",
-              onClick: handleEditStore,
+              onClick: handleEditCategory,
             },
           ]}
           extraButtons={[
             {
               label: "Create New",
               variant: "primary",
-              onClick: handleCreateNewStore,
+              onClick: handleCreateNewCategory,
             },
             {
               label: "Delete",
               variant: "danger",
-              onClick: handleDeleteSelectedStores,
+              onClick: handleDeleteSelectedCategories,
               className: "delete-btn",
-              disabled: selectedStores.length === 0,
+              disabled: selectedCategories.length === 0,
             },
           ]}
         />
@@ -198,39 +198,39 @@ function StoreManagement() {
       {showModal && (
         <GenericModal
           show={showModal}
-          title="Create New Store"
-          fields={storeFields}
-          onSave={handleCreateStore}
+          title="Create New Category"
+          fields={categoryFields}
+          onSave={handleCreateCategory}
           onClose={() => setShowModal(false)}
         />
       )}
 
-      {editingStore && (
+      {editingCategory && (
         <GenericModal
           show={true}
-          title="Edit Store"
+          title="Edit Category"
           fields={[
             {
-              label: "Store Name",
-              controlId: "editStoreName",
+              label: "Category Name",
+              controlId: "editCategoryName",
               type: "text",
-              value: editingStoreName,
-              onChange: (e) => setEditingStoreName(e.target.value),
+              value: editingCategoryName,
+              onChange: (e) => setEditingCategoryName(e.target.value),
             },
             {
-              label: "Store Location",
-              controlId: "editStoreLocation",
+              label: "Category Description",
+              controlId: "editDescription",
               type: "text",
-              value: editingStoreLocation,
-              onChange: (e) => setEditingStoreLocation(e.target.value),
+              value: editingDescription,
+              onChange: (e) => setEditingDescription(e.target.value),
             },
           ]}
-          onSave={handleUpdateStore}
-          onClose={() => setEditingStore(null)}
+          onSave={handleUpdateCategory}
+          onClose={() => setEditingCategory(null)}
         />
       )}
     </div>
   );
 }
 
-export default StoreManagement;
+export default CategoryManagement;

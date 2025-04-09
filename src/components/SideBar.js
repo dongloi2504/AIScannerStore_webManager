@@ -69,6 +69,16 @@ const Sidebar = ({ onToggle }) => {
               Category
             </NavLink>
           </div>
+          <div className="sidebar-item">
+            <NavLink
+              to="/order-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Order
+            </NavLink>
+          </div>
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">
             <NavLink

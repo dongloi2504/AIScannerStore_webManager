@@ -17,9 +17,14 @@ const DataTable = ({
   totalPages,
   actions = [],
   extraButtons = [],
+  idType = ["managerId", "storeId", "productId", "categoryId", "orderId"]
 }) => {
   const isAllChecked = useMemo(
-    () => data.length > 0 && data.every((item) => selectedItems.includes(item.storeId)),
+    () => data.length > 0 && data.every((item) => selectedItems.includes(item[idType[0]])
+    || selectedItems.includes(item[idType[1]])
+    || selectedItems.includes(item[idType[2]])
+    || selectedItems.includes(item[idType[3]])
+    || selectedItems.includes(item[idType[4]])),
     [data, selectedItems]
   );
 
@@ -90,9 +95,12 @@ const DataTable = ({
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedItems.includes(item.storeId)}
-                    onChange={() => handleCheckOne(item.storeId)}
-                    aria-label={`Select ${item.storeId}`}
+                    checked={selectedItems.includes(item[idType[0]]) || selectedItems.includes(item[idType[1]]) 
+                      || selectedItems.includes(item[idType[2]]) || selectedItems.includes(item[idType[3]])
+                      || selectedItems.includes(item[idType[4]])}
+                    onChange={() => handleCheckOne(item[idType[0]] || item[idType[1]] 
+                      || item[idType[2]] || item[idType[3]] || item[idType[4]])}
+                    aria-label={`Select ${item[idType[0]] || item[idType[1]] || item[idType[2]] || item[idType[3]] || item[idType[4]]}`}
                   />
                 </td>
                 {columns.map((col, colIdx) => (
