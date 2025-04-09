@@ -3,7 +3,7 @@ import instance from "./Customize-Axios";
   
   // Hàm lấy danh sách Manager
   export function getManager({
-    pageNumber = 0,
+    pageNumber = 1,
     pageSize,
     managerId,
     storeId,
@@ -11,21 +11,17 @@ import instance from "./Customize-Axios";
     managerPhone,
     managerEmail,
   } = {}) {
-    const query = {
-      storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
-    };
+    return instance.get("/api/store-manager", {
+      params: {
 
-    if (managerId) {
-      query.managerId = managerId;
-    }
-
-    return instance.post("/api/store-manager/get",{
-      pageNumber,
-      pageSize,
-      query,
+      ManagerId: managerId,
+      StoreId: storeId,
+      ManagerNameQuery: managerName,
+      ManagerPhoneQuery: managerPhone,
+      ManagerEmailQuery: managerEmail,
+      PageNumber: pageNumber,
+      PageSize: pageSize,
+      }
     });
   }
   

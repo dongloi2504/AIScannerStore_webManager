@@ -19,7 +19,6 @@ function App() {
         <Route path="/product-management" element={<ProductManagement />} />
         <Route path="/manager-management" element={<ManagerManagement />} />
         <Route path="/category-management" element={<CategoryManagement />} />
-        <Route path="/order-management" element={<OrderManagement />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
         <Route path="/store-detail/:storeId" element={<StoreDetail />} />
         <Route path="/inventory-history/:id" element={<InventoryHistoryPage />} />
