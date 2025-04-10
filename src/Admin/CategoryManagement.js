@@ -3,70 +3,74 @@ import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import { getCategory, createCategory, updateCategory, deleteCategory } from "../ServiceApi/apiCatetory";
+import { getStores, deleteStore, createStore, updateStore } from "../ServiceApi/apiAdmin";
 import GenericModal from "../components/GenericModal";
 
 function CategoryManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [selectedStores, setSelectedStores] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [description, setDescription] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [storeLocation, setStoreLocation] = useState("");
   const [filters, setFilters] = useState({
     categoryId: "",
     categoryNameQuery: "",
     descriptionQuery: "",
+    storeName: "",
+    storeId: "",
+    storeLocation: "",
   });
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editingCategoryName, setEditingCategoryName] = useState("");
-  const [editingDescription, setEditingDescription] = useState("");
+  const [editingStore, setEditingStore] = useState(null);
+  const [editingStoreName, setEditingStoreName] = useState("");
+  const [editingStoreLocation, setEditingStoreLocation] = useState("");
 
   useEffect(() => {
     loadCategories();
   }, [currentPage]);
 
-  const loadCategories = async () => {
+  const loadStores = async () => {
     try {
-      const response = await getCategory({
+      const response = await getStores({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
       });
-      setCategories(response.items ?? []);
+      setStores(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching stores:", error);
     }
   };
 
-  const allCategoriesIds = useMemo(() => categories.map((category) => category.categoryId), [categories]);
+  const allStoreIds = useMemo(() => stores.map((store) => store.storeId), [stores]);
 
   const handleCheckAll = (e) => {
-    setSelectedCategories(e.target.checked ? allCategoriesIds : []);
+    setSelectedStores(e.target.checked ? allStoreIds : []);
   };
 
-  const handleCheckOne = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
+  const handleCheckOne = (storeId) => {
+    setSelectedStores((prev) =>
+      prev.includes(storeId)
+        ? prev.filter((id) => id !== storeId)
+        : [...prev, storeId]
     );
   };
 
-  const handleDeleteSelectedCategories = async () => {
-    if (selectedCategories.length === 0) return;
+  const handleDeleteSelectedStores = async () => {
+    if (selectedStores.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedCategories.length} categori(es)?`
+      `Are you sure you want to delete ${selectedStores.length} store(s)?`
     );
     if (!confirmDelete) return;
 
     try {
-      const deletePromises = selectedCategories.map((id) => deleteCategory(id));
+      const deletePromises = selectedStores.map((id) => deleteStore(id));
       const results = await Promise.allSettled(deletePromises);
 
       const failedDeletes = results.filter(
@@ -74,69 +78,69 @@ function CategoryManagement() {
       );
 
       if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} categori(es).`);
+        console.error(`Failed to delete ${failedDeletes.length} store(s).`);
       }
 
-      setSelectedCategories([]);
-      loadCategories();
+      setSelectedStores([]);
+      loadStores();
     } catch (error) {
-      console.error("Error deleting categories:", error);
+      console.error("Error deleting stores:", error);
     }
   };
 
-  const handleCreateCategory = async () => {
+  const handleCreateStore = async () => {
     try {
-      await createCategory({ categoryName, description });
-      console.log("Category created successfully");
+      await createStore({ storeName, storeLocation });
+      console.log("Store created successfully");
       setShowModal(false);
-      loadCategories();
-      setCategoryName("");
-      setDescription("");
+      loadStores();
+      setStoreName("");
+      setStoreLocation("");
     } catch (error) {
-      console.error("Error creating category:", error);
+      console.error("Error creating store:", error);
     }
   };
 
-  const categoryFields = [
+  const storeFields = [
     {
-      label: "Category Name",
-      controlId: "categoryName",
+      label: "Store Name",
+      controlId: "storeName",
       type: "text",
-      value: categoryName,
-      onChange: (e) => setCategoryName(e.target.value),
+      value: storeName,
+      onChange: (e) => setStoreName(e.target.value),
     },
     {
-      label: "Category Description",
-      controlId: "description",
+      label: "Store Location",
+      controlId: "storeLocation",
       type: "text",
-      value: description,
-      onChange: (e) => setDescription(e.target.value),
+      value: storeLocation,
+      onChange: (e) => setStoreLocation(e.target.value),
     },
   ];
 
-  const handleCreateNewCategory = () => {
+  const handleCreateNewStore = () => {
     setShowModal(true);
   };
 
-  // Khi bấm "Edit", lưu category cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditCategory = (category) => {
-    setEditingCategory(category);
-    setEditingCategoryName(category.categoryName);
-    setEditingDescription(category.description);
+  // Khi bấm "Edit", lưu store cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
+  const handleEditStore = (store) => {
+    setEditingStore(store);
+    setEditingStoreName(store.storeName);
+    setEditingStoreLocation(store.storeLocation);
   };
 
-  const handleUpdateCategory = async () => {
+  const handleUpdateStore = async () => {
     try {
-      await updateCategory({
-        categoryId: editingCategory.categoryId,
-        categoryName: editingCategoryName,
-        description: editingDescription,
+      await updateStore({
+        storeId: editingStore.storeId,
+        storeName: editingStoreName,
+        storeLocation: editingStoreLocation,
       });
-      console.log("Category updated successfully");
-      setEditingCategory(null);
-      loadCategories();
+      console.log("Store updated successfully");
+      setEditingStore(null);
+      loadStores();
     } catch (error) {
-      console.error("Error updating Category:", error);
+      console.error("Error updating store:", error);
     }
   };
 
@@ -146,17 +150,17 @@ function CategoryManagement() {
       <div className="content">
         <DataTable
           title="Category Management"
-          data={categories}
+          data={stores}
           columns={[
-            { key: "categoryId", label: "Category ID" },
-            { key: "categoryName", label: "Category Name" },
-            { key: "description", label: "Category Description" },
+            { key: "storeId", label: "Store ID" },
+            { key: "storeName", label: "Store Name" },
+            { key: "storeLocation", label: "Location" },
           ]}
-          selectedItems={selectedCategories}
+          selectedItems={selectedStores}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
-          handleDeleteSelected={handleDeleteSelectedCategories}
-          handleSearch={loadCategories}
+          handleDeleteSelected={handleDeleteSelectedStores}
+          handleSearch={loadStores}
           filters={[
             { label: "Category Name", value: filters.categoryNameQuery },
             { label: "Category ID", value: filters.categoryId },
@@ -175,21 +179,21 @@ function CategoryManagement() {
               label: "Edit",
               className: "edit",
               variant: "info",
-              onClick: handleEditCategory,
+              onClick: handleEditStore,
             },
           ]}
           extraButtons={[
             {
               label: "Create New",
               variant: "primary",
-              onClick: handleCreateNewCategory,
+              onClick: handleCreateNewStore,
             },
             {
               label: "Delete",
               variant: "danger",
-              onClick: handleDeleteSelectedCategories,
+              onClick: handleDeleteSelectedStores,
               className: "delete-btn",
-              disabled: selectedCategories.length === 0,
+              disabled: selectedStores.length === 0,
             },
           ]}
         />
@@ -198,35 +202,35 @@ function CategoryManagement() {
       {showModal && (
         <GenericModal
           show={showModal}
-          title="Create New Category"
-          fields={categoryFields}
-          onSave={handleCreateCategory}
+          title="Create New Store"
+          fields={storeFields}
+          onSave={handleCreateStore}
           onClose={() => setShowModal(false)}
         />
       )}
 
-      {editingCategory && (
+      {editingStore && (
         <GenericModal
           show={true}
-          title="Edit Category"
+          title="Edit Store"
           fields={[
             {
-              label: "Category Name",
-              controlId: "editCategoryName",
+              label: "Store Name",
+              controlId: "editStoreName",
               type: "text",
-              value: editingCategoryName,
-              onChange: (e) => setEditingCategoryName(e.target.value),
+              value: editingStoreName,
+              onChange: (e) => setEditingStoreName(e.target.value),
             },
             {
-              label: "Category Description",
-              controlId: "editDescription",
+              label: "Store Location",
+              controlId: "editStoreLocation",
               type: "text",
-              value: editingDescription,
-              onChange: (e) => setEditingDescription(e.target.value),
+              value: editingStoreLocation,
+              onChange: (e) => setEditingStoreLocation(e.target.value),
             },
           ]}
-          onSave={handleUpdateCategory}
-          onClose={() => setEditingCategory(null)}
+          onSave={handleUpdateStore}
+          onClose={() => setEditingStore(null)}
         />
       )}
     </div>
