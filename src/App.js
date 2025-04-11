@@ -10,6 +10,7 @@ import ProductManagement from './Admin/ProductManagement';
 import OrderManagement from './Admin/OrderManagement';
 import StoreDetail from './Admin/StoreDetail';
 import InventoryHistoryPage from './Admin/InventoryHistoryPage';
+import Report from './Admin/Report';
 function App() {
   return (
     <BrowserRouter basename="/AIScannerStore_build">
@@ -19,11 +20,11 @@ function App() {
         <Route path="/product-management" element={<ProductManagement />} />
         <Route path="/manager-management" element={<ManagerManagement />} />
         <Route path="/category-management" element={<CategoryManagement />} />
-        <Route path="/inventory-history/:id" element={<OrderManagement />} />
+        <Route path="/order-management" element={<OrderManagement />} />
         <Route path="/product-detail/:id" element={<ProductDetail />} />
         <Route path="/store-detail/:storeId" element={<StoreDetail />} />
-        <Route path="/inventory-history/:id" element={<InventoryHistoryPage />}
-        />
+        <Route path="/inventory-history/:id" element={<InventoryHistoryPage />}/>
+        <Route path="/report" element={<Report />}/>
       </Routes>
     </BrowserRouter>
   );

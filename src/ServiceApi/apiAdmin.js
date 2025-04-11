@@ -190,3 +190,45 @@ export function getInventoryDetailById({ id, PageNumber = 1, PageSize = 8 }) {
     params: { PageNumber, PageSize },
   });
 }
+
+export function getCustomerWalletReport({
+  pageNumber = 1,
+  pageSize = 8,
+  sortBy = "string",
+  isDescending = true,
+  dateFrom,
+  dateTo
+}) {
+  return instance.post("/api/report/customer-wallet/get", {
+    pageNumber,
+    pageSize,
+    sortBy,
+    isDescending,
+    query: {
+      dateFrom,
+      dateTo,
+    },
+  });
+}
+
+export function getSalesByDay() {
+  return instance.get("/api/report/by-day");
+}
+
+export function getSalesByProduct() {
+  return instance.get("/api/report/by-product");
+}
+
+export function getOrderStatus() {
+  return instance.get("/api/report/order-status");
+}
+
+export function getStockFlowReport({
+  type,
+}) {
+  return instance.get("/api/report/stock-flow", {
+    params: {
+      Type: type,
+    },
+  });
+}

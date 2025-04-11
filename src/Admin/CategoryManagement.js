@@ -2,75 +2,76 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getCategory, createCategory, updateCategory, deleteCategory } from "../ServiceApi/apiCatetory";
-import { getStores, deleteStore, createStore, updateStore } from "../ServiceApi/apiAdmin";
-import GenericModal from "../components/GenericModal";
+import { getManager, updateManager, createManager, deleteManager} from "../ServiceApi/apiManager";
+import GenericModal from "../components/GenericModal";  
 
-function CategoryManagement() {
+function ManagerManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [stores, setStores] = useState([]);
-  const [selectedStores, setSelectedStores] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [selectedManagers, setSelectedManagers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [storeName, setStoreName] = useState("");
-  const [storeLocation, setStoreLocation] = useState("");
+  const [storeId, setStoreId] = useState("");
+  const [managerName, setManagerName] = useState("");
+  const [managerPhone, setManagerPhone] = useState("");
+  const [managerEmail, setManagerEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [filters, setFilters] = useState({
-    categoryId: "",
-    categoryNameQuery: "",
-    descriptionQuery: "",
-    storeName: "",
-    storeId: "",
-    storeLocation: "",
+    managerName:"",
+    managerId: "",
+    managerPhone: "",
   });
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
-  const [editingStore, setEditingStore] = useState(null);
-  const [editingStoreName, setEditingStoreName] = useState("");
-  const [editingStoreLocation, setEditingStoreLocation] = useState("");
+  const [editingManager, setEditingManager] = useState(null);
+  const [editingManagerName, setEditingManagerName] = useState("");
+  const [editingManagerPhone, setEditingManagerPhone] = useState("");
+  const [editingManagerEmail, setEditingManagerEmail] = useState("");
+  const [editingStoreId, setEditingStoreId] = useState("");
 
   useEffect(() => {
-    loadCategories();
+    loadManagers();
   }, [currentPage]);
 
-  const loadStores = async () => {
+  const loadManagers = async () => {
     try {
-      const response = await getStores({
+      const response = await getManager({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
       });
-      setStores(response.items ?? []);
+      setManagers(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
-      console.error("Error fetching stores:", error);
+      console.error("Error fetching managers:", error);
     }
   };
 
-  const allStoreIds = useMemo(() => stores.map((store) => store.storeId), [stores]);
+  const allManagerIds = useMemo(() => managers.map((m) => m.managerId), [managers]);
 
   const handleCheckAll = (e) => {
-    setSelectedStores(e.target.checked ? allStoreIds : []);
+    setSelectedManagers(e.target.checked ? allManagerIds : []);
   };
 
-  const handleCheckOne = (storeId) => {
-    setSelectedStores((prev) =>
-      prev.includes(storeId)
-        ? prev.filter((id) => id !== storeId)
-        : [...prev, storeId]
+  const handleCheckOne = (managerId) => {
+    setSelectedManagers((prev) =>
+      prev.includes(managerId)
+        ? prev.filter((id) => id !== managerId)
+        : [...prev, managerId]
     );
   };
 
-  const handleDeleteSelectedStores = async () => {
-    if (selectedStores.length === 0) return;
+  const handleDeleteSelectedManagers = async () => {
+    if (selectedManagers.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedStores.length} store(s)?`
+      `Are you sure you want to delete ${selectedManagers.length} manager(s)?`
     );
     if (!confirmDelete) return;
 
     try {
-      const deletePromises = selectedStores.map((id) => deleteStore(id));
+      const deletePromises = selectedManagers.map((id) => deleteManager(id));
       const results = await Promise.allSettled(deletePromises);
 
       const failedDeletes = results.filter(
@@ -78,69 +79,60 @@ function CategoryManagement() {
       );
 
       if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} store(s).`);
+        console.error(`Failed to delete ${failedDeletes.length} manager(s).`);
       }
 
-      setSelectedStores([]);
-      loadStores();
+      setSelectedManagers([]);
+      loadManagers();
     } catch (error) {
-      console.error("Error deleting stores:", error);
+      console.error("Error deleting managers:", error);
     }
   };
 
-  const handleCreateStore = async () => {
+  const handleCreateManager = async () => {
     try {
-      await createStore({ storeName, storeLocation });
-      console.log("Store created successfully");
+      await createManager({ storeId, managerName, managerPhone, managerEmail, password });
+      console.log("Created successfully");
       setShowModal(false);
-      loadStores();
-      setStoreName("");
-      setStoreLocation("");
+      loadManagers();
+      setStoreId("");
+      setManagerName("");
+      setManagerPhone("");
+      setManagerEmail("");
+      setPassword("");
     } catch (error) {
-      console.error("Error creating store:", error);
+      console.error("Error creating :", error);
     }
   };
 
-  const storeFields = [
-    {
-      label: "Store Name",
-      controlId: "storeName",
-      type: "text",
-      value: storeName,
-      onChange: (e) => setStoreName(e.target.value),
-    },
-    {
-      label: "Store Location",
-      controlId: "storeLocation",
-      type: "text",
-      value: storeLocation,
-      onChange: (e) => setStoreLocation(e.target.value),
-    },
-  ];
 
-  const handleCreateNewStore = () => {
+  const handleCreateNewManager = () => {
     setShowModal(true);
   };
 
-  // Khi bấm "Edit", lưu store cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditStore = (store) => {
-    setEditingStore(store);
-    setEditingStoreName(store.storeName);
-    setEditingStoreLocation(store.storeLocation);
+  // Khi bấm "Edit", lưu manager cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
+  const handleEditManager = (manager) => {
+    setEditingManager(manager);
+    setEditingManagerName(manager.managerName);
+    setEditingManagerPhone(manager.managerPhone);
+    setEditingManagerEmail(manager.managerEmail);
+    setEditingStoreId(manager.storeId);
   };
 
-  const handleUpdateStore = async () => {
+  const handleUpdateManager = async () => {
     try {
-      await updateStore({
-        storeId: editingStore.storeId,
-        storeName: editingStoreName,
-        storeLocation: editingStoreLocation,
+      await updateManager({
+        managerId: editingManager.managerId,
+        managerName: editingManagerName,
+        managerPhone: editingManagerPhone,
+        managerEmail: editingManagerEmail,
+        storeId: editingStoreId,
       });
-      console.log("Store updated successfully");
-      setEditingStore(null);
-      loadStores();
+      console.log("Updated successfully");
+      setEditingManager(null);
+      loadManagers();
     } catch (error) {
-      console.error("Error updating store:", error);
+      console.error("Error updating :", error);
     }
   };
 
@@ -149,25 +141,26 @@ function CategoryManagement() {
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
-          title="Category Management"
-          data={stores}
+          title="Manager Management"
+          data={managers}
           columns={[
-            { key: "storeId", label: "Store ID" },
+            { key: "managerId", label: "Manager ID" },
+            { key: "managerName", label: "Name" },
+            { key: "managerPhone", label: "Phone" },
             { key: "storeName", label: "Store Name" },
-            { key: "storeLocation", label: "Location" },
           ]}
-          selectedItems={selectedStores}
+          selectedItems={selectedManagers}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
-          handleDeleteSelected={handleDeleteSelectedStores}
-          handleSearch={loadStores}
+          handleDeleteSelected={handleDeleteSelectedManagers}
+          handleSearch={loadManagers}
           filters={[
-            { label: "Category Name", value: filters.categoryNameQuery },
-            { label: "Category ID", value: filters.categoryId },
-            { label: "Category Description", value: filters.descriptionQuery },
+            { label: "Manager Name", value: filters.managerName },
+            { label: "Manager ID", value: filters.managerId },
+            { label: "Manager Phone", value: filters.managerPhone },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["categoryNameQuery", "categoryId", "descriptionQuery"];
+            const filterKeys = ["managerName", "managerId", "managerPhone"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -179,21 +172,21 @@ function CategoryManagement() {
               label: "Edit",
               className: "edit",
               variant: "info",
-              onClick: handleEditStore,
+              onClick: handleEditManager,
             },
           ]}
           extraButtons={[
             {
               label: "Create New",
               variant: "primary",
-              onClick: handleCreateNewStore,
+              onClick: handleCreateNewManager,
             },
             {
               label: "Delete",
               variant: "danger",
-              onClick: handleDeleteSelectedStores,
+              onClick: handleDeleteSelectedManagers,
               className: "delete-btn",
-              disabled: selectedStores.length === 0,
+              disabled: selectedManagers.length === 0,
             },
           ]}
         />
@@ -202,39 +195,91 @@ function CategoryManagement() {
       {showModal && (
         <GenericModal
           show={showModal}
-          title="Create New Store"
-          fields={storeFields}
-          onSave={handleCreateStore}
+          title="Create New Manager"
+          fields={[
+            {
+              label: "Store Name",
+              controlId: "storeId",
+              type: "select",
+              value: storeId,
+              onChange: (e) => setStoreId(e.target.value),
+              options: managers.map((p) => ({ label: p.storeName, value: p.storeId })),
+            },
+            {
+              label: "Manager Name",
+              controlId: "managerName",
+              type: "text",
+              value: managerName,
+              onChange: (e) => setManagerName(e.target.value),
+            },
+            {
+              label: "Manager Phone",
+              controlId: "managerPhone",
+              type: "text",
+              value: managerPhone,
+              onChange: (e) => setManagerPhone(e.target.value),
+            },
+            {
+              label: "Manager Email",
+              controlId: "managerEmail",
+              type: "text",
+              value: managerEmail,
+              onChange: (e) => setManagerEmail(e.target.value),
+            },
+            {
+              label: "Password",
+              controlId: "password",
+              type: "text",
+              value: password,
+              onChange: (e) => setPassword(e.target.value),
+            },
+          ]}
+          onSave={handleCreateManager}
           onClose={() => setShowModal(false)}
         />
       )}
 
-      {editingStore && (
+      {editingManager && (
         <GenericModal
           show={true}
-          title="Edit Store"
+          title="Edit Manager"
           fields={[
             {
               label: "Store Name",
-              controlId: "editStoreName",
-              type: "text",
-              value: editingStoreName,
-              onChange: (e) => setEditingStoreName(e.target.value),
+              controlId: "editStoreId",
+              type: "select",
+              value: editingStoreId,
+              onChange: (e) => setEditingStoreId(e.target.value),
+              options: managers.map((p) => ({ label: p.storeName, value: p.storeId })),
             },
             {
-              label: "Store Location",
-              controlId: "editStoreLocation",
+              label: "Manager Name",
+              controlId: "editManagerName",
               type: "text",
-              value: editingStoreLocation,
-              onChange: (e) => setEditingStoreLocation(e.target.value),
+              value: editingManagerName,
+              onChange: (e) => setEditingManagerName(e.target.value),
+            },
+            {
+              label: "Manager Phone",
+              controlId: "editingManagerPhone",
+              type: "text",
+              value: editingManagerPhone,
+              onChange: (e) => setEditingManagerPhone(e.target.value),
+            },
+            {
+              label: "Manager Email",
+              controlId: "editingManagerEmail",
+              type: "text",
+              value: editingManagerEmail,
+              onChange: (e) => setEditingManagerEmail(e.target.value),
             },
           ]}
-          onSave={handleUpdateStore}
-          onClose={() => setEditingStore(null)}
+          onSave={handleUpdateManager}
+          onClose={() => setEditingManager(null)}
         />
       )}
     </div>
   );
 }
 
-export default CategoryManagement;
+export default ManagerManagement;
