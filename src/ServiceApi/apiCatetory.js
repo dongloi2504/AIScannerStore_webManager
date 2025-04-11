@@ -6,6 +6,7 @@ import instance from "./Customize-Axios";
     pageNumber = 0,
     pageSize,
     sortBy,
+    isDescending = true,
     categoryId,
     categoryNameQuery,
     descriptionQuery,
@@ -19,17 +20,19 @@ import instance from "./Customize-Axios";
       pageNumber, 
       pageSize,
       sortBy,
+      isDescending,
       query,
     });
   }
   
   // Hàm cập nhật Category
-  export function updateCategory({ categoryId, categoryName, description, isSuspended = true, }) {
+  export function updateCategory({ categoryId, categoryName, description, categoryCode,}) {
     return instance.put("/api/category", {
       categoryId,
-      isSuspended,
       categoryName,
       description,
+      categoryCode,
+      isSuspended : true,
     });
   }
 
@@ -44,8 +47,8 @@ export function createCategory({ categoryName, description }) {
   // Hàm xoá Category
   export function deleteCategory(ids) {
     return instance.delete(`/api/category`, {
-      data: ids ,
-      headers: { "Content-Type": "application/json" }, 
+      data: {ids : [ids]} ,
+      headers: { "Content-Type": "application/json" }
     });
   }
   

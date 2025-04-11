@@ -5,7 +5,7 @@ import instance from "./Customize-Axios";
   export function getOrder({
     pageNumber = 0,
     pageSize,
-    sortBy = "",
+    sortBy,
     isDescending = true,
     customerId,
     customerCode,

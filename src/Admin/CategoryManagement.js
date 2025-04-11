@@ -25,6 +25,7 @@ function CategoryManagement() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingCategoryName, setEditingCategoryName] = useState("");
   const [editingDescription, setEditingDescription] = useState("");
+  const [editingCategoryCode, setEditingCategoryCode] = useState("");
 
   useEffect(() => {
     loadCategories();
@@ -123,6 +124,7 @@ function CategoryManagement() {
     setEditingCategory(category);
     setEditingCategoryName(category.categoryName);
     setEditingDescription(category.description);
+    setEditingCategoryCode(category.categoryCode);
   };
 
   const handleUpdateCategory = async () => {
@@ -131,12 +133,13 @@ function CategoryManagement() {
         categoryId: editingCategory.categoryId,
         categoryName: editingCategoryName,
         description: editingDescription,
+        categoryCode: editingCategoryCode,
       });
-      console.log("Category updated successfully");
+      console.log("Updated successfully");
       setEditingCategory(null);
       loadCategories();
     } catch (error) {
-      console.error("Error updating Category:", error);
+      console.error("Error updating:", error);
     }
   };
 
@@ -148,7 +151,7 @@ function CategoryManagement() {
           title="Category Management"
           data={categories}
           columns={[
-            { key: "categoryId", label: "Category ID" },
+            { key: "categoryId", label: "Category Code" },
             { key: "categoryName", label: "Category Name" },
             { key: "description", label: "Category Description" },
           ]}
