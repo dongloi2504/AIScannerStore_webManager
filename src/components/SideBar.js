@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../Styles/Sidebar.css";
+import { CanAccess } from "./CanAccess.js";
+import { Role } from "../const/Role.js";
+import { useAuth } from "../Authen/AuthContext";
 
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -17,6 +21,7 @@ const Sidebar = ({ onToggle }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("staffId");
+	setUser(null);
     navigate("/");
     console.log("logged out");
   };
@@ -28,17 +33,21 @@ const Sidebar = ({ onToggle }) => {
 
         {/* Menu chính */}
         <nav className="sidebar-menu">
-          <div className="sidebar-item">
-            <NavLink
-              to="/store-management"
-              className={({ isActive }) =>
-                isActive ? "sidebar-link active" : "sidebar-link"
-              }
-            >
-              Store
-            </NavLink>
-          </div>
-
+		
+			<CanAccess roles={[Role.ADMIN]}>
+			  <div className="sidebar-item">
+				<NavLink
+				  to="/store-management"
+				  className={({ isActive }) =>
+					isActive ? "sidebar-link active" : "sidebar-link"
+				  }
+				>
+				  Store
+				</NavLink>
+			  </div>
+			</CanAccess>
+			
+		  <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
           <div className="sidebar-item">
             <NavLink
               to="/product-management"
@@ -49,6 +58,9 @@ const Sidebar = ({ onToggle }) => {
               Product
             </NavLink>
           </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN]}>
           <div className="sidebar-item">
             <NavLink
               to="/manager-management"
@@ -59,6 +71,9 @@ const Sidebar = ({ onToggle }) => {
               Manager
             </NavLink>
           </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN]}>
           <div className="sidebar-item">
             <NavLink
               to="/category-management"
@@ -69,6 +84,9 @@ const Sidebar = ({ onToggle }) => {
               Category
             </NavLink>
           </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
           <div className="sidebar-item">
             <NavLink
               to="/order-management"
@@ -79,6 +97,8 @@ const Sidebar = ({ onToggle }) => {
               Order
             </NavLink>
           </div>
+		  </CanAccess>
+		  
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">
             <NavLink
