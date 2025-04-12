@@ -1,43 +1,60 @@
 import React from "react";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  Legend,
 } from "recharts";
 
-const SalesByDay = ({ data, totalRevenue, average }) => {
-  // Dữ liệu giả định đã được xử lý định dạng (ví dụ: date đã là "dd/MM/yyyy")
+const SalesByStoreChart = ({ data, totalRevenue, average }) => {
+  // Xử lý dữ liệu đầu vào: lấy storeName từ đối tượng store
+  const processed = data.map((item) => ({
+    storeName: item.storeName, // Đã được mapping từ API ở Report
+    revenue: Number(item.revenue),
+  }));
+
   return (
     <div>
-      {/* Biểu đồ doanh thu */}
-      <div style={{ width: "100%", height: 350 }}>
-        <ResponsiveContainer>
-          <LineChart
-            data={data}
+      <div style={{ width: "100%", height: 400 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={processed}
             margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
+            
+            {/* Trục X */}
             <XAxis
-              dataKey="date"
+              dataKey="storeName"
+              angle={-25}
+              textAnchor="end"
+              // Tùy chỉnh label trục X
               label={{
-                value: "Ngày",
-                position: "insideBottomRight",
-                offset: -5,
+                value: "Store",
+                // "insideBottomRight" sẽ đẩy chữ vào bên trong trục, góc phải.
+                position: "insideBottomRight", 
+                // offset âm để kéo nhãn lên một chút
+                offset: -5, 
+                // Có thể thay đổi style bên trong, ví dụ: fill, fontSize, ...
               }}
             />
+
+            {/* Trục Y */}
             <YAxis
-              // Bạn có thể điều chỉnh domain và tickFormatter nếu cần
+              // Tùy chỉnh label trục Y
               label={{
                 value: "VNĐ",
                 angle: -90,
                 position: "insideLeft",
-                offset: 10,
+                // Tăng offset để đẩy label ra xa trục hơn (sang trái hơn)
+                offset: -12,
               }}
             />
+
             <Tooltip
               formatter={(val) =>
                 Number(val).toLocaleString("vi-VN", {
@@ -46,14 +63,9 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
                 })
               }
             />
-            <Line
-              type="monotone"
-              dataKey="revenue"
-              stroke="#4e6ef2"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-            />
-          </LineChart>
+            <Legend />
+            <Bar dataKey="revenue" fill="#82ca9d" name="Doanh thu" />
+          </BarChart>
         </ResponsiveContainer>
       </div>
       {/* Hiển thị Total Revenue và Average bên dưới biểu đồ */}
@@ -81,4 +93,4 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
   );
 };
 
-export default SalesByDay;
+export default SalesByStoreChart;

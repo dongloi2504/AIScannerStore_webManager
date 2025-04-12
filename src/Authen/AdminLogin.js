@@ -2,23 +2,24 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
 import { loginAdmin } from '../ServiceApi/apiAuth';
+import { useAuth } from './AuthContext';
 
 function AdminLogin() {
   const [UserEmail, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
+  const { user, setUser } = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const data = await loginAdmin({ UserEmail, password });
       console.log('Login response:', data);
-
+	  setUser(data.userInfo);
       if (data && data.isSuccess && data.accessToken) {
         localStorage.setItem('token', data.accessToken);
         localStorage.setItem("staffId", data.userInfo.staffId);
-        navigate('/store-management');
+        navigate('/product-management');
       } else {
         // Thay vì hiển thị lỗi lên console, dùng alert
         alert(data?.message || 'Login failed. Please try again.');

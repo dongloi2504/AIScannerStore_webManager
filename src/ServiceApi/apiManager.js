@@ -53,10 +53,10 @@ export function createManager({ storeId, managerName, managerPhone, managerEmail
   }
 
   // Hàm xoá Manager
-  export function deleteManager(ids) {
+  export function deleteManager(ids ) {
     return instance.delete(`/api/store-manager`, {
-      data: ids ,
-      headers: { "Content-Type": "application/json" }, 
+      data: {ids : [ids]} ,
+      headers: { "Content-Type": "application/json" },
     });
   }
   

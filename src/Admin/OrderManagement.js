@@ -214,20 +214,20 @@ function OrderManagement() {
               onClick: handleEditManager,
             },
           ]}
-          extraButtons={[
-            {
-              label: "Create New",
-              variant: "primary",
-              onClick: handleCreateNewManager,
-            },
-            {
-              label: "Delete",
-              variant: "danger",
-              // onClick: handleDeleteSelectedManagers,
-              className: "delete-btn",
-              disabled: selectedManagers.length === 0,
-            },
-          ]}
+          // extraButtons={[
+          //   {
+          //     label: "Create New",
+          //     variant: "primary",
+          //     onClick: handleCreateNewManager,
+          //   },
+          //   {
+          //     label: "Delete",
+          //     variant: "danger",
+          //     // onClick: handleDeleteSelectedManagers,
+          //     className: "delete-btn",
+          //     disabled: selectedManagers.length === 0,
+          //   },
+          // ]}
         />
       </div>
 

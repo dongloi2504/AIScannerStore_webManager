@@ -19,12 +19,15 @@ const GenericReport = ({
   handleNext,
   onTabChange,
 }) => {
-  // Lấy tab hiện tại dựa trên activeTab từ prop
+  // Lấy tab hiện tại dựa trên activeTab
   const currentTab = tabs.find((t) => t.key === activeTab) || {};
   const currentData = currentTab.data || [];
   const currentColumns = currentTab.columns || [];
 
   const renderContent = () => {
+    // Ưu tiên hiển thị customContent nếu có
+    if (currentTab.customContent) return currentTab.customContent;
+
     if (currentTab.type === "chart") {
       return (
         <div style={{ overflowX: "auto" }}>
@@ -44,7 +47,6 @@ const GenericReport = ({
       );
     }
     if (currentTab.type === "orderStatusChart") {
-      // Render component OrderStatusChart cho tab Order Status
       return <OrderStatusChart />;
     }
     // Fallback: render bảng dữ liệu
@@ -78,9 +80,36 @@ const GenericReport = ({
     );
   };
 
+  // Chỉ hiển thị pagination nếu không hiển thị chart (bao gồm customContent, chart, productChart, orderStatusChart)
+  const renderPagination = () => {
+    if (
+      currentTab.customContent ||
+      currentTab.type === "chart" ||
+      currentTab.type === "productChart" ||
+      currentTab.type === "orderStatusChart"
+    ) {
+      return null;
+    }
+    return (
+      <div className="pagination">
+        <div className="pagination-left">
+          <Button onClick={handlePrev} disabled={currentPage === 1}>
+            Prev
+          </Button>
+          <Button onClick={handleNext} disabled={currentPage === totalPages}>
+            Next
+          </Button>
+        </div>
+        <div className="pagination-right">
+          Page {currentPage} of {totalPages}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="data-table-container">
-      {/* Title + Buttons */}
+      {/* Title và nhóm Button */}
       <div className="top-bar">
         <h1 className="page-title">{title}</h1>
         <div className="button-group">
@@ -118,27 +147,11 @@ const GenericReport = ({
       {/* Organize Control (Filter section) */}
       {organizeControl && <div style={{ marginBottom: "1rem" }}>{organizeControl}</div>}
 
-      {/* Main content */}
+      {/* Nội dung chính */}
       {renderContent()}
 
-      {/* Pagination (chỉ hiển thị nếu không phải chart type) */}
-      {currentTab.type !== "chart" &&
-        currentTab.type !== "productChart" &&
-        currentTab.type !== "orderStatusChart" && (
-          <div className="pagination">
-            <div className="pagination-left">
-              <Button onClick={handlePrev} disabled={currentPage === 1}>
-                Prev
-              </Button>
-              <Button onClick={handleNext} disabled={currentPage === totalPages}>
-                Next
-              </Button>
-            </div>
-            <div className="pagination-right">
-              Page {currentPage} of {totalPages}
-            </div>
-          </div>
-        )}
+      {/* Phân trang */}
+      {renderPagination()}
     </div>
   );
 };

@@ -10,24 +10,41 @@ import ProductManagement from './Admin/ProductManagement';
 import OrderManagement from './Admin/OrderManagement';
 import StoreDetail from './Admin/StoreDetail';
 import InventoryHistoryPage from './Admin/InventoryHistoryPage';
+import { AuthProvider } from './Authen/AuthContext';
+import withAuthorization from './HOC/withAuthorization';
+import Unauthorized from './Admin/Unauthorized';
+import { Role } from './const/Role';
+
 import Report from './Admin/Report';
 function App() {
-  return (
-    <BrowserRouter basename="/AIScannerStore_build">
-      <Routes>
-        <Route path="/" element={<AdminLogin />} />
-        <Route path="/store-management" element={<StoreManagement />} />
-        <Route path="/product-management" element={<ProductManagement />} />
-        <Route path="/manager-management" element={<ManagerManagement />} />
-        <Route path="/category-management" element={<CategoryManagement />} />
-        <Route path="/order-management" element={<OrderManagement />} />
-        <Route path="/product-detail/:id" element={<ProductDetail />} />
-        <Route path="/store-detail/:storeId" element={<StoreDetail />} />
-        <Route path="/inventory-history/:id" element={<InventoryHistoryPage />}/>
-        <Route path="/report" element={<Report />}/>
-      </Routes>
-    </BrowserRouter>
-  );
+	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
+	const AuthorizedProductManagement = withAuthorization(ProductManagement, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedManagerManagement = withAuthorization(ManagerManagement, [Role.ADMIN]);
+	const AuthorizedCategoryManagement = withAuthorization(CategoryManagement, [Role.ADMIN]);
+	const AuthorizedOrderManagement = withAuthorization(OrderManagement, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedProductDetail = withAuthorization(ProductDetail, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
+
+	return (
+		<AuthProvider value={null}>
+			<BrowserRouter basename="/AIScannerStore_build">
+				<Routes>
+					<Route path="/" element={<AdminLogin />} />
+					<Route path="/store-management" element={<AuthorizedStoreManagement />} />
+					<Route path="/product-management" element={<AuthorizedProductManagement />} />
+					<Route path="/manager-management" element={<AuthorizedManagerManagement />} />
+					<Route path="/category-management" element={<AuthorizedCategoryManagement />} />
+					<Route path="/order-management" element={<AuthorizedOrderManagement />} />
+					<Route path="/product-detail/:id" element={<AuthorizedProductDetail />} />
+					<Route path="/store-detail/:storeId" element={<AuthorizedStoreDetail />} />
+					<Route path="/inventory-history/:id" element={<AuthorizedInventoryHistoryPage />} />
+					<Route path="/report" element={<Report />} />
+					<Route path="/unauthorized" element={<Unauthorized />} />
+				</Routes>
+			</BrowserRouter>
+		</AuthProvider>
+	);
 }
 
 export default App;

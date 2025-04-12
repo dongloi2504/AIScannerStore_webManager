@@ -219,6 +219,10 @@ export function getSalesByProduct() {
   return instance.get("/api/report/by-product");
 }
 
+export function getSalesByStore() {
+  return instance.get("/api/report/by-store");
+}
+
 export function getOrderStatus() {
   return instance.get("/api/report/order-status");
 }
