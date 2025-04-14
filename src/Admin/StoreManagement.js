@@ -152,7 +152,7 @@ function StoreManagement() {
           title="Store Management"
           data={stores}
           columns={[
-            { key: "storeId", label: "Store ID" },
+            { key: "storeCode", label: "Store Code" },
             { key: "storeName", label: "Store Name" },
             { key: "storeLocation", label: "Location" },
           ]}
