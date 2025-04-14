@@ -9,14 +9,14 @@ function AdminLogin() {
   const [UserEmail, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { user, setUser } = useAuth();
+  const { setAuth } = useAuth();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const data = await loginAdmin({ UserEmail, password });
-	  setUser(data.userInfo);
       if (data && data.isSuccess && data.accessToken) {
+	    setAuth(data.userInfo, data.accessToken);
         localStorage.setItem('token', data.accessToken);
         localStorage.setItem("staffId", data.userInfo.staffId);
         navigate('/product-management');
