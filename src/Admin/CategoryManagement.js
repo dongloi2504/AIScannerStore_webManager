@@ -88,7 +88,6 @@ function CategoryManagement() {
   const handleCreateCategory = async () => {
     try {
       await createCategory({ categoryName, description });
-      console.log("Category created successfully");
       setShowModal(false);
       loadCategories();
       setCategoryName("");
@@ -135,7 +134,6 @@ function CategoryManagement() {
         description: editingDescription,
         categoryCode: editingCategoryCode,
       });
-      console.log("Updated successfully");
       setEditingCategory(null);
       loadCategories();
     } catch (error) {

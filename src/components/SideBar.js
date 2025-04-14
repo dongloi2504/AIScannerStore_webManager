@@ -23,7 +23,6 @@ const Sidebar = ({ onToggle }) => {
     localStorage.removeItem("staffId");
     setUser(null);
     navigate("/");
-    console.log("logged out");
   };
 
   return (

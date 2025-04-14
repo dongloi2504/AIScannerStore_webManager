@@ -59,16 +59,17 @@ function ProductDetail() {
   const currentStores = productStores.slice(startIndex, endIndex);
 
   const infoRows = [
-    { label: "Product", value: product.productName },
-    { label: "ID", value: product.productId },
+	{ label: "ID", value: product.productId },
+	{ label: "Product Code", value: product.productCode },
+    { label: "Name", value: product.productName },
     { label: "Category", value: product.categoryName },
     { label: "Description", value: product.description },
   ];
 
   const productData = {
-    columns: ["Store ID", "Store", "Price"],
+    columns: ["Store Code", "Store", "Price"],
     rows: currentStores.map((s) => [
-      s.storeId,
+      s.storeCode,
       s.storeName || "N/A",
       `${s.price.toLocaleString()}₫`,
     ]),

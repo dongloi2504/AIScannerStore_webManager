@@ -10,7 +10,6 @@ export const AuthProvider = ({ children }) => {
   // Load user from localStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-	console.log('user:' + storedUser);
     if (storedUser) {
       setUserState(JSON.parse(storedUser));
     }

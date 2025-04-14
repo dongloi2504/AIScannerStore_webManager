@@ -93,7 +93,6 @@ function OrderManagement() {
   const handleCreateManager = async () => {
     try {
       await createManager({ storeId, managerName, managerPhone, managerEmail, password });
-      console.log("Created successfully");
       setShowModal(false);
       loadOrders();
       setStoreId("");
