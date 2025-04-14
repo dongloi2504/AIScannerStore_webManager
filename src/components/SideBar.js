@@ -21,7 +21,7 @@ const Sidebar = ({ onToggle }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("staffId");
-    setUser(null);
+	setUser(null);
     navigate("/");
     console.log("logged out");
   };
@@ -33,85 +33,72 @@ const Sidebar = ({ onToggle }) => {
 
         {/* Menu chính */}
         <nav className="sidebar-menu">
-
-          <CanAccess roles={[Role.ADMIN]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/store-management"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Store
-              </NavLink>
-            </div>
-          </CanAccess>
-
-          <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/product-management"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Product
-              </NavLink>
-            </div>
-          </CanAccess>
-
-          <CanAccess roles={[Role.ADMIN]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/manager-management"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Manager
-              </NavLink>
-            </div>
-          </CanAccess>
-
-          <CanAccess roles={[Role.ADMIN]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/category-management"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Category
-              </NavLink>
-            </div>
-          </CanAccess>
-
-          <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/order-management"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Order
-              </NavLink>
-            </div>
-          </CanAccess>
-
-          <CanAccess roles={[Role.ADMIN]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/report"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Report
-              </NavLink>
-            </div>
-          </CanAccess>
-          
+		
+			<CanAccess roles={[Role.ADMIN]}>
+			  <div className="sidebar-item">
+				<NavLink
+				  to="/store-management"
+				  className={({ isActive }) =>
+					isActive ? "sidebar-link active" : "sidebar-link"
+				  }
+				>
+				  Store
+				</NavLink>
+			  </div>
+			</CanAccess>
+			
+		  <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
+          <div className="sidebar-item">
+            <NavLink
+              to="/product-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Product
+            </NavLink>
+          </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN]}>
+          <div className="sidebar-item">
+            <NavLink
+              to="/manager-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Manager
+            </NavLink>
+          </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN]}>
+          <div className="sidebar-item">
+            <NavLink
+              to="/category-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Category
+            </NavLink>
+          </div>
+		  </CanAccess>
+		  
+		  <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
+          <div className="sidebar-item">
+            <NavLink
+              to="/order-management"
+              className={({ isActive }) =>
+                isActive ? "sidebar-link active" : "sidebar-link"
+              }
+            >
+              Order
+            </NavLink>
+          </div>
+		  </CanAccess>
+		  
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">
             <NavLink

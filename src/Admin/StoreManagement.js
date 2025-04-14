@@ -69,17 +69,23 @@ function StoreManagement() {
 
   const handleDeleteSelectedStores = async () => {
     if (selectedStores.length === 0) return;
-  
+
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${selectedStores.length} store(s)?`
     );
     if (!confirmDelete) return;
-  
+
     try {
-      await deleteStore(selectedStores);
-  
+      const deletePromises = selectedStores.map((id) => deleteStore(id));
+      const results = await Promise.allSettled(deletePromises);
+      const failed = results.filter((r) => r.status === "rejected");
+
+      if (failed.length > 0) {
+        console.error(`❌ Failed to delete ${failed.length} store(s).`);
+      }
+
       setSelectedStores([]);
-      loadStores(); 
+      loadStores();
     } catch (err) {
       console.error("Error deleting stores:", err);
     }

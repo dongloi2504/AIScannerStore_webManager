@@ -1,17 +1,17 @@
 /* ========== Cấu hình chung cho sidebar ========== */
 .sidebar {
-    width: 220px;
-    background-color: #191919; /* nền tối */
-    color: #ffffff; /* chữ trắng */
-    height: 100%;
-    padding: 1rem 0; /* padding top và bottom */
-    box-sizing: border-box;
-    position: fixed;
-    transition: width 0.3s ease;
-    border-right: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  width: 220px;
+  background-color: #191919; /* nền tối */
+  color: #ffffff; /* chữ trắng */
+  height: 100vh;
+  padding: 1rem 0; /* padding top và bottom */
+  box-sizing: border-box;
+  position: fixed;
+  transition: width 0.3s ease;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 /* Dịch chuyển nội dung bên trong sidebar sang phải */

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import Button from "react-bootstrap/Button";
 
 const DataTable = ({
@@ -17,40 +17,15 @@ const DataTable = ({
   totalPages,
   actions = [],
   extraButtons = [],
-  idType = ["managerId", "storeId", "productId", "categoryId", "orderId"],
-  tabs = null,
-  onTabChange = null,
+  idType = ["managerId", "storeId", "productId", "categoryId", "orderId"]
 }) => {
-  const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
-
-  const currentData = useMemo(() => {
-    if (tabs && activeTabKey) {
-      const currentTab = tabs.find((tab) => tab.key === activeTabKey);
-      return currentTab?.data || [];
-    }
-    return data;
-  }, [tabs, activeTabKey, data]);
-
-  const currentColumns = useMemo(() => {
-    if (tabs && activeTabKey) {
-      const currentTab = tabs.find((tab) => tab.key === activeTabKey);
-      return currentTab?.columns || [];
-    }
-    return columns;
-  }, [tabs, activeTabKey, columns]);
-
   const isAllChecked = useMemo(
-    () =>
-      currentData.length > 0 &&
-      currentData.every(
-        (item) =>
-          selectedItems.includes(item[idType[0]]) ||
-          selectedItems.includes(item[idType[1]]) ||
-          selectedItems.includes(item[idType[2]]) ||
-          selectedItems.includes(item[idType[3]]) ||
-          selectedItems.includes(item[idType[4]])
-      ),
-    [currentData, selectedItems]
+    () => data.length > 0 && data.every((item) => selectedItems.includes(item[idType[0]])
+    || selectedItems.includes(item[idType[1]])
+    || selectedItems.includes(item[idType[2]])
+    || selectedItems.includes(item[idType[3]])
+    || selectedItems.includes(item[idType[4]])),
+    [data, selectedItems]
   );
 
   return (
@@ -73,24 +48,6 @@ const DataTable = ({
         </div>
       </div>
 
-      {/* Tabs */}
-      {tabs?.length > 0 && (
-        <div className="tab-group" style={{ marginBottom: "1rem" }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => {
-                setActiveTabKey(tab.key);
-                onTabChange?.(tab.key);
-              }}
-              className={`tab-button ${activeTabKey === tab.key ? "active" : ""}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* Search Bar */}
       <div className="search-container">
         {filters.map((filter, index) => (
@@ -108,7 +65,7 @@ const DataTable = ({
       </div>
 
       {/* Data Table */}
-      <table className="data-table">
+      <table className="data-table ">
         <thead>
           <tr>
             <th>
@@ -119,49 +76,34 @@ const DataTable = ({
                 aria-label="Select All"
               />
             </th>
-            {currentColumns.map((col, idx) => (
+            {columns.map((col, idx) => (
               <th key={idx}>{col.label}</th>
             ))}
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          {currentData.length === 0 ? (
+          {data.length === 0 ? (
             <tr>
-              <td colSpan={currentColumns.length + 2} style={{ textAlign: "center" }}>
+              <td colSpan={columns.length + 2} style={{ textAlign: "center" }}>
                 No data available
               </td>
             </tr>
           ) : (
-            currentData.map((item, idx) => (
+            data.map((item, idx) => (
               <tr key={idx}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={
-                      selectedItems.includes(item[idType[0]]) ||
-                      selectedItems.includes(item[idType[1]]) ||
-                      selectedItems.includes(item[idType[2]]) ||
-                      selectedItems.includes(item[idType[3]]) ||
-                      selectedItems.includes(item[idType[4]])
-                    }
-                    onChange={() =>
-                      handleCheckOne(
-                        item[idType[0]] ||
-                          item[idType[1]] ||
-                          item[idType[2]] ||
-                          item[idType[3]] ||
-                          item[idType[4]]
-                      )
-                    }
-                    aria-label={`Select ${item[idType[0]] ||
-                      item[idType[1]] ||
-                      item[idType[2]] ||
-                      item[idType[3]] ||
-                      item[idType[4]]}`}
+                    checked={selectedItems.includes(item[idType[0]]) || selectedItems.includes(item[idType[1]]) 
+                      || selectedItems.includes(item[idType[2]]) || selectedItems.includes(item[idType[3]])
+                      || selectedItems.includes(item[idType[4]])}
+                    onChange={() => handleCheckOne(item[idType[0]] || item[idType[1]] 
+                      || item[idType[2]] || item[idType[3]] || item[idType[4]])}
+                    aria-label={`Select ${item[idType[0]] || item[idType[1]] || item[idType[2]] || item[idType[3]] || item[idType[4]]}`}
                   />
                 </td>
-                {currentColumns.map((col, colIdx) => (
+                {columns.map((col, colIdx) => (
                   <td key={colIdx}>{item[col.key]}</td>
                 ))}
                 <td>
