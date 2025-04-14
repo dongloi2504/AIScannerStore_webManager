@@ -15,7 +15,6 @@ function AdminLogin() {
 
     try {
       const data = await loginAdmin({ UserEmail, password });
-      console.log('Login response:', data);
 	  setUser(data.userInfo);
       if (data && data.isSuccess && data.accessToken) {
         localStorage.setItem('token', data.accessToken);
