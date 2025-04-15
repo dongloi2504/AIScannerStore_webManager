@@ -62,6 +62,14 @@ export function uploadfile(file) {
     },
   });
 }
+export function addProduct({ productName, description, categoryId, imageUrl }) {
+  return instance.post("/api/product/add", {
+    productName,
+    description,
+    categoryId,
+    imageUrl,
+  });
+}
 // Lấy sản phẩm thông qua các giá trị của sản phẩm
 export function getProducts({
   pageNumber = 0,

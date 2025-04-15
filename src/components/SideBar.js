@@ -7,7 +7,7 @@ import { useAuth } from "../Authen/AuthContext";
 
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
-  const { user, setUser } = useAuth();
+  const { user, setAuth } = useAuth();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -21,7 +21,7 @@ const Sidebar = ({ onToggle }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("staffId");
-    setUser(null);
+    setAuth(null, null);
     navigate("/");
   };
 

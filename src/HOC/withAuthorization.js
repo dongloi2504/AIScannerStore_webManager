@@ -5,8 +5,8 @@ import { Helmet } from 'react-helmet';
 
 const withAuthorization = (Component, allowedRoles = []) => {
   return function WrappedComponent(props) {
-    const { user } = useAuth();
-
+    const { user, loading } = useAuth();
+	if (loading === undefined || loading) return <div>Loading...</div>
     if (!user) return <Navigate to="/" replace />;
     if (!allowedRoles.includes(user.role)) return <Navigate to="/unauthorized" replace />;
 
