@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './AdminLogin.css';
 import { loginAdmin } from '../ServiceApi/apiAuth';
 import { useAuth } from './AuthContext';
+import { Helmet } from 'react-helmet';
 
 function AdminLogin() {
   const [UserEmail, setEmail] = useState('');
@@ -14,7 +15,6 @@ function AdminLogin() {
 
     try {
       const data = await loginAdmin({ UserEmail, password });
-      console.log('Login response:', data);
 	  setUser(data.userInfo);
       if (data && data.isSuccess && data.accessToken) {
         localStorage.setItem('token', data.accessToken);
@@ -31,6 +31,10 @@ function AdminLogin() {
   };
 
   return (
+	<>
+	<Helmet>
+	  <title>AIScannerStore | Login</title>
+	</Helmet>
     <div className="admin-login-container">
       <div className="admin-login-box">
         <div className="login-illustration">
@@ -76,6 +80,7 @@ function AdminLogin() {
         </div>
       </div>
     </div>
+	</>
   );
 }
 

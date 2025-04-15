@@ -92,7 +92,6 @@ function StaffManagement() {
   const handleCreateManager = async () => {
     try {
       await createManager({ storeId, managerName, managerPhone, managerEmail, password });
-      console.log("Created successfully");
       setShowModal(false);
       loadManagers();
       setStoreId("");
@@ -128,7 +127,6 @@ function StaffManagement() {
         managerEmail: editingManagerEmail,
         storeId: editingStoreId,
       });
-      console.log("Updated successfully");
       setEditingManager(null);
       loadManagers();
     } catch (error) {

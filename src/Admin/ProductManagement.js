@@ -86,7 +86,6 @@ function ProductManagement() {
 
     // TODO: Gọi API xóa bên server (DELETE /api/product?ids=...)
     // Rồi load lại danh sách
-    console.log("Deleting products from server...", selectedProducts);
     setSelectedProducts([]);
     loadProducts();
   };
@@ -102,11 +101,6 @@ function ProductManagement() {
 
       // TODO: Gọi API tạo sản phẩm
       // const createRes = await createProduct({ productName, categoryName, imageUrl: uploadedImageUrl, ... })
-      console.log("Creating product with data:", {
-        productName,
-        categoryName,
-        imageUrl: uploadedImageUrl,
-      });
 
       // Load lại danh sách sau khi tạo
       await loadProducts();
@@ -186,7 +180,7 @@ function ProductManagement() {
           title="Product Management"
           data={products}
           columns={[
-            { key: "productId", label: "Product ID" },
+            { key: "productCode", label: "Product Code" },
             { key: "productName", label: "Product" },
             { key: "categoryName", label: "Category" },
           ]}
