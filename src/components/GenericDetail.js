@@ -21,7 +21,8 @@ function GenericDetail({
   totalPages,
   itemKey = null,
   tabs = null,
-  onTabChange = null, // 👈 ensure this prop is accepted
+  onTabChange = null,
+  onRowClick = null, // Hỗ trợ onRowClick, truyền callback từ cha
 }) {
   const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
 
@@ -68,7 +69,7 @@ function GenericDetail({
           <h1 className="page-title">{title}</h1>
 
           <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <div className="detail-image-box"  style={{ width: "300px", height: "250px" }}>
+            <div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
               {imageUrl && (
                 <img
                   src={imageUrl}
@@ -94,7 +95,7 @@ function GenericDetail({
                   onClick={() => {
                     setActiveTabKey(tab.key);
                     if (typeof onTabChange === "function") {
-                      onTabChange(tab.key); // 👈 This triggers parent pagination logic
+                      onTabChange(tab.key);
                     }
                   }}
                   className={`tab-button ${activeTabKey === tab.key ? "active" : ""}`}
@@ -160,7 +161,16 @@ function GenericDetail({
                     const id = itemKey ? row[itemKey] : rowIndex;
                     const cells = Array.isArray(row) ? row : Object.values(row);
                     return (
-                      <tr key={id}>
+                      <tr
+                        key={id}
+                        // Gọi onRowClick với cả dữ liệu của hàng và chỉ số hàng
+                        onClick={(e) => {
+                          if (e.target.tagName !== "INPUT" && onRowClick) {
+                            onRowClick(row, rowIndex);
+                          }
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
                         {itemKey !== null && (
                           <td>
                             <input
@@ -168,6 +178,7 @@ function GenericDetail({
                               checked={selectedItems.includes(id)}
                               onChange={() => handleCheckOne(id)}
                               aria-label={`Select row ${rowIndex}`}
+                              onClick={(e) => e.stopPropagation()}
                             />
                           </td>
                         )}
@@ -178,7 +189,10 @@ function GenericDetail({
                                 variant={cell.variant || "primary"}
                                 size={cell.size || "sm"}
                                 className={cell.className || ""}
-                                onClick={cell.onClick}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  cell.onClick();
+                                }}
                               >
                                 {cell.label || "Action"}
                               </Button>

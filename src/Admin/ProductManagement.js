@@ -4,13 +4,14 @@ import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import GenericModal from "../components/GenericModal";
-import { uploadfile , getProducts} from "../ServiceApi/apiAdmin";
+import { uploadfileIO, getProducts, addProduct } from "../ServiceApi/apiAdmin";
+import { getCategory } from "../ServiceApi/apiCatetory";
 
 function ProductManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const navigate = useNavigate();
 
-  // State chứa danh sách product được trả về từ API
+  // State chứa danh sách sản phẩm
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
 
@@ -19,26 +20,32 @@ function ProductManagement() {
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
 
+  // State cho modal tạo mới sản phẩm
   const [showModal, setShowModal] = useState(false);
-
-  // State cho tạo mới sản phẩm
   const [productName, setProductName] = useState("");
-  const [categoryName, setcategoryName] = useState("");
+  const [description, setDescription] = useState("");
+  // Thay vì nhập thủ công categoryId, ta sẽ chọn từ dropdown
+  const [categoryId, setCategoryId] = useState("");
   const [productImageFile, setProductImageFile] = useState(null);
 
   // State cho search filters
   const [filters, setFilters] = useState({
     productName: "",
     productId: "",
+    categoryId: "",
   });
 
-  // State cho modal chỉnh sửa
+  // State cho modal chỉnh sửa sản phẩm (nếu cần)
   const [editingProduct, setEditingProduct] = useState(null);
   const [editingProductName, setEditingProductName] = useState("");
-  const [editingcategoryName, setEditingcategoryName] = useState("");
+  const [editingDescription, setEditingDescription] = useState("");
+  const [editingCategoryId, setEditingCategoryId] = useState("");
+
+  // State danh sách category lấy từ API
+  const [categories, setCategories] = useState([]);
 
   // ============================
-  // HÀM LOAD PRODUCTS TỪ API
+  // Hàm load danh sách sản phẩm từ API
   // ============================
   const loadProducts = async () => {
     try {
@@ -48,7 +55,6 @@ function ProductManagement() {
         pageNumber: currentPage,
         pageSize: pageSize,
       });
-  
       const { items, totalItem } = response;
       setProducts(items || []);
       setTotalPages(Math.ceil((totalItem ?? 0) / pageSize));
@@ -57,13 +63,28 @@ function ProductManagement() {
     }
   };
 
-  // Mỗi khi currentPage hoặc filters thay đổi => gọi loadProducts
+  // Load danh sách sản phẩm khi currentPage thay đổi
   useEffect(() => {
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
-  // Lấy danh sách id của products
+  // Load danh sách category khi component khởi tạo
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        // Lấy tất cả các category với pageSize rất lớn
+        const res = await getCategory({ pageNumber: 1, pageSize: 2147483647 });
+        console.log("Categories fetched:", res);
+        setCategories(res?.items || []);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Lấy danh sách id của products để xử lý check all
   const allProductIds = useMemo(() => products.map((p) => p.productId), [products]);
 
   const handleCheckAll = (e) => {
@@ -72,50 +93,59 @@ function ProductManagement() {
 
   const handleCheckOne = (productId) => {
     setSelectedProducts((prev) =>
-      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
     );
   };
 
-  // Xoá nhiều sản phẩm (tạm thời mình để ví dụ xóa cục bộ, tuỳ API)
+  // Xoá nhiều sản phẩm (tùy theo API thực tế)
   const handleDeleteSelectedProducts = () => {
     if (selectedProducts.length === 0) return;
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${selectedProducts.length} product(s)?`
     );
     if (!confirmDelete) return;
-
-    // TODO: Gọi API xóa bên server (DELETE /api/product?ids=...)
-    // Rồi load lại danh sách
+    // TODO: Gọi API để xoá sản phẩm ở server, sau đó load lại danh sách
     setSelectedProducts([]);
     loadProducts();
   };
 
-  // Tạo mới product (có upload file)
+  // Tạo mới sản phẩm với quy trình: upload ảnh -> lấy URL -> gọi API addProduct
   const handleCreateProduct = async () => {
     try {
       let uploadedImageUrl = "";
       if (productImageFile) {
-        const uploadRes = await uploadfile(productImageFile);
-        uploadedImageUrl = uploadRes?.data?.url || "";
+        // Sử dụng uploadfileIO thay vì uploadfile
+        const uploadRes = await uploadfileIO(productImageFile);
+        // Giả sử URL được trả về nằm trong uploadRes.image_url hoặc uploadRes.url, tùy theo API trả về
+        uploadedImageUrl = uploadRes?.image_url || uploadRes?.url || uploadRes;
       }
+      // Gọi API tạo sản phẩm với thông tin theo cấu trúc:
+      // { productName, description, categoryId, imageUrl }
+      await addProduct({
+        productName,
+        description,
+        categoryId,
+        imageUrl: uploadedImageUrl,
+      });
 
-      // TODO: Gọi API tạo sản phẩm
-      // const createRes = await createProduct({ productName, categoryName, imageUrl: uploadedImageUrl, ... })
-
-      // Load lại danh sách sau khi tạo
+      // Load lại danh sách sản phẩm sau khi tạo thành công
       await loadProducts();
 
-      // Đóng modal, reset form
+      // Đóng modal và reset form
       setShowModal(false);
       setProductName("");
-      setcategoryName("");
+      setDescription("");
+      setCategoryId("");
       setProductImageFile(null);
     } catch (error) {
       console.error("Error uploading file or creating product:", error);
     }
   };
 
-  // Cấu hình các trường trong modal tạo product
+  // Cấu hình các trường trong modal tạo sản phẩm
+  // Ở trường Category, dùng type "select" với options từ categories
   const productFields = [
     {
       label: "Product Name",
@@ -125,11 +155,23 @@ function ProductManagement() {
       onChange: (e) => setProductName(e.target.value),
     },
     {
-      label: "Category",
-      controlId: "categoryName",
+      label: "Description",
+      controlId: "description",
       type: "text",
-      value: categoryName,
-      onChange: (e) => setcategoryName(e.target.value),
+      value: description,
+      onChange: (e) => setDescription(e.target.value),
+    },
+    {
+      label: "Category",
+      controlId: "categoryId",
+      type: "select",
+      value: categoryId,
+      onChange: (e) => setCategoryId(e.target.value),
+      // Các options: mảng các đối tượng { label, value }
+      options: categories.map((cat) => ({
+        label: cat.categoryName,
+        value: cat.categoryId, // Sử dụng key tương ứng với ID của category từ API
+      })),
     },
     {
       label: "Product Image",
@@ -143,23 +185,23 @@ function ProductManagement() {
     setShowModal(true);
   };
 
-  // Xử lý Edit
+  // Xử lý Edit (nếu cần)
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setEditingProductName(product.productName);
-    setEditingcategoryName(product.category);
+    setEditingDescription(product.description);
+    setEditingCategoryId(product.categoryId);
   };
 
   const handleUpdateProduct = async () => {
     try {
-      
       console.log("Product updated with data:", {
         productId: editingProduct.productId,
         productName: editingProductName,
-        categoryName: editingcategoryName,
+        description: editingDescription,
+        categoryId: editingCategoryId,
       });
-
-      // Load lại danh sách
+      // TODO: Gọi API update product nếu có yêu cầu
       await loadProducts();
       setEditingProduct(null);
     } catch (error) {
@@ -167,7 +209,7 @@ function ProductManagement() {
     }
   };
 
-  // Xử lý Detail => chuyển sang trang /product-detail/:id
+  // Xử lý chuyển sang trang chi tiết sản phẩm
   const handleDetailProduct = (product) => {
     navigate(`/product-detail/${product.productId}`, { state: { product } });
   };
@@ -182,7 +224,7 @@ function ProductManagement() {
           columns={[
             { key: "productCode", label: "Product Code" },
             { key: "productName", label: "Product" },
-            { key: "categoryName", label: "Category" },
+            { key: "categoryId", label: "Category ID" },
           ]}
           selectedItems={selectedProducts}
           handleCheckAll={handleCheckAll}
@@ -192,10 +234,10 @@ function ProductManagement() {
           filters={[
             { label: "Product Name", value: filters.productName },
             { label: "Product ID", value: filters.productId },
-            { label: "Category", value: filters.categoryName },
+            { label: "Category ID", value: filters.categoryId },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["productName", "productId", "categoryName"];
+            const filterKeys = ["productName", "productId", "categoryId"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -258,11 +300,22 @@ function ProductManagement() {
               onChange: (e) => setEditingProductName(e.target.value),
             },
             {
-              label: "Category",
-              controlId: "editcategoryName",
+              label: "Description",
+              controlId: "editDescription",
               type: "text",
-              value: editingcategoryName,
-              onChange: (e) => setEditingcategoryName(e.target.value),
+              value: editingDescription,
+              onChange: (e) => setEditingDescription(e.target.value),
+            },
+            {
+              label: "Category",
+              controlId: "editCategoryId",
+              type: "select",
+              value: editingCategoryId,
+              onChange: (e) => setEditingCategoryId(e.target.value),
+              options: categories.map((cat) => ({
+                label: cat.categoryName,
+                value: cat.categoryId,
+              })),
             },
           ]}
           onSave={handleUpdateProduct}
