@@ -110,6 +110,16 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
+		  
+		  <CanAccess roles={[Role.HELPDESK]}>
+            <div className="sidebar-item">
+              <NavLink
+                to="/device-management"
+                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                Devices
+              </NavLink>
+            </div>
+          </CanAccess>
           
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">

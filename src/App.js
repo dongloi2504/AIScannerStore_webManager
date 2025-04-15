@@ -13,7 +13,7 @@ import InventoryHistoryPage from './Admin/InventoryHistoryPage';
 import withAuthorization from './HOC/withAuthorization';
 import Unauthorized from './Admin/Unauthorized';
 import { Role } from './const/Role';
-
+import DeviceManagement from './ITHelpdesk/DeviceManagement';
 import Report from './Admin/Report';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
@@ -25,6 +25,7 @@ function App() {
 	const AuthorizedProductDetail = withAuthorization(ProductDetail, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
 
 	return (
 		<BrowserRouter basename="/AIScannerStore_build">
@@ -32,13 +33,14 @@ function App() {
 				<Route path="/" element={<AdminLogin />} />
 				<Route path="/store-management" element={<AuthorizedStoreManagement />} />
 				<Route path="/product-management" element={<AuthorizedProductManagement />} />
-				<Route path="/manager-management" element={<AuthorizedManagerManagement />} />
+				<Route path="/staff-management" element={<AuthorizedStaffManagement />} />
 				<Route path="/category-management" element={<AuthorizedCategoryManagement />} />
 				<Route path="/order-management" element={<AuthorizedOrderManagement />} />
 				<Route path="/product-detail/:id" element={<AuthorizedProductDetail />} />
 				<Route path="/store-detail/:storeId" element={<AuthorizedStoreDetail />} />
 				<Route path="/inventory-history/:id" element={<AuthorizedInventoryHistoryPage />} />
 				<Route path="/report" element={<Report />} />
+				<Route path="/device-management" element={<AuthorizedDeviceManagementPage />} />
 				<Route path="/unauthorized" element={<Unauthorized />} />
 			</Routes>
 		</BrowserRouter>
