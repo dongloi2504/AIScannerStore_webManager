@@ -2,10 +2,12 @@
 import instance from "./Customize-Axios";
 
 // Hàm tạo store
-export function createStore({ storeName, storeLocation }) {
+export function createStore({ storeName, storeAddress, imageUrl, storeCode }) {
   return instance.post("/api/store", {
     storeName,
-    storeLocation,
+    storeAddress,
+    imageUrl,
+    storeCode,
   });
 }
 
@@ -13,7 +15,7 @@ export function createStore({ storeName, storeLocation }) {
 export function getStores({
   storeId,
   storeName,
-  storeLocation,
+  storeAddress,
   pageNumber = 1,
   pageSize,
 } = {}) {
@@ -21,7 +23,7 @@ export function getStores({
     params: {
       StoreId: storeId,
       StoreNameQuery: storeName,
-      StoreAddressQuery: storeLocation,
+      StoreAddressQuery: storeAddress,
       PageNumber: pageNumber,
       PageSize: pageSize,
     }
@@ -37,11 +39,13 @@ export function deleteStore(ids) {
 
 
 // Hàm cập nhật store (PUT /api/store/{id})
-export function updateStore({ storeId, storeName, storeLocation }) {
+export function updateStore({ storeId, storeName, storeAddress, storeCode, imageUrl }) {
   return instance.put("/api/store", {
     storeId,
     storeName,
-    storeLocation,
+    storeAddress,
+    storeCode,
+    imageUrl,
   });
 }
 

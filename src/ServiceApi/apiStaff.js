@@ -1,35 +1,43 @@
 import instance from "./Customize-Axios";
 
   
-  // Hàm lấy danh sách Manager
-  export function getManager({
+  // Hàm lấy danh sách Staff
+  export function getStaff({
     pageNumber = 0,
     pageSize,
-    managerId,
+    SortBy,
+    isDescending = true,
+    staffId,
     storeId,
-    managerName,
-    managerPhone,
-    managerEmail,
+    staffName,
+    staffPhone,
+    staffEmail,
+    role,
+    staffCode,
   } = {}) {
     const query = {
       storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
+      staffName,
+      staffPhone,
+      staffEmail,
+      role,
+      staffCode,
     };
 
-    if (managerId) {
-      query.managerId = managerId;
+    if (staffId) {
+      query.staffId = staffId;
     }
 
-    return instance.post("/api/store-manager/get",{
+    return instance.post("/api/staff/get",{
       pageNumber,
       pageSize,
+      SortBy,
+      isDescending,
       query,
     });
   }
   
-  // Hàm cập nhật Manager
+  // Hàm cập nhật Staff
   export function updateManager({ managerId, storeId, managerName, managerPhone, managerEmail }) {
     return instance.put("/api/store-manager", {
       managerId,
@@ -41,7 +49,7 @@ import instance from "./Customize-Axios";
     });
   }
 
-  // Hàm tạo Manager
+  // Hàm tạo Staff
 export function createManager({ storeId, managerName, managerPhone, managerEmail, password }) {
     return instance.post("/api/store-manager", {
       storeId,
@@ -52,7 +60,7 @@ export function createManager({ storeId, managerName, managerPhone, managerEmail
     });
   }
 
-  // Hàm xoá Manager
+  // Hàm xoá Staff
   export function deleteManager(ids ) {
     return instance.delete(`/api/store-manager`, {
       data: {ids : [ids]} ,

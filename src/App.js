@@ -4,7 +4,7 @@ import AdminLogin from './Authen/AdminLogin';
 import StoreManagement from './Admin/StoreManagement';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProductDetail from './Admin/ProductDetail';
-import ManagerManagement from './Admin/ManagerManagement';
+import StaffManagement from './Admin/StaffManagement';
 import CategoryManagement from './Admin/CategoryManagement';
 import ProductManagement from './Admin/ProductManagement';
 import OrderManagement from './Admin/OrderManagement';
@@ -19,7 +19,7 @@ function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
 	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
 	const AuthorizedProductManagement = withAuthorization(ProductManagement, [Role.ADMIN, Role.MANAGER]);
-	const AuthorizedManagerManagement = withAuthorization(ManagerManagement, [Role.ADMIN]);
+	const AuthorizedStaffManagement = withAuthorization(StaffManagement, [Role.ADMIN]);
 	const AuthorizedCategoryManagement = withAuthorization(CategoryManagement, [Role.ADMIN]);
 	const AuthorizedOrderManagement = withAuthorization(OrderManagement, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedProductDetail = withAuthorization(ProductDetail, [Role.ADMIN, Role.MANAGER]);
