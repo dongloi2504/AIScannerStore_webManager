@@ -34,6 +34,7 @@ function StoreManagement() {
   const [editingStoreName, setEditingStoreName] = useState("");
   const [editingStoreAddress, setEditingStoreAddress] = useState("");
   const [editingStoreCode, setEditingStoreCode] = useState("");
+  const [editingImageURL] = useState("");
 
   useEffect(() => {
     loadStores();
@@ -106,14 +107,17 @@ function StoreManagement() {
     setEditingStore(store);
     setEditingStoreName(store.storeName);
     setEditingStoreAddress(store.storeAddress);
+    setEditingStoreCode(store.storeCode);
   };
 
   const handleUpdateStore = async () => {
     try {
       await updateStore({
+        storeId: editingStore.storeId,
         storeCode: editingStoreCode,
         storeName: editingStoreName,
         storeAddress: editingStoreAddress,
+        imageUrl: editingImageURL,
       });
       setEditingStore(null);
       loadStores();
@@ -238,6 +242,13 @@ function StoreManagement() {
           show={true}
           title="Edit Store"
           fields={[
+            {
+              label: "Store Code",
+              controlId: "editStoreCode",
+              type: "text",
+              value: editingStoreCode,
+              onChange: (e) => setEditingStoreCode(e.target.value),
+            },
             {
               label: "Store Name",
               controlId: "editStoreName",

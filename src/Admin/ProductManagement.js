@@ -23,6 +23,7 @@ function ProductManagement() {
 
   // State cho tạo mới sản phẩm
   const [productName, setProductName] = useState("");
+  const [productCode, setProductCode] = useState("");
   const [categoryName, setcategoryName] = useState("");
   const [productImageFile, setProductImageFile] = useState(null);
 
@@ -108,6 +109,7 @@ function ProductManagement() {
       // Đóng modal, reset form
       setShowModal(false);
       setProductName("");
+      setProductCode("");
       setcategoryName("");
       setProductImageFile(null);
     } catch (error) {
