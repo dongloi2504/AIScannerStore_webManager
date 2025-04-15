@@ -37,10 +37,11 @@ import instance from "./Customize-Axios";
   }
 
   // Hàm tạo Category
-export function createCategory({ categoryName, description }) {
+export function createCategory({ categoryName, description, categoryCode }) {
     return instance.post("/api/category", {
       categoryName,
       description,
+      categoryCode,
     });
   }
 
