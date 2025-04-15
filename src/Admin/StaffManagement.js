@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getManager, updateManager, createManager, deleteManager} from "../ServiceApi/apiManager";
+import { getStaff, updateManager, createManager, deleteManager} from "../ServiceApi/apiStaff";
 import GenericModal from "../components/GenericModal";  
 
-function ManagerManagement() {
+function StaffManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [managers, setManagers] = useState([]);
   const [selectedManagers, setSelectedManagers] = useState([]);
@@ -37,7 +37,7 @@ function ManagerManagement() {
 
   const loadManagers = async () => {
     try {
-      const response = await getManager({
+      const response = await getStaff({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
@@ -141,12 +141,12 @@ function ManagerManagement() {
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
-          title="Manager Management"
+          title="Staff Management"
           data={managers}
           columns={[
-            { key: "managerId", label: "Manager ID" },
-            { key: "managerName", label: "Name" },
-            { key: "managerPhone", label: "Phone" },
+            { key: "staffCode", label: "Staff Code" },
+            { key: "staffName", label: "Staff Name" },
+            { key: "role", label: "Staff Role" },
             { key: "storeName", label: "Store Name" },
           ]}
           selectedItems={selectedManagers}
@@ -282,4 +282,4 @@ function ManagerManagement() {
   );
 }
 
-export default ManagerManagement;
+export default StaffManagement;

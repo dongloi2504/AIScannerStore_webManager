@@ -21,16 +21,19 @@ function StoreManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [storeName, setStoreName] = useState("");
-  const [storeLocation, setStoreLocation] = useState("");
+  const [storeAddress, setStoreAddress] = useState("");
+  const [imageUrl, setImageURL] = useState("");
+  const [storeCode, setStoreCode] = useState("");
   const [filters, setFilters] = useState({
     storeName: "",
-    storeId: "",
-    storeLocation: "",
+    storeCode: "",
+    storeAddress: "",
   });
 
   const [editingStore, setEditingStore] = useState(null);
   const [editingStoreName, setEditingStoreName] = useState("");
-  const [editingStoreLocation, setEditingStoreLocation] = useState("");
+  const [editingStoreAddress, setEditingStoreAddress] = useState("");
+  const [editingStoreCode, setEditingStoreCode] = useState("");
 
   useEffect(() => {
     loadStores();
@@ -87,11 +90,13 @@ function StoreManagement() {
 
   const handleCreateStore = async () => {
     try {
-      await createStore({ storeName, storeLocation });
+      await createStore({ storeName, storeAddress, imageUrl, storeCode });
       setShowModal(false);
       loadStores();
       setStoreName("");
-      setStoreLocation("");
+      setStoreAddress("");
+      setImageURL("");
+      setStoreCode("");
     } catch (error) {
       console.error("Error creating store:", error);
     }
@@ -100,15 +105,15 @@ function StoreManagement() {
   const handleEditStore = (store) => {
     setEditingStore(store);
     setEditingStoreName(store.storeName);
-    setEditingStoreLocation(store.storeLocation);
+    setEditingStoreAddress(store.storeAddress);
   };
 
   const handleUpdateStore = async () => {
     try {
       await updateStore({
-        storeId: editingStore.storeId,
+        storeCode: editingStoreCode,
         storeName: editingStoreName,
-        storeLocation: editingStoreLocation,
+        storeAddress: editingStoreAddress,
       });
       setEditingStore(null);
       loadStores();
@@ -125,6 +130,13 @@ function StoreManagement() {
 
   const storeFields = [
     {
+      label: "Store Code",
+      controlId: "storeCode",
+      type: "text",
+      value: storeCode,
+      onChange: (e) => setStoreCode(e.target.value),
+    },
+    {
       label: "Store Name",
       controlId: "storeName",
       type: "text",
@@ -132,11 +144,11 @@ function StoreManagement() {
       onChange: (e) => setStoreName(e.target.value),
     },
     {
-      label: "Store Location",
-      controlId: "storeLocation",
+      label: "Store Address",
+      controlId: "storeAddress",
       type: "text",
-      value: storeLocation,
-      onChange: (e) => setStoreLocation(e.target.value),
+      value: storeAddress,
+      onChange: (e) => setStoreAddress(e.target.value),
     },
   ];
 
@@ -152,9 +164,9 @@ function StoreManagement() {
           title="Store Management"
           data={stores}
           columns={[
-            { key: "storeId", label: "Store ID" },
+            { key: "storeCode", label: "Store Code" },
             { key: "storeName", label: "Store Name" },
-            { key: "storeLocation", label: "Location" },
+            { key: "storeAddress", label: "Address" },
           ]}
           selectedItems={selectedStores}
           handleCheckAll={handleCheckAll}
@@ -163,11 +175,11 @@ function StoreManagement() {
           handleSearch={loadStores}
           filters={[
             { label: "Store Name", value: filters.storeName },
-            { label: "Store ID", value: filters.storeId },
-            { label: "Location", value: filters.storeLocation },
+            { label: "Store Code", value: filters.storeCode },
+            { label: "Address", value: filters.storeAddress },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["storeName", "storeId", "storeLocation"];
+            const filterKeys = ["storeName", "storeCode", "storeAddress"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() =>
@@ -234,11 +246,11 @@ function StoreManagement() {
               onChange: (e) => setEditingStoreName(e.target.value),
             },
             {
-              label: "Store Location",
-              controlId: "editStoreLocation",
+              label: "Store Address",
+              controlId: "editStoreAddress",
               type: "text",
-              value: editingStoreLocation,
-              onChange: (e) => setEditingStoreLocation(e.target.value),
+              value: editingStoreAddress,
+              onChange: (e) => setEditingStoreAddress(e.target.value),
             },
           ]}
           onSave={handleUpdateStore}

@@ -15,6 +15,7 @@ function CategoryManagement() {
   const [showModal, setShowModal] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [description, setDescription] = useState("");
+  const [categoryCode, setCategoryCode] = useState("");
   const [filters, setFilters] = useState({
     categoryId: "",
     categoryNameQuery: "",
@@ -87,18 +88,26 @@ function CategoryManagement() {
 
   const handleCreateCategory = async () => {
     try {
-      await createCategory({ categoryName, description });
+      await createCategory({ categoryName, description, categoryCode });
       console.log("Category created successfully");
       setShowModal(false);
       loadCategories();
       setCategoryName("");
       setDescription("");
+      setCategoryCode("");
     } catch (error) {
       console.error("Error creating category:", error);
     }
   };
 
   const categoryFields = [
+    {
+      label: "Category Code",
+      controlId: "categoryCode",
+      type: "text",
+      value: categoryCode,
+      onChange: (e) => setCategoryCode(e.target.value),
+    },
     {
       label: "Category Name",
       controlId: "categoryName",
@@ -151,7 +160,7 @@ function CategoryManagement() {
           title="Category Management"
           data={categories}
           columns={[
-            { key: "categoryId", label: "Category Code" },
+            { key: "categoryCode", label: "Category Code" },
             { key: "categoryName", label: "Category Name" },
             { key: "description", label: "Category Description" },
           ]}
@@ -213,6 +222,13 @@ function CategoryManagement() {
           show={true}
           title="Edit Category"
           fields={[
+            {
+              label: "Category Code",
+              controlId: "editCategoryCode",
+              type: "text",
+              value: editingCategoryCode,
+              onChange: (e) => setEditingCategoryCode(e.target.value),
+            },
             {
               label: "Category Name",
               controlId: "editCategoryName",
