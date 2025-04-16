@@ -14,6 +14,7 @@ import withAuthorization from './HOC/withAuthorization';
 import Unauthorized from './Admin/Unauthorized';
 import { Role } from './const/Role';
 import DeviceManagement from './ITHelpdesk/DeviceManagement';
+import LiveOrderManagement from './Staff/LiveOrderManagement';
 import Report from './Admin/Report';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
@@ -26,7 +27,7 @@ function App() {
 	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
-
+	const AuthorizedLiveOrderEditing = withAuthorization(LiveOrderManagement, [Role.ALL]);
 	return (
 		<BrowserRouter basename="/AIScannerStore_build">
 			<Routes>
@@ -41,7 +42,9 @@ function App() {
 				<Route path="/inventory-history/:id" element={<AuthorizedInventoryHistoryPage />} />
 				<Route path="/report" element={<Report />} />
 				<Route path="/device-management" element={<AuthorizedDeviceManagementPage />} />
+				<Route path="/live-order" element={<AuthorizedLiveOrderEditing />} />
 				<Route path="/unauthorized" element={<Unauthorized />} />
+				
 			</Routes>
 		</BrowserRouter>
 	);

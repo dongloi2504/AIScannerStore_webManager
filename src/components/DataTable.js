@@ -107,7 +107,7 @@ const DataTable = ({
           /></>
         ))}
         <Button className="search-btn" variant="secondary" onClick={handleSearch}>
-          Search
+			{ filters.length > 0 ? "Search" : "Reload" }
         </Button>
       </div>
 
@@ -115,14 +115,17 @@ const DataTable = ({
       <table className="data-table">
         <thead>
           <tr>
-            <th>
+		  {extraButtons.length != 0 ?
+            (<th>
               <input
                 type="checkbox"
                 onChange={handleCheckAll}
                 checked={isAllChecked}
                 aria-label="Select All"
               />
-            </th>
+			</th>) 
+			: ""}
+			
             {currentColumns.map((col, idx) => (
               <th key={idx}>{col.label}</th>
             ))}
@@ -139,6 +142,7 @@ const DataTable = ({
           ) : (
             currentData.map((item, idx) => (
               <tr key={idx}>
+			    {extraButtons.length != 0 ? (
                 <td>
                   <input
                     type="checkbox"
@@ -164,7 +168,7 @@ const DataTable = ({
                       item[idType[3]] ||
                       item[idType[4]]}`}
                   />
-                </td>
+                </td>) : "" }
                 {currentColumns.map((col, colIdx) => (
                   <td key={colIdx}>{item[col.key]}</td>
                 ))}

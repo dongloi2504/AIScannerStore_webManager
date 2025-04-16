@@ -28,7 +28,7 @@ const Sidebar = ({ onToggle }) => {
   return (
     <>
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
-        <div className="sidebar-logo">Admin</div>
+        <div className="sidebar-logo">{user.staffName}</div>
 
         {/* Menu chính */}
         <nav className="sidebar-menu">
@@ -111,12 +111,24 @@ const Sidebar = ({ onToggle }) => {
             </div>
           </CanAccess>
 		  
+		  {/* Sidebar link for device management */}
 		  <CanAccess roles={[Role.HELPDESK]}>
             <div className="sidebar-item">
               <NavLink
                 to="/device-management"
                 className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
                 Devices
+              </NavLink>
+            </div>
+          </CanAccess>
+		  
+		  {/* Sidebar link for live order editing */}
+		  <CanAccess roles={[Role.ALL]}>
+            <div className="sidebar-item">
+              <NavLink
+                to="/live-order"
+                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                Live Orders
               </NavLink>
             </div>
           </CanAccess>
