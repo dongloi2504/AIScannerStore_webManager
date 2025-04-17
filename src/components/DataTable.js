@@ -93,17 +93,21 @@ const DataTable = ({
 
       {/* Search Bar */}
       <div className="search-container">
-        {filters.map((filter, index) => (
+        {filters.map((filter, index) => (<>
+			{filter.hasLabel ?
+			<label htmlFor={`filter-${index}`} className="form-label">
+				{filter.label}
+			</label> : ""}
           <input
             key={index}
-            type="text"
+            type={filter.type ?? "text"}
             placeholder={`Enter ${filter.label}`}
             value={filter.value}
-            onChange={(e) => setFilters(index, e.target.value)}
-          />
+            onChange={(e) => setFilters(index,filter.type === "checkbox" ? e.target.checked : e.target.value )}
+          /></>
         ))}
         <Button className="search-btn" variant="secondary" onClick={handleSearch}>
-          Search
+			{ filters.length > 0 ? "Search" : "Reload" }
         </Button>
       </div>
 
@@ -111,18 +115,21 @@ const DataTable = ({
       <table className="data-table">
         <thead>
           <tr>
-            <th>
+		  {extraButtons.length != 0 ?
+            (<th>
               <input
                 type="checkbox"
                 onChange={handleCheckAll}
                 checked={isAllChecked}
                 aria-label="Select All"
               />
-            </th>
+			</th>) 
+			: ""}
+			
             {currentColumns.map((col, idx) => (
               <th key={idx}>{col.label}</th>
             ))}
-            <th>Action</th>
+            {actions.length != 0 ? <th>Action</th> : ""}
           </tr>
         </thead>
         <tbody>
@@ -135,6 +142,7 @@ const DataTable = ({
           ) : (
             currentData.map((item, idx) => (
               <tr key={idx}>
+			    {extraButtons.length != 0 ? (
                 <td>
                   <input
                     type="checkbox"
@@ -160,10 +168,11 @@ const DataTable = ({
                       item[idType[3]] ||
                       item[idType[4]]}`}
                   />
-                </td>
+                </td>) : "" }
                 {currentColumns.map((col, colIdx) => (
                   <td key={colIdx}>{item[col.key]}</td>
                 ))}
+				{actions.length != 0 ?
                 <td>
                   {actions.map((action, actionIdx) => (
                     <Button
@@ -175,7 +184,7 @@ const DataTable = ({
                       {action.label}
                     </Button>
                   ))}
-                </td>
+                </td> : ""}
               </tr>
             ))
           )}
