@@ -136,3 +136,9 @@ form {
   text-decoration: none;
 }
 
+.extra-links ul {
+  list-style-position: inside;
+  padding-left: 0;
+  margin-left: 0;
+} 
+

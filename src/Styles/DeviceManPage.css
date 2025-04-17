@@ -1,0 +1,16 @@
+.search-container input[type="checkbox"] {
+  flex: 0 0 auto;
+  margin-top:10px;
+  margin-bottom:10px;
+  align-items: center;
+  min-width:36px;
+  gap: 0.5rem; /* space between checkbox and label */
+}
+.search-container label {
+	margin-top:9px;
+}
+
+.form-control input[type="checkbox"] {
+	width:36px;
+	height:36px;
+}

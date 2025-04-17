@@ -4,6 +4,7 @@ import './AdminLogin.css';
 import { loginAdmin } from '../ServiceApi/apiAuth';
 import { useAuth } from './AuthContext';
 import { Helmet } from 'react-helmet';
+import { Role } from '../const/Role';
 
 function AdminLogin() {
   const [UserEmail, setEmail] = useState('');
@@ -19,7 +20,10 @@ function AdminLogin() {
 	    setAuth(data.userInfo, data.accessToken);
         localStorage.setItem('token', data.accessToken);
         localStorage.setItem("staffId", data.userInfo.staffId);
-        navigate('/store-management');
+		let link = '/product-management';
+		if (data.userInfo.role === Role.HELPDESK)
+			link = '/device-management';
+        navigate(link);
       } else {
         // Thay vì hiển thị lỗi lên console, dùng alert
         alert(data?.message || 'Login failed. Please try again.');
@@ -39,12 +43,11 @@ function AdminLogin() {
       <div className="admin-login-box">
         <div className="login-illustration">
           <img
-            src="https://storage.googleapis.com/a1aa/image/5dg7ZGHWpw-g4Jc34mNRjVZ1oeR1RaSF4rM9kWv8iIA.jpg"
+            src="./logo.jpg"
             alt="Login Illustration"
           />
         </div>
         <div className="login-form-container">
-          <div className="company-logo">company</div>
           <h2 className="login-title">Login</h2>
 
           <form onSubmit={handleSubmit}>
@@ -55,7 +58,7 @@ function AdminLogin() {
                 type="text"
                 value={UserEmail}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Nhập email"
+                placeholder="Input email"
                 required
               />
             </div>
@@ -66,7 +69,7 @@ function AdminLogin() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nhập mật khẩu"
+                placeholder="Input password"
                 required
               />
             </div>
@@ -75,7 +78,7 @@ function AdminLogin() {
             </button>
           </form>
           <div className="extra-links">
-            <a href="#forgot-password">Forgot your password?</a>
+            <subtitle>Contact Administration if you forgot your password</subtitle>
           </div>
         </div>
       </div>

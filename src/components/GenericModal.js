@@ -54,7 +54,14 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
                     }),
                   }}
                 />
-              ) : (
+              ) : (field.type === "checkbox") ? ( 
+				<Form.Check
+                  name={field.controlId}
+                  type={field.type}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+			  ) : (
                 <Form.Control
                   name={field.controlId}
                   type={field.type || "text"}

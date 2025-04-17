@@ -6,3 +6,10 @@ export async function loginAdmin({ UserEmail, password }) {
     password,
   });
 }
+export function resetCustomerPassword({ attemptId, token, newPassword }) {
+  return instance.post("/api/auth/customer/password-reset", {
+    attemptId,
+    token,
+    newPassword,
+  });
+}
