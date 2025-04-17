@@ -17,7 +17,7 @@ const DataTable = ({
   totalPages,
   actions = [],
   extraButtons = [],
-  idType = ["managerId", "storeId", "productId", "categoryId", "orderId"],
+  idType = ["staffId", "storeId", "productId", "categoryId", "orderId"],
   tabs = null,
   onTabChange = null,
 }) => {

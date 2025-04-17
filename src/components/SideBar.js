@@ -75,6 +75,19 @@ const Sidebar = ({ onToggle }) => {
           <CanAccess roles={[Role.ADMIN]}>
             <div className="sidebar-item">
               <NavLink
+                to="/customer-management"
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                Customer
+              </NavLink>
+            </div>
+          </CanAccess>
+
+          <CanAccess roles={[Role.ADMIN]}>
+            <div className="sidebar-item">
+              <NavLink
                 to="/category-management"
                 className={({ isActive }) =>
                   isActive ? "sidebar-link active" : "sidebar-link"

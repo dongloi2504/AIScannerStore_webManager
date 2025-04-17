@@ -19,7 +19,7 @@ function AdminLogin() {
 	    setAuth(data.userInfo, data.accessToken);
         localStorage.setItem('token', data.accessToken);
         localStorage.setItem("staffId", data.userInfo.staffId);
-        navigate('/product-management');
+        navigate('/store-management');
       } else {
         // Thay vì hiển thị lỗi lên console, dùng alert
         alert(data?.message || 'Login failed. Please try again.');

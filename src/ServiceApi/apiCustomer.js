@@ -1,34 +1,33 @@
 import instance from "./Customize-Axios";
 
   
-  // Hàm lấy danh sách Staff
-  export function getStaff({
+  // Hàm lấy danh sách Customer
+  export function getCustomer({
     pageNumber = 0,
     pageSize,
     SortBy,
     isDescending = true,
-    staffId,
-    storeId,
-    staffName,
-    staffPhone,
-    staffEmail,
-    role,
-    staffCode,
+    customerId,
+    customerName,
+    isSuspended = true,
+    customerCode,
+    customerEmail,
+    customerPhone,
   } = {}) {
     const query = {
-      storeId,
-      staffName,
-      staffPhone,
-      staffEmail,
-      role,
-      staffCode,
+      id: customerId,
+      name: customerName,
+      isSuspended,
+      code: customerCode,
+      email: customerEmail,
+      phone: customerPhone,
     };
 
-    if (staffId) {
-      query.staffId = staffId;
-    }
+    // if (staffId) {
+    //   query.staffId = staffId;
+    // }
 
-    return instance.post("/api/staff/get",{
+    return instance.post("/api/customer/get",{
       pageNumber,
       pageSize,
       SortBy,
