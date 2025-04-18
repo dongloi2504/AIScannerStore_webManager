@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Button from "react-bootstrap/Button";
+import { Role } from "../const/Role";
+import { CanAccess } from "./CanAccess";
 
 const DataTable = ({
   title,
@@ -60,6 +62,7 @@ const DataTable = ({
         <h1 className="page-title">{title}</h1>
         <div className="button-group">
           {extraButtons.map((btn, index) => (
+			<CanAccess roles={btn?.roles ?? [Role.ALL]}>
             <Button
               key={index}
               variant={btn.variant}
@@ -69,6 +72,7 @@ const DataTable = ({
             >
               {btn.label}
             </Button>
+			</CanAccess>
           ))}
         </div>
       </div>
@@ -175,6 +179,7 @@ const DataTable = ({
 				{actions.length != 0 ?
                 <td>
                   {actions.map((action, actionIdx) => (
+				    <CanAccess roles={action?.roles ?? [Role.ALL]}>
                     <Button
                       key={actionIdx}
                       className={`action-btn ${action.className}`}
@@ -183,6 +188,7 @@ const DataTable = ({
                     >
                       {action.label}
                     </Button>
+					</CanAccess>
                   ))}
                 </td> : ""}
               </tr>

@@ -62,13 +62,28 @@ export function uploadfile(file) {
     },
   });
 }
-export function addProduct({ productName, description, categoryId, imageUrl }) {
+export function addProduct({ productName, description, categoryId, imageUrl, productCode, basePrice }) {
   return instance.post("/api/product/add", {
     productName,
     description,
     categoryId,
     imageUrl,
+	productCode,
+	basePrice
   });
+}
+
+export function updateProduct({ productId, productName, description, categoryId, imageUrl, productCode, basePrice, isSuspended }) {
+	return instance.put("/api/product", {
+	  productId,
+	  productName,
+      description,
+      categoryId,
+      imageUrl,
+	  productCode,
+	  basePrice,
+	  isSuspended
+	});
 }
 // Lấy sản phẩm thông qua các giá trị của sản phẩm
 export function getProducts({
@@ -77,6 +92,8 @@ export function getProducts({
   productNameQuery,
   descriptionQuery,
   categoryIds = [],
+  productCode = null,
+  categoryCode = null,
   productId = null, // Thêm productId vào
   minPrice = null,
   maxPrice = null,
@@ -88,6 +105,8 @@ export function getProducts({
     categoryIds,
     minPrice,
     maxPrice,
+	categoryCode,
+	productCode,
     isSuspended,
   };
 

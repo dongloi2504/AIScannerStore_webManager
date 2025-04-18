@@ -4,8 +4,13 @@ import Select from "react-select";
 
 function GenericModal({ show, title, fields, onSave, onClose }) {
   const [saving, setSaving] = React.useState(false);
-
+  const formRef = React.useRef(null);
   const handleSaveChanges = async () => {
+	const form = formRef.current;
+    if (form && !form.checkValidity()) {
+      form.reportValidity(); // Show browser validation UI
+    return;
+	}
     try {
       setSaving(true);
       await onSave?.();
@@ -23,7 +28,7 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
+        <Form ref={formRef}>
           {fields.map((field, index) => (
             <Form.Group className="mb-3" key={index} controlId={field.controlId}>
               <Form.Label>{field.label}</Form.Label>
@@ -36,6 +41,7 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
                   onChange={(selected) =>
                     field.onChange({ target: { value: selected?.value } })
                   }
+				  required={field.required}
                   placeholder="-- Select --"
                   styles={{
                     menu: (provided) => ({
@@ -58,7 +64,7 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
 				<Form.Check
                   name={field.controlId}
                   type={field.type}
-                  value={field.value}
+                  checked={field.value}
                   onChange={field.onChange}
                 />
 			  ) : (
@@ -67,7 +73,10 @@ function GenericModal({ show, title, fields, onSave, onClose }) {
                   type={field.type || "text"}
                   placeholder={field.placeholder || ""}
                   value={field.value}
+				  maxLength={field?.maxLength ?? undefined}
+				  min={field?.allowNegative ? undefined : 0}
                   onChange={field.onChange}
+				  required={field.required}
                 />
               )}
             </Form.Group>
