@@ -38,32 +38,36 @@ import instance from "./Customize-Axios";
   }
   
   // Hàm cập nhật Staff
-  export function updateManager({ managerId, storeId, managerName, managerPhone, managerEmail }) {
-    return instance.put("/api/store-manager", {
-      managerId,
+  export function updateStaff({ staffId, storeId, staffName, staffPhone, staffEmail, staffCode, role, }) {
+    return instance.put("/api/staff", {
+      staffId,
       isSuspended: true,
       storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
+      staffName,
+      staffPhone,
+      staffEmail,
+      staffCode,
+      role,
     });
   }
 
   // Hàm tạo Staff
-export function createManager({ storeId, managerName, managerPhone, managerEmail, password }) {
-    return instance.post("/api/store-manager", {
+export function createStaff({ storeId, staffName, staffPhone, staffEmail, password, staffCode, role, }) {
+    return instance.post("/api/staff", {
       storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
+      staffName,
+      staffPhone,
+      staffEmail,
+      staffCode,
+      role,
       password,
     });
   }
 
   // Hàm xoá Staff
-  export function deleteManager(ids ) {
-    return instance.delete(`/api/store-manager`, {
-      data: {ids : [ids]} ,
+  export function deleteStaff(ids ) {
+    return instance.delete(`/api/staff`, {
+      data: [ids] ,
       headers: { "Content-Type": "application/json" },
     });
   }

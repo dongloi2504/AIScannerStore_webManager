@@ -207,77 +207,14 @@ function OrderManagement() {
           totalPages={totalPages}
           actions={[
             {
-              label: "Edit",
-              className: "edit",
-              variant: "info",
+              label: "Detail",
+              className: "detail",
+              variant: "secondary",
               onClick: handleEditManager,
             },
           ]}
-          // extraButtons={[
-          //   {
-          //     label: "Create New",
-          //     variant: "primary",
-          //     onClick: handleCreateNewManager,
-          //   },
-          //   {
-          //     label: "Delete",
-          //     variant: "danger",
-          //     // onClick: handleDeleteSelectedManagers,
-          //     className: "delete-btn",
-          //     disabled: selectedManagers.length === 0,
-          //   },
-          // ]}
         />
       </div>
-
-      {/* {showModal && (
-        <GenericModal
-          show={showModal}
-          title="Create New Manager"
-          fields={managerFields}
-          onSave={handleCreateManager}
-          onClose={() => setShowModal(false)}
-        />
-      )}
-
-      {editingManager && (
-        <GenericModal
-          show={true}
-          title="Edit Manager"
-          fields={[
-            {
-              label: "Store Id",
-              controlId: "editStoreId",
-              type: "text",
-              value: editingStoreId,
-              onChange: (e) => setEditingStoreId(e.target.value),
-            },
-            {
-              label: "Manager Name",
-              controlId: "editManagerName",
-              type: "text",
-              value: editingManagerName,
-              onChange: (e) => setEditingManagerName(e.target.value),
-            },
-            {
-              label: "Manager Phone",
-              controlId: "editingManagerPhone",
-              type: "text",
-              value: editingManagerPhone,
-              onChange: (e) => setEditingManagerPhone(e.target.value),
-            },
-            {
-              label: "Manager Email",
-              controlId: "editingManagerEmail",
-              type: "text",
-              value: editingManagerEmail,
-              onChange: (e) => setEditingManagerEmail(e.target.value),
-            },
-          ]}
-          onSave={handleUpdateManager}
-          onClose={() => setEditingManager(null)}
-        />
-      )} */}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import StaffManagement from './Admin/StaffManagement';
 import CategoryManagement from './Admin/CategoryManagement';
 import ProductManagement from './Admin/ProductManagement';
 import OrderManagement from './Admin/OrderManagement';
+import CustomerManagement from './Admin/CustomerManagement';
 import StoreDetail from './Admin/StoreDetail';
 import InventoryHistoryPage from './Admin/InventoryHistoryPage';
 import withAuthorization from './HOC/withAuthorization';
@@ -23,6 +24,7 @@ function App() {
 	const AuthorizedProductManagement = withAuthorization(ProductManagement, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedStaffManagement = withAuthorization(StaffManagement, [Role.ADMIN]);
 	const AuthorizedCategoryManagement = withAuthorization(CategoryManagement, [Role.ADMIN]);
+	const AuthorizedCustomerManagement = withAuthorization(CustomerManagement, [Role.ADMIN]);
 	const AuthorizedOrderManagement = withAuthorization(OrderManagement, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedProductDetail = withAuthorization(ProductDetail, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER]);
@@ -40,6 +42,7 @@ function App() {
 				<Route path="/staff-management" element={<AuthorizedStaffManagement />} />
 				<Route path="/category-management" element={<AuthorizedCategoryManagement />} />
 				<Route path="/order-management" element={<AuthorizedOrderManagement />} />
+				<Route path="/customer-management" element={<AuthorizedCustomerManagement />} />
 				<Route path="/product-detail/:id" element={<AuthorizedProductDetail />} />
 				<Route path="/store-detail/:storeId" element={<AuthorizedStoreDetail />} />
 				<Route path="/inventory-history/:id" element={<AuthorizedInventoryHistoryPage />} />
