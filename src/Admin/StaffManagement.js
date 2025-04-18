@@ -22,8 +22,8 @@ function StaffManagement() {
   const [password, setPassword] = useState("");
   const [filters, setFilters] = useState({
     staffCode:"",
-    staffName: "",
-    role: "",
+    staffName:"",
+    role:"",
   });
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
@@ -165,7 +165,7 @@ function StaffManagement() {
           filters={[
             { label: "Staff Code", value: filters.staffCode },
             { label: "Staff Name", value: filters.staffName },
-            { label: "Store Role", value: filters.role },
+            { label: "Staff Role", value: filters.role },
           ]}
           setFilters={(index, value) => {
             const filterKeys = ["staffCode", "staffName", "role"];
@@ -211,7 +211,7 @@ function StaffManagement() {
               type: "select",
               value: storeId,
               onChange: (e) => setStoreId(e.target.value),
-              options: staffs.map((p) => ({ label: p.storeName, value: p.storeId })),
+              options: staffs.map((p) => ({ label: p.store?.storeName, value: p.store?.storeId })),
             },
             {
               label: "Staff Name",
@@ -266,7 +266,7 @@ function StaffManagement() {
               type: "select",
               value: editingStoreId,
               onChange: (e) => setEditingStoreId(e.target.value),
-              options: staffs.map((p) => ({ label: p.storeName, value: p.storeId })),
+              options: staffs.map((p) => ({ label: p.store?.storeName, value: p.store?.storeId })),
             },
             {
               label: "Staff Name",

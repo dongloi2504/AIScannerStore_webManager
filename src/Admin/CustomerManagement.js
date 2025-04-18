@@ -1,169 +1,173 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "../Styles/GlobalStyles.css";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getCustomer, updateStaff, createStaff, deleteStaff} from "../ServiceApi/apiCustomer";
+import { getCustomer, updateStaff,} from "../ServiceApi/apiCustomer";
 import GenericModal from "../components/GenericModal";  
 
 function CustomerManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [managers, setManagers] = useState([]);
-  const [selectedManagers, setSelectedManagers] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
-  const [customerId, setCustomerId] = useState("");
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [customerCode, setCustomerCode] = useState("");
+  const [id, setId] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [filters, setFilters] = useState({
-    orderId:"",
-    total: "",
-    status: "",
-    createdDate: "",
+    name:"",
+    code: "",
+    email: "",
   });
 
-  // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
-  const [editingManager, setEditingManager] = useState(null);
-  const [editingManagerName, setEditingManagerName] = useState("");
-  const [editingManagerPhone, setEditingManagerPhone] = useState("");
-  const [editingManagerEmail, setEditingManagerEmail] = useState("");
-  const [editingStoreId, setEditingStoreId] = useState("");
+  // // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
+  // const [editingCustomer, setEditingCustomer] = useState(null);
+  // // const [editingCusName, setEditingManagerName] = useState("");
+  // // const [editingManagerPhone, setEditingManagerPhone] = useState("");
+  // // const [editingManagerEmail, setEditingManagerEmail] = useState("");
+  // // const [editingStoreId, setEditingStoreId] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadOrders();
+    loadCustomers();
   }, [currentPage]);
 
-  const loadOrders = async () => {
+  const loadCustomers = async () => {
     try {
       const response = await getCustomer({
         pageNumber: currentPage,
         pageSize: pageSize,
         ...filters,
       });
-      setManagers(response.items ?? []);
+      setCustomers(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.error("Error fetching customers:", error);
     }
   };
 
-  const allOrderIds = useMemo(() => managers.map((m) => m.orderId), [managers]);
+  const allCustomerIds = useMemo(() => customers.map((m) => m.id), [customers]);
 
   const handleCheckAll = (e) => {
-    setSelectedManagers(e.target.checked ? allOrderIds : []);
+    setSelectedCustomers(e.target.checked ? allCustomerIds : []);
   };
 
-  const handleCheckOne = (orderId) => {
-    setSelectedManagers((prev) =>
-      prev.includes(orderId)
-        ? prev.filter((id) => id !== orderId)
-        : [...prev, orderId]
+  const handleCheckOne = (id) => {
+    setSelectedCustomers((prev) =>
+      prev.includes(id)
+        ? prev.filter((id) => id !== id)
+        : [...prev, id]
     );
   };
 
-  const handleDeleteSelectedManagers = async () => {
-    if (selectedManagers.length === 0) return;
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedManagers.length} order(s)?`
-    );
-    if (!confirmDelete) return;
+  // const handleDeleteSelectedManagers = async () => {
+  //   if (selectedManagers.length === 0) return;
+  //   const confirmDelete = window.confirm(
+  //     `Are you sure you want to delete ${selectedManagers.length} order(s)?`
+  //   );
+  //   if (!confirmDelete) return;
 
-    try {
-      const deletePromises = selectedManagers.map((id) => deleteStaff(id));
-      const results = await Promise.allSettled(deletePromises);
+  //   try {
+  //     const deletePromises = selectedManagers.map((id) => deleteStaff(id));
+  //     const results = await Promise.allSettled(deletePromises);
 
-      const failedDeletes = results.filter(
-        (result) => result.status === "rejected"
-      );
+  //     const failedDeletes = results.filter(
+  //       (result) => result.status === "rejected"
+  //     );
 
-      if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} order(s).`);
-      }
+  //     if (failedDeletes.length > 0) {
+  //       console.error(`Failed to delete ${failedDeletes.length} order(s).`);
+  //     }
 
-      setSelectedManagers([]);
-      loadOrders();
-    } catch (error) {
-      console.error("Error deleting orders:", error);
-    }
-  };
+  //     setSelectedManagers([]);
+  //     loadOrders();
+  //   } catch (error) {
+  //     console.error("Error deleting orders:", error);
+  //   }
+  // };
 
-  const handleCreateManager = async () => {
-    try {
-      await createStaff({ storeId, managerName, managerPhone, managerEmail, password });
-      setShowModal(false);
-      loadOrders();
-      setStoreId("");
-      setManagerName("");
-      setManagerPhone("");
-      setManagerEmail("");
-      setPassword("");
-    } catch (error) {
-      console.error("Error creating :", error);
-    }
-  };
+  // const handleCreateManager = async () => {
+  //   try {
+  //     await createStaff({ storeId, managerName, managerPhone, managerEmail, password });
+  //     setShowModal(false);
+  //     loadOrders();
+  //     setStoreId("");
+  //     setManagerName("");
+  //     setManagerPhone("");
+  //     setManagerEmail("");
+  //     setPassword("");
+  //   } catch (error) {
+  //     console.error("Error creating :", error);
+  //   }
+  // };
 
-  const managerFields = [
-    {
-      label: "Store Id",
-      controlId: "storeId",
-      type: "text",
-      value: storeId,
-      onChange: (e) => setStoreId(e.target.value),
-    },
-    {
-      label: "Manager Name",
-      controlId: "managerName",
-      type: "text",
-      value: managerName,
-      onChange: (e) => setManagerName(e.target.value),
-    },
-    {
-      label: "Manager Phone",
-      controlId: "managerPhone",
-      type: "text",
-      value: managerPhone,
-      onChange: (e) => setManagerPhone(e.target.value),
-    },
-    {
-      label: "Manager Email",
-      controlId: "managerEmail",
-      type: "text",
-      value: managerEmail,
-      onChange: (e) => setManagerEmail(e.target.value),
-    },
-  ];
+  // const managerFields = [
+  //   {
+  //     label: "Store Id",
+  //     controlId: "storeId",
+  //     type: "text",
+  //     value: storeId,
+  //     onChange: (e) => setStoreId(e.target.value),
+  //   },
+  //   {
+  //     label: "Manager Name",
+  //     controlId: "managerName",
+  //     type: "text",
+  //     value: managerName,
+  //     onChange: (e) => setManagerName(e.target.value),
+  //   },
+  //   {
+  //     label: "Manager Phone",
+  //     controlId: "managerPhone",
+  //     type: "text",
+  //     value: managerPhone,
+  //     onChange: (e) => setManagerPhone(e.target.value),
+  //   },
+  //   {
+  //     label: "Manager Email",
+  //     controlId: "managerEmail",
+  //     type: "text",
+  //     value: managerEmail,
+  //     onChange: (e) => setManagerEmail(e.target.value),
+  //   },
+  // ];
 
-  const handleCreateNewManager = () => {
-    setShowModal(true);
-  };
+  // const handleCreateNewManager = () => {
+  //   setShowModal(true);
+  // };
 
   // Khi bấm "Edit", lưu manager cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditManager = (manager) => {
-    setEditingManager(manager);
-    setEditingManagerName(manager.managerName);
-    setEditingManagerPhone(manager.managerPhone);
-    setEditingManagerEmail(manager.managerEmail);
-    setEditingStoreId(manager.storeId);
-  };
+  // const handleEditManager = (manager) => {
+  //   setEditingManager(manager);
+  //   setEditingManagerName(manager.managerName);
+  //   setEditingManagerPhone(manager.managerPhone);
+  //   setEditingManagerEmail(manager.managerEmail);
+  //   setEditingStoreId(manager.storeId);
+  // };
 
-  const handleUpdateManager = async () => {
-    try {
-      await updateStaff({
-        managerId: editingManager.managerId,
-        managerName: editingManagerName,
-        managerPhone: editingManagerPhone,
-        managerEmail: editingManagerEmail,
-        storeId: editingStoreId,
-      });
-      console.log("Updated successfully");
-      setEditingManager(null);
-      loadOrders();
-    } catch (error) {
-      console.error("Error updating :", error);
-    }
+  // const handleUpdateManager = async () => {
+  //   try {
+  //     await updateStaff({
+  //       managerId: editingManager.managerId,
+  //       managerName: editingManagerName,
+  //       managerPhone: editingManagerPhone,
+  //       managerEmail: editingManagerEmail,
+  //       storeId: editingStoreId,
+  //     });
+  //     console.log("Updated successfully");
+  //     setEditingManager(null);
+  //     loadOrders();
+  //   } catch (error) {
+  //     console.error("Error updating :", error);
+  //   }
+  // };
+  const handleDetailCustomer = (customer) => {
+    navigate(`/customer-detail/${customer.id}`, { state: { customer } });
   };
 
   return (
@@ -172,26 +176,25 @@ function CustomerManagement() {
       <div className="content">
         <DataTable
           title="Customer Management"
-          data={managers}
+          data={customers}
           columns={[
-            { key: "customerCode", label: "Customer Code" },
-            { key: "customerName", label: "Customer Name" },
-            { key: "customerEmail", label: "Customer Email" },
-            { key: "customerPhone", label: "Customer Phone"},
+            { key: "code", label: "Customer Code" },
+            { key: "name", label: "Customer Name" },
+            { key: "email", label: "Customer Email" },
+            { key: "phoneNumber", label: "Customer Phone"},
           ]}
-          selectedItems={selectedManagers}
+          selectedItems={selectedCustomers}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
-          handleDeleteSelected={handleDeleteSelectedManagers}
-          handleSearch={loadOrders}
+          // handleDeleteSelected={handleDeleteSelectedManagers}
+          handleSearch={loadCustomers}
           filters={[
-            { label: "Order Id", value: filters.orderId },
-            { label: "Total Price", value: filters.total },
-            { label: "Status", value: filters.status },
-            { label: "Date", value: filters.createdDate },
+            { label: "Customer code", value: filters.code },
+            { label: "Customer Name", value: filters.name },
+            { label: "Customer Email", value: filters.email },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["orderId", "total", "status", "createdDate"];
+            const filterKeys = ["code", "name", "email",];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -200,26 +203,12 @@ function CustomerManagement() {
           totalPages={totalPages}
           actions={[
             {
-              label: "Edit",
-              className: "edit",
-              variant: "info",
-              onClick: handleEditManager,
+              label: "Detail",
+              className: "detail",
+              variant: "secondary",
+              onClick: handleDetailCustomer,
             },
           ]}
-          // extraButtons={[
-          //   {
-          //     label: "Create New",
-          //     variant: "primary",
-          //     onClick: handleCreateNewManager,
-          //   },
-          //   {
-          //     label: "Delete",
-          //     variant: "danger",
-          //     // onClick: handleDeleteSelectedManagers,
-          //     className: "delete-btn",
-          //     disabled: selectedManagers.length === 0,
-          //   },
-          // ]}
         />
       </div>
 
