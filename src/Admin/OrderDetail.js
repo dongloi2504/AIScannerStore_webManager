@@ -51,7 +51,7 @@ function OrderDetail() {
   const infoRows = [
     { label: "Order Code", value: order.orderCode },
     { label: "Device Code", value: order.device?.deviceCode || "N/A" },
-    { label: "Store ID", value: order.device?.storeId || "N/A" },
+    { label: "Store Code", value: order.device?.storeCode || "N/A" },
     { label: "Total", value: `${order.total.toLocaleString()}₫` },
     { label: "Status", value: order.status },
     { label: "Created Date", value: new Date(order.createdDate).toLocaleString() },
