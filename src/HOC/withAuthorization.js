@@ -6,9 +6,9 @@ import { Role } from '../const/Role';
 
 const withAuthorization = (Component, allowedRoles = []) => {
   return function WrappedComponent(props) {
-    const { user, loading } = useAuth();
+    const { user, loading, isTokenExpired } = useAuth();
 	if (loading === undefined || loading) return <div>Loading...</div>
-    if (!user) return <Navigate to="/" replace />;
+    if (!user || isTokenExpired()) return <Navigate to="/" replace />;
     if (!allowedRoles.includes(user.role) && !allowedRoles.includes(Role.ALL)) return <Navigate to="/unauthorized" replace />;
 
     return (<>

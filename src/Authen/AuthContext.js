@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -32,9 +33,21 @@ export const AuthProvider = ({ children }) => {
 	  localStorage.removeItem('token', token);
     }
   };
+  
+  const isTokenExpired = () => {
+	  if(!token) return false;
+	  try {
+        const decoded = jwtDecode(token);
+        const now = Date.now() / 1000; // current time in seconds
+        return decoded.exp < now;
+      } catch (err) {
+        // token is invalid or can't be decoded
+        return true;
+	  }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, setAuth }}>
+    <AuthContext.Provider value={{ user, token, loading, setAuth, isTokenExpired }}>
       {children}
     </AuthContext.Provider>
   );
