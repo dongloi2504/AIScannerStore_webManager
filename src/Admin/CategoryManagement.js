@@ -4,6 +4,7 @@ import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import { getCategory, createCategory, updateCategory, deleteCategory } from "../ServiceApi/apiCatetory";
 import GenericModal from "../components/GenericModal";
+import { useToast } from "../Context/ToastContext";
 
 function CategoryManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -17,16 +18,20 @@ function CategoryManagement() {
   const [description, setDescription] = useState("");
   const [categoryCode, setCategoryCode] = useState("");
   const [filters, setFilters] = useState({
-    categoryId: "",
+    categoryCode: "",
     categoryNameQuery: "",
     descriptionQuery: "",
+	isSuspended: false,
   });
+  
+  const { showToast } = useToast();
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingCategoryName, setEditingCategoryName] = useState("");
   const [editingDescription, setEditingDescription] = useState("");
   const [editingCategoryCode, setEditingCategoryCode] = useState("");
+  const [editingSuspend, setEditingSuspend] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -63,39 +68,35 @@ function CategoryManagement() {
   const handleDeleteSelectedCategories = async () => {
     if (selectedCategories.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedCategories.length} categori(es)?`
+      `Are you sure you want to suspend ${selectedCategories.length} categori(es)?`
     );
     if (!confirmDelete) return;
-
-    try {
-      const deletePromises = selectedCategories.map((id) => deleteCategory(id));
-      const results = await Promise.allSettled(deletePromises);
-
-      const failedDeletes = results.filter(
-        (result) => result.status === "rejected"
-      );
-
-      if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} categori(es).`);
-      }
-
-      setSelectedCategories([]);
+	deleteCategory(selectedCategories)
+	.then(res => {
+	  setSelectedCategories([]);
       loadCategories();
-    } catch (error) {
-      console.error("Error deleting categories:", error);
-    }
+	  showToast("Categori(es) suspended!","info");
+	}).catch(error => {
+		const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+	})
   };
 
   const handleCreateCategory = async () => {
     try {
-      await createCategory({ categoryName, description });
+      await createCategory({ categoryCode, categoryName, description });
       setShowModal(false);
       loadCategories();
       setCategoryName("");
       setDescription("");
       setCategoryCode("");
+	  showToast("Category Created!", "info");
     } catch (error) {
-      console.error("Error creating category:", error);
+      const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -104,6 +105,8 @@ function CategoryManagement() {
       label: "Category Code",
       controlId: "categoryCode",
       type: "text",
+	  maxLength: 50,
+	  required: true,
       value: categoryCode,
       onChange: (e) => setCategoryCode(e.target.value),
     },
@@ -112,6 +115,8 @@ function CategoryManagement() {
       controlId: "categoryName",
       type: "text",
       value: categoryName,
+	  required: true,
+	  maxLength: 50,
       onChange: (e) => setCategoryName(e.target.value),
     },
     {
@@ -133,6 +138,7 @@ function CategoryManagement() {
     setEditingCategoryName(category.categoryName);
     setEditingDescription(category.description);
     setEditingCategoryCode(category.categoryCode);
+	setEditingSuspend(category.isSuspended);
   };
 
   const handleUpdateCategory = async () => {
@@ -142,11 +148,16 @@ function CategoryManagement() {
         categoryName: editingCategoryName,
         description: editingDescription,
         categoryCode: editingCategoryCode,
+		isSuspended: editingSuspend,
       });
       setEditingCategory(null);
       loadCategories();
+	  showToast("Category updated!", "info");
     } catch (error) {
-      console.error("Error updating:", error);
+      const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -169,11 +180,12 @@ function CategoryManagement() {
           handleSearch={loadCategories}
           filters={[
             { label: "Category Name", value: filters.categoryNameQuery },
-            { label: "Category ID", value: filters.categoryId },
+            { label: "Category Code", value: filters.categoryCode },
             { label: "Category Description", value: filters.descriptionQuery },
+			{ label: "Suspend", value: filters.isSuspended, type:"checkbox", hasLabel: true }
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["categoryNameQuery", "categoryId", "descriptionQuery"];
+            const filterKeys = ["categoryNameQuery", "categoryCode", "descriptionQuery", "isSuspended"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -195,7 +207,7 @@ function CategoryManagement() {
               onClick: handleCreateNewCategory,
             },
             {
-              label: "Delete",
+              label: "Suspend",
               variant: "danger",
               onClick: handleDeleteSelectedCategories,
               className: "delete-btn",
@@ -241,6 +253,13 @@ function CategoryManagement() {
               value: editingDescription,
               onChange: (e) => setEditingDescription(e.target.value),
             },
+			{
+			  label: "Suspend",
+			  controlId: "editSuspend",
+			  type: "checkbox",
+			  value: editingSuspend,
+			  onChange: (e) => setEditingSuspend(e.target.checked),
+			}
           ]}
           onSave={handleUpdateCategory}
           onClose={() => setEditingCategory(null)}
