@@ -21,13 +21,13 @@ import ForgetPassword from './Authen/ForgetPassword';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
 	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
-	const AuthorizedProductManagement = withAuthorization(ProductManagement, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedProductManagement = withAuthorization(ProductManagement, [Role.ADMIN, Role.MANAGER, Role.STAFF]);
 	const AuthorizedStaffManagement = withAuthorization(StaffManagement, [Role.ADMIN]);
 	const AuthorizedCategoryManagement = withAuthorization(CategoryManagement, [Role.ADMIN]);
 	const AuthorizedCustomerManagement = withAuthorization(CustomerManagement, [Role.ADMIN]);
 	const AuthorizedOrderManagement = withAuthorization(OrderManagement, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedProductDetail = withAuthorization(ProductDetail, [Role.ADMIN, Role.MANAGER]);
-	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER]);
+	const AuthorizedStoreDetail = withAuthorization(StoreDetail, [Role.ADMIN, Role.MANAGER, Role.STAFF]);
 	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
 	const AuthorizedLiveOrderEditing = withAuthorization(LiveOrderManagement, [Role.ALL]);

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import Button from "react-bootstrap/Button";
+import { CanAccess } from "./CanAccess";
 import "../Styles/GlobalStyles.css";
 import "../Styles/Detail.css";
 
@@ -111,6 +112,7 @@ function GenericDetail({
         {extraButtons.length > 0 && (
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
             {extraButtons.map((btn, index) => (
+			  <CanAccess roles={btn.roles}>
               <Button
                 key={index}
                 variant={btn.variant}
@@ -121,6 +123,7 @@ function GenericDetail({
               >
                 {btn.label}
               </Button>
+			  </CanAccess>
             ))}
           </div>
         )}

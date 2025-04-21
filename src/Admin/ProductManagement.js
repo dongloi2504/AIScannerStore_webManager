@@ -4,7 +4,7 @@ import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import GenericModal from "../components/GenericModal";
-import { uploadfileIO, getProducts, addProduct, updateProduct } from "../ServiceApi/apiAdmin";
+import { uploadfileIO, getProducts, addProduct, updateProduct, suspendProducts } from "../ServiceApi/apiAdmin";
 import { getCategory } from "../ServiceApi/apiCatetory";
 import { Role } from "../const/Role";
 import { useToast } from "../Context/ToastContext";
@@ -115,12 +115,20 @@ function ProductManagement() {
   const handleDeleteSelectedProducts = () => {
     if (selectedProducts.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedProducts.length} product(s)?`
+      `Are you sure you want to suspend ${selectedProducts.length} product(s)?`
     );
     if (!confirmDelete) return;
-    // TODO: Gọi API để xoá sản phẩm ở server, sau đó load lại danh sách
-    setSelectedProducts([]);
-    loadProducts();
+    suspendProducts(selectedProducts).then(x => {
+	  showToast("Product(s) suspended!","info");
+	  setSelectedProducts([]);
+      loadProducts();
+	})
+	.catch(error => {
+		const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message,"error");
+	});
+    
   };
 
   // Tạo mới sản phẩm với quy trình: upload ảnh -> lấy URL -> gọi API addProduct
@@ -142,17 +150,16 @@ function ProductManagement() {
 		productCode,
 		basePrice,
       });
-	  if(result.isSuccess)
-	  {
-	    // Load lại danh sách sản phẩm sau khi tạo thành công
 	    await loadProducts();
         // Đóng modal và reset form
         setShowModal(false);
         setProductName("");
         setDescription("");
         setCategoryId("");
+	    setProductCode("");
+		setBasePrice(0);
         setProductImageFile(null);
-	  }
+		setTimeout(() => { showToast("Product Added!", "info"); }, 0);
     } catch (error) {
 		const message =
           typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
@@ -169,6 +176,7 @@ function ProductManagement() {
       controlId: "productCode",
       type: "text",
       value: productCode,
+	  required: true,
 	  maxLength: 50,
       onChange: (e) => setProductCode(e.target.value),
     },
@@ -255,6 +263,7 @@ function ProductManagement() {
 	  })
       await loadProducts();
       setEditingProduct(null);
+	  showToast("Product Updated!", "info");
     } catch (error) {
 		const message =
           typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
@@ -323,7 +332,7 @@ function ProductManagement() {
 			  roles: [Role.ADMIN]
             },
             {
-              label: "Delete",
+              label: "Suspend",
               variant: "danger",
               onClick: handleDeleteSelectedProducts,
               className: "delete-btn",
