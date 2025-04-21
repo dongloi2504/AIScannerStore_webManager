@@ -157,6 +157,17 @@ const Sidebar = ({ onToggle }) => {
             </div>
           </CanAccess>
           
+		    {/* Sidebar link for change password */}
+		  <CanAccess roles={[Role.ALL]}>
+            <div className="sidebar-item">
+              <NavLink
+                to="/change-password"
+                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                Change password
+              </NavLink>
+            </div>
+          </CanAccess>
+		  
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">
             <NavLink
