@@ -70,10 +70,10 @@ function InventoryHistoryPage() {
     { label: "Location", value: store.storeLocation },
     ...(headerInfo
       ? [
-          { label: "Staff", value: headerInfo.staffName },
-          { label: "Type", value: headerInfo.type },
-          { label: "Date", value: headerInfo.date },
-        ]
+        { label: "Staff", value: headerInfo.staffName },
+        { label: "Type", value: headerInfo.type },
+        { label: "Date", value: headerInfo.date },
+      ]
       : []),
   ];
 
@@ -83,7 +83,7 @@ function InventoryHistoryPage() {
         onBack={() => navigate(-1)}
         title="Inventory Note Detail"
         infoRows={infoRows}
-        imageUrl={headerInfo?.imageUrl || ""}
+        imageUrls={[headerInfo?.imageUrl].filter(Boolean)}
         productData={tableData}
       />
     </div>

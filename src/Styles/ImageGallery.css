@@ -1,0 +1,38 @@
+.detail-image-box {
+    width: 300px;
+    height: 250px;
+    overflow: hidden; /* ✅ ngăn ảnh tràn */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .image-gallery-fixed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto; /* nếu nhiều ảnh thì scroll gọn */
+    box-sizing: border-box;
+  }
+  
+  .preview-image-fixed {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .preview-image-fixed:hover {
+    transform: scale(1.05);
+  }
+  
+  .image-link {
+    text-decoration: none;
+  }
+  
