@@ -10,6 +10,7 @@ import {
   deleteManager
 } from "../ServiceApi/apiOrder";
 import GenericModal from "../components/GenericModal";
+import Select from "react-select";
 
 function OrderManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -24,14 +25,26 @@ function OrderManagement() {
   const [managerPhone, setManagerPhone] = useState("");
   const [managerEmail, setManagerEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [filters, setFilters] = useState({
-    orderId: "",
-    total: "",
+    orderCode: "",
+    customerCode: "",
+    storeCode: "",
     status: "",
-    createdDate: "",
+    isCorrection: false,
+    isFlagged: false,
   });
 
-  const navigate = useNavigate(); // ✅ Dùng để điều hướng đến trang chi tiết
+  const statusOptions = [
+    { label: "CREATED", value: "CREATED" },
+    { label: "PAID", value: "PAID" },
+    { label: "FINISHED", value: "FINISHED" },
+    { label: "EDITED", value: "EDITED" },
+    { label: "STAFF_CANCELLED", value: "STAFF_CANCELLED" },
+    { label: "CANCELLED", value: "CANCELLED" },
+  ];
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadOrders();
@@ -42,7 +55,12 @@ function OrderManagement() {
       const response = await getOrder({
         pageNumber: currentPage,
         pageSize: pageSize,
-        ...filters,
+        customerCode: filters.customerCode,
+        storeCode: filters.storeCode,
+        orderCode: filters.orderCode,
+        statuses: filters.status ? [filters.status] : [],
+        isCorrection: filters.isCorrection,
+        isFlagged: filters.isFlagged,
       });
       setManagers(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
@@ -75,10 +93,7 @@ function OrderManagement() {
     try {
       const deletePromises = selectedManagers.map((id) => deleteManager(id));
       const results = await Promise.allSettled(deletePromises);
-
-      const failedDeletes = results.filter(
-        (result) => result.status === "rejected"
-      );
+      const failedDeletes = results.filter((r) => r.status === "rejected");
 
       if (failedDeletes.length > 0) {
         console.error(`Failed to delete ${failedDeletes.length} order(s).`);
@@ -93,7 +108,13 @@ function OrderManagement() {
 
   const handleCreateManager = async () => {
     try {
-      await createManager({ storeId, managerName, managerPhone, managerEmail, password });
+      await createManager({
+        storeId,
+        managerName,
+        managerPhone,
+        managerEmail,
+        password,
+      });
       setShowModal(false);
       loadOrders();
       setStoreId("");
@@ -152,7 +173,7 @@ function OrderManagement() {
           title="Order Management"
           data={managers}
           columns={[
-            { key: "orderId", label: "Order ID" },
+            { key: "orderCode", label: "Order Code" },
             { key: "total", label: "Total Price" },
             { key: "status", label: "Status" },
             { key: "createdDate", label: "Create Date" },
@@ -163,13 +184,63 @@ function OrderManagement() {
           handleDeleteSelected={handleDeleteSelectedManagers}
           handleSearch={loadOrders}
           filters={[
-            { label: "Order Id", value: filters.orderId },
-            { label: "Total Price", value: filters.total },
-            { label: "Status", value: filters.status },
-            { label: "Date", value: filters.createdDate },
+            { label: "Order Code", value: filters.orderCode },
+            { label: "Customer Code", value: filters.customerCode },
+            { label: "Store Code", value: filters.storeCode },
+            {
+              label: "Status",
+              type: "custom",
+              element: (
+                <Select
+                  options={statusOptions}
+                  placeholder="Select Status"
+                  isClearable
+                  value={
+                    filters.status
+                      ? statusOptions.find((opt) => opt.value === filters.status)
+                      : null
+                  }
+                  onChange={(selected) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      status: selected?.value || "",
+                    }))
+                  }
+                />
+              ),
+            },
+            {
+              label: "Correction",
+              type: "checkbox",
+              value: filters.isCorrection,
+              hasLabel: true,
+              onChange: (e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  isCorrection: e.target.checked,
+                })),
+            },
+            {
+              label: "Flagged",
+              type: "checkbox",
+              value: filters.isFlagged,
+              hasLabel: true,
+              onChange: (e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  isFlagged: e.target.checked,
+                })),
+            },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["orderId", "total", "status", "createdDate"];
+            const filterKeys = [
+              "orderCode",
+              "customerCode",
+              "storeCode",
+              "status",
+              "isCorrection",
+              "isFlagged",
+            ];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -181,13 +252,12 @@ function OrderManagement() {
               label: "Detail",
               className: "detail",
               variant: "secondary",
-              onClick: (order) => navigate(`/order-detail/${order.orderId}`), // ✅ điều hướng đến OrderDetail
+              onClick: (order) => navigate(`/order-detail/${order.orderId}`),
             },
           ]}
         />
       </div>
 
-      {/* Optional: Modal tạo manager */}
       <GenericModal
         show={showModal}
         title="Create Manager"
