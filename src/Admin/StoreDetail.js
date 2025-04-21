@@ -238,7 +238,7 @@ function StoreDetail() {
         infoRows={infoRows}
         tabs={tabs}
         itemKey={null}
-		imageUrl={store?.imageUrl}
+        imageUrls={[store.imageUrl].filter(Boolean)}
         currentPage={activeTab === "products" ? productPage : inventoryPage}
         totalPages={activeTab === "products" ? productTotalPages : inventoryTotalPages}
         handlePrev={() =>

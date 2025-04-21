@@ -145,7 +145,7 @@ function ProductDetail() {
       <GenericDetail
         onBack={() => navigate(-1)}
         title="Product Detail"
-        imageUrl={product.imageUrl}
+        imageUrls={[product.imageUrl].filter(Boolean)}
         infoRows={infoRows}
         productData={{
           columns: productData.columns,

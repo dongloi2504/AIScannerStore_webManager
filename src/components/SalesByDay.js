@@ -35,7 +35,7 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
                 value: "VNĐ",
                 angle: -90,
                 position: "insideLeft",
-                offset: 10,
+                offset: -14,
               }}
             />
             <Tooltip

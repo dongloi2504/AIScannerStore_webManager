@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Button from "react-bootstrap/Button";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import { CanAccess } from "./CanAccess";
 import "../Styles/GlobalStyles.css";
 import "../Styles/Detail.css";
@@ -10,6 +12,7 @@ function GenericDetail({
   notFound = false,
   notFoundMessage = "Item not found!",
   imageUrl = "",
+  imageUrls = [],
   infoRows = [],
   productData = { columns: [], rows: [] },
   selectedItems = [],
@@ -23,9 +26,11 @@ function GenericDetail({
   itemKey = null,
   tabs = null,
   onTabChange = null,
-  onRowClick = null, // Hỗ trợ onRowClick, truyền callback từ cha
+  onRowClick = null,
 }) {
   const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const tableData = useMemo(() => {
     if (tabs && activeTabKey) {
@@ -45,15 +50,8 @@ function GenericDetail({
     );
   }, [tableData.rows, selectedItems, itemKey]);
 
-  if (notFound) {
-    return (
-      <div className="page-container">
-        <div className="content">
-          <h2>{notFoundMessage}</h2>
-        </div>
-      </div>
-    );
-  }
+  const gallery = imageUrls.length > 0 ? imageUrls : imageUrl ? [imageUrl] : [];
+  const lightboxImages = gallery.map((url) => ({ src: url }));
 
   return (
     <div className="page-container">
@@ -65,65 +63,126 @@ function GenericDetail({
           </Button>
         </div>
 
-        {/* Info & Tabs */}
-        <div className="detail-content-wrapper">
-          <h1 className="page-title">{title}</h1>
+        {/* Info + Images */}
+        {notFound ? (
+          <h2>{notFoundMessage}</h2>
+        ) : (
+          <div className="detail-content-wrapper">
+            <h1 className="page-title">{title}</h1>
 
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Detail"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {infoRows.map((item, idx) => (
-                <p key={idx}>
-                  <strong>{item.label}:</strong> {item.value}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          {tabs?.length > 0 && (
-            <div className="tab-group">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
+            <div
+              style={{
+                display: "flex",
+                gap: "1rem",
+                marginTop: "1rem",
+                flexWrap: "wrap",
+              }}
+            >
+              {/* Image gallery */}
+              {(gallery.length > 0 ? gallery : [null]).map((url, index) => (
+                <div
+                  key={index}
+                  className="detail-image-box"
+                  style={{
+                    width: "300px",
+                    height: "250px",
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                    boxShadow: "0 0 6px rgba(0,0,0,0.1)",
+                    flexShrink: 0,
+                    backgroundColor: url ? "transparent" : "#f0f0f0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: url ? "pointer" : "default",
+                  }}
                   onClick={() => {
-                    setActiveTabKey(tab.key);
-                    if (typeof onTabChange === "function") {
-                      onTabChange(tab.key);
+                    if (url) {
+                      setLightboxIndex(index);
+                      setLightboxOpen(true);
                     }
                   }}
-                  className={`tab-button ${activeTabKey === tab.key ? "active" : ""}`}
                 >
-                  {tab.label}
-                </button>
+                  {url ? (
+                    <img
+                      src={url}
+                      alt={`Image ${index + 1}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ color: "#aaa" }}>No image</span>
+                  )}
+                </div>
               ))}
-            </div>
-          )}
-        </div>
 
-        {/* Extra buttons */}
-        {extraButtons.length > 0 && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-            {extraButtons.map((btn, index) => (
-			  <CanAccess roles={btn.roles}>
-              <Button
-                key={index}
-                variant={btn.variant}
-                onClick={btn.onClick}
-                disabled={btn.disabled}
-                className={btn.className}
-                style={{ marginLeft: "0.5rem" }}
+              {/* Info rows */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                  flex: 1,
+                  minWidth: "300px",
+                }}
               >
-                {btn.label}
-              </Button>
-			  </CanAccess>
+                {infoRows.map((item, idx) => (
+                  <p key={idx}>
+                    <strong>{item.label}:</strong> {item.value}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            {/* Tabs */}
+            {tabs?.length > 0 && (
+              <div className="tab-group">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => {
+                      setActiveTabKey(tab.key);
+                      if (typeof onTabChange === "function") {
+                        onTabChange(tab.key);
+                      }
+                    }}
+                    className={`tab-button ${
+                      activeTabKey === tab.key ? "active" : ""
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Extra Buttons */}
+        {extraButtons.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "1rem",
+            }}
+          >
+            {extraButtons.map((btn, index) => (
+              <CanAccess roles={btn.roles} key={index}>
+                <Button
+                  variant={btn.variant}
+                  onClick={btn.onClick}
+                  disabled={btn.disabled}
+                  className={btn.className}
+                  style={{ marginLeft: "0.5rem" }}
+                >
+                  {btn.label}
+                </Button>
+              </CanAccess>
             ))}
           </div>
         )}
@@ -153,7 +212,9 @@ function GenericDetail({
                 {tableData.rows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={tableData.columns.length + (itemKey !== null ? 1 : 0)}
+                      colSpan={
+                        tableData.columns.length + (itemKey !== null ? 1 : 0)
+                      }
                       style={{ textAlign: "center" }}
                     >
                       No data available
@@ -162,11 +223,12 @@ function GenericDetail({
                 ) : (
                   tableData.rows.map((row, rowIndex) => {
                     const id = itemKey ? row[itemKey] : rowIndex;
-                    const cells = Array.isArray(row) ? row : Object.values(row);
+                    const cells = Array.isArray(row)
+                      ? row
+                      : Object.values(row);
                     return (
                       <tr
                         key={id}
-                        // Gọi onRowClick với cả dữ liệu của hàng và chỉ số hàng
                         onClick={(e) => {
                           if (e.target.tagName !== "INPUT" && onRowClick) {
                             onRowClick(row, rowIndex);
@@ -180,7 +242,6 @@ function GenericDetail({
                               type="checkbox"
                               checked={selectedItems.includes(id)}
                               onChange={() => handleCheckOne(id)}
-                              aria-label={`Select row ${rowIndex}`}
                               onClick={(e) => e.stopPropagation()}
                             />
                           </td>
@@ -213,22 +274,36 @@ function GenericDetail({
           )}
 
           {/* Pagination */}
-          {typeof currentPage === "number" && typeof totalPages === "number" && (
-            <div className="pagination">
-              <div className="pagination-left">
-                <Button onClick={handlePrev} disabled={currentPage === 1}>
-                  Prev
-                </Button>
-                <Button onClick={handleNext} disabled={currentPage === totalPages}>
-                  Next
-                </Button>
+          {typeof currentPage === "number" &&
+            typeof totalPages === "number" && (
+              <div className="pagination">
+                <div className="pagination-left">
+                  <Button onClick={handlePrev} disabled={currentPage === 1}>
+                    Prev
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+                <div className="pagination-right">
+                  Page {currentPage} of {totalPages}
+                </div>
               </div>
-              <div className="pagination-right">
-                Page {currentPage} of {totalPages}
-              </div>
-            </div>
-          )}
+            )}
         </div>
+
+        {/* Lightbox preview */}
+        {lightboxOpen && (
+          <Lightbox
+            open={lightboxOpen}
+            close={() => setLightboxOpen(false)}
+            slides={lightboxImages}
+            index={lightboxIndex}
+          />
+        )}
       </div>
     </div>
   );

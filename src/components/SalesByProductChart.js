@@ -58,7 +58,7 @@ const SalesByProductChart = ({ data }) => {
                 value: "VND",
                 angle: -90,
                 position: "insideLeft",
-                offset: -10,
+                offset: -14,
                 style: { textAnchor: "middle" },
               }}
             />

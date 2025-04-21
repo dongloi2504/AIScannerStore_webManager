@@ -18,6 +18,7 @@ import DeviceManagement from './ITHelpdesk/DeviceManagement';
 import LiveOrderManagement from './Staff/LiveOrderManagement';
 import Report from './Admin/Report';
 import ForgetPassword from './Authen/ForgetPassword';
+import OrderDetail from './Admin/OrderDetail';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
 	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
@@ -32,7 +33,7 @@ function App() {
 	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
 	const AuthorizedLiveOrderEditing = withAuthorization(LiveOrderManagement, [Role.ALL]);
 	const AuthorizedReport = withAuthorization(Report,Role.ADMIN);
-
+	const AuthorizedOrderDetail = withAuthorization(OrderDetail,Role.ADMIN,Role.MANAGER);
 	return (
 		<BrowserRouter basename="/AIScannerStore_build">
 			<Routes>
@@ -51,6 +52,7 @@ function App() {
 				<Route path="/live-order" element={<AuthorizedLiveOrderEditing />} />
 				<Route path="/unauthorized" element={<Unauthorized />} />
 				<Route path="/forget-password" element={<ForgetPassword/>}/>
+				<Route path="/order-detail/:id" element={<OrderDetail/>}/>
 			</Routes>
 		</BrowserRouter>
 	);
