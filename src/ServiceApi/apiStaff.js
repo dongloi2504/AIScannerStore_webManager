@@ -14,6 +14,8 @@ import instance from "./Customize-Axios";
     staffEmail,
     role,
     staffCode,
+	storeCode,
+	isSuspended,
   } = {}) {
     const query = {
       storeId,
@@ -22,6 +24,8 @@ import instance from "./Customize-Axios";
       staffEmail,
       role,
       staffCode,
+	  isSuspended,
+	  storeCode,
     };
 
     if (staffId) {
@@ -38,10 +42,10 @@ import instance from "./Customize-Axios";
   }
   
   // Hàm cập nhật Staff
-  export function updateStaff({ staffId, storeId, staffName, staffPhone, staffEmail, staffCode, role, }) {
+  export function updateStaff({ staffId, storeId, staffName, staffPhone, staffEmail, staffCode, role, isSuspended }) {
     return instance.put("/api/staff", {
       staffId,
-      isSuspended: true,
+      isSuspended,
       storeId,
       staffName,
       staffPhone,

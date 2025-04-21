@@ -11,14 +11,15 @@ import {
   AuditInventory,
   uploadfileIO,
   getInventoryHistoryByStoreId,
+  getSingleStore,
 } from "../ServiceApi/apiAdmin";
+import { Role } from "../const/Role";
 
 function StoreDetail() {
   const { id: storeId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const store = location.state?.store;
-
+  const [store, setStore] = useState(location.state?.store);
   const PAGE_SIZE = 8;
 
   const [inventory, setInventory] = useState([]);
@@ -43,12 +44,18 @@ function StoreDetail() {
   const [inventoryPage, setInventoryPage] = useState(1);
   const [inventoryTotalPages, setInventoryTotalPages] = useState(1);
 
+
+  useEffect(() => {
+	if(!store) {
+	  getSingleStore(storeId).then(res => setStore(res)).catch(console.err);
+	}
+  }, []);
   useEffect(() => {
     if (!store?.storeId) return;
     fetchProducts();
     fetchInventory(productPage);
     fetchInventoryHistory(inventoryPage);
-  }, [store?.storeId]);
+  }, [store]);
 
   useEffect(() => {
     if (activeTab === "products") {
@@ -177,26 +184,17 @@ function StoreDetail() {
     }
   };
 
-  if (!store) {
-    return (
-      <GenericDetail
-        onBack={() => navigate(-1)}
-        notFound
-        notFoundMessage="Store data not found! (Did you refresh or access directly?)"
-      />
-    );
-  }
-
   const infoRows = [
-    { label: "Store Name", value: store.storeName },
-    { label: "Store ID", value: store.storeId },
-    { label: "Location", value: store.storeLocation },
+    { label: "Store ID", value: store?.storeId },
+    { label: "Store Name", value: store?.storeName },
+    { label: "Store Code", value: store?.storeCode },
+    { label: "Location", value: store?.storeLocation },
   ];
 
   const productData = {
-    columns: ["Product ID", "Product Name", "Price", "Stock"],
+    columns: ["Product Code", "Product Name", "Price", "Stock"],
     rows: inventory.map((item) => [
-      item.productId,
+      item.code,
       item.productName,
       `${item.price.toLocaleString()}₫`,
       item.stock,
@@ -224,8 +222,15 @@ function StoreDetail() {
     { key: "products", label: "Products", data: productData },
     { key: "inventory", label: "Inventory I/O", data: ioData },
   ];
-
-  return (
+  if (!store)
+    return (
+      <GenericDetail
+        onBack={() => navigate(-1)}
+        notFound
+        notFoundMessage="Store data loading..."
+      />
+    );
+  else return (
     <div className="store-detail-container">
       <GenericDetail
         onBack={() => navigate(-1)}
@@ -233,6 +238,7 @@ function StoreDetail() {
         infoRows={infoRows}
         tabs={tabs}
         itemKey={null}
+        imageUrls={[store.imageUrl].filter(Boolean)}
         currentPage={activeTab === "products" ? productPage : inventoryPage}
         totalPages={activeTab === "products" ? productTotalPages : inventoryTotalPages}
         handlePrev={() =>
@@ -251,18 +257,21 @@ function StoreDetail() {
             variant: "primary",
             onClick: () => setShowModal(true),
             disabled: activeTab !== "products",
+			roles: [Role.ADMIN]
           },
           {
             label: "Audit Stock",
             variant: "secondary",
             onClick: handleAuditStock,
             disabled: activeTab !== "products",
+			roles: [Role.ADMIN, Role.MANAGER],
           },
           {
             label: "Change Stock",
             variant: "warning",
             onClick: handleChangeStock,
             disabled: activeTab !== "products",
+			roles: [Role.ADMIN, Role.MANAGER],
           },
         ]}
         onTabChange={(key) => {

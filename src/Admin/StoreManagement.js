@@ -4,14 +4,17 @@ import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import { useNavigate } from "react-router-dom";
 import {
+  uploadfileIO,
   getStores,
   deleteStore,
   createStore,
   updateStore,
 } from "../ServiceApi/apiAdmin";
 import GenericModal from "../components/GenericModal";
+import { useToast } from "../Context/ToastContext";
 
 function StoreManagement() {
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stores, setStores] = useState([]);
@@ -24,10 +27,12 @@ function StoreManagement() {
   const [storeAddress, setStoreAddress] = useState("");
   const [imageUrl, setImageURL] = useState("");
   const [storeCode, setStoreCode] = useState("");
+  const [storeImageFile, setStoreImageFile] = useState(null);
   const [filters, setFilters] = useState({
     storeName: "",
     storeCode: "",
     storeAddress: "",
+	suspend: false,
   });
 
   const [editingStore, setEditingStore] = useState(null);
@@ -35,6 +40,8 @@ function StoreManagement() {
   const [editingStoreAddress, setEditingStoreAddress] = useState("");
   const [editingStoreCode, setEditingStoreCode] = useState("");
   const [editingImageURL] = useState("");
+  const [editingStoreImageFile, setEditingStoreImageFile] = useState(null);
+  const [editingStoreSuspend, setEditingStoreSuspend] = useState(false);
 
   useEffect(() => {
     loadStores();
@@ -75,31 +82,45 @@ function StoreManagement() {
     if (selectedStores.length === 0) return;
   
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedStores.length} store(s)?`
+      `Are you sure you want to suspend ${selectedStores.length} store(s)?`
     );
     if (!confirmDelete) return;
   
     try {
       await deleteStore(selectedStores);
-  
+	  showToast("Store suspended!", "info");
       setSelectedStores([]);
       loadStores(); 
-    } catch (err) {
-      console.error("Error deleting stores:", err);
+    } catch (error) {
+      const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+	  showToast(message, "error");
+	  throw error;
     }
   };
 
   const handleCreateStore = async () => {
     try {
-      await createStore({ storeName, storeAddress, imageUrl, storeCode });
+	  let uploadedImageUrl = "";
+      if (storeImageFile) {
+        // Sử dụng uploadfileIO thay vì uploadfile
+        const uploadRes = await uploadfileIO(storeImageFile);
+        // Giả sử URL được trả về nằm trong uploadRes.image_url hoặc uploadRes.url, tùy theo API trả về
+        uploadedImageUrl = uploadRes?.image_url || uploadRes?.url || uploadRes;
+      }
+      await createStore({ storeName, storeAddress, imageUrl: uploadedImageUrl, storeCode });
       setShowModal(false);
       loadStores();
       setStoreName("");
       setStoreAddress("");
-      setImageURL("");
+      setStoreImageFile(null);
       setStoreCode("");
+	  showToast("Store Created!", "info");
     } catch (error) {
-      console.error("Error creating store:", error);
+      	const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -108,21 +129,35 @@ function StoreManagement() {
     setEditingStoreName(store.storeName);
     setEditingStoreAddress(store.storeAddress);
     setEditingStoreCode(store.storeCode);
+	setEditingStoreSuspend(store.isSuspended);
   };
 
   const handleUpdateStore = async () => {
     try {
+	  	  // Keep the old image if nothing uploaded
+	  let uploadedImageUrl = editingStore.imageUrl;
+      if (storeImageFile) {
+        // Sử dụng uploadfileIO thay vì uploadfile
+        const uploadRes = await uploadfileIO(storeImageFile);
+        // Giả sử URL được trả về nằm trong uploadRes.image_url hoặc uploadRes.url, tùy theo API trả về
+        uploadedImageUrl = uploadRes?.image_url || uploadRes?.url || uploadRes;
+      }
       await updateStore({
         storeId: editingStore.storeId,
         storeCode: editingStoreCode,
         storeName: editingStoreName,
         storeAddress: editingStoreAddress,
-        imageUrl: editingImageURL,
+        imageUrl: uploadedImageUrl,
+		isSuspended: editingStoreSuspend,
       });
       setEditingStore(null);
       loadStores();
+	  showToast("Store Updated!", "info");
     } catch (error) {
-      console.error("Error updating store:", error);
+        const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -138,6 +173,7 @@ function StoreManagement() {
       controlId: "storeCode",
       type: "text",
       value: storeCode,
+	  required:true,
       onChange: (e) => setStoreCode(e.target.value),
     },
     {
@@ -145,6 +181,7 @@ function StoreManagement() {
       controlId: "storeName",
       type: "text",
       value: storeName,
+	  required:true,
       onChange: (e) => setStoreName(e.target.value),
     },
     {
@@ -153,6 +190,12 @@ function StoreManagement() {
       type: "text",
       value: storeAddress,
       onChange: (e) => setStoreAddress(e.target.value),
+    },
+	{
+      label: "Store Image",
+      controlId: "storeImage",
+      type: "file",
+      onChange: (e) => setStoreImageFile(e.target.files[0]),
     },
   ];
 
@@ -181,9 +224,10 @@ function StoreManagement() {
             { label: "Store Name", value: filters.storeName },
             { label: "Store Code", value: filters.storeCode },
             { label: "Address", value: filters.storeAddress },
+			{ label: "Suspend", value: filters.suspend, type:"checkbox", hasLabel:true },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["storeName", "storeCode", "storeAddress"];
+            const filterKeys = ["storeName", "storeCode", "storeAddress", "suspend"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() =>
@@ -215,7 +259,7 @@ function StoreManagement() {
               onClick: handleCreateNewStore,
             },
             {
-              label: "Delete",
+              label: "Suspend",
               variant: "danger",
               onClick: handleDeleteSelectedStores,
               className: "delete-btn",
@@ -247,6 +291,7 @@ function StoreManagement() {
               controlId: "editStoreCode",
               type: "text",
               value: editingStoreCode,
+			  required:true,
               onChange: (e) => setEditingStoreCode(e.target.value),
             },
             {
@@ -254,6 +299,7 @@ function StoreManagement() {
               controlId: "editStoreName",
               type: "text",
               value: editingStoreName,
+			  required:true,
               onChange: (e) => setEditingStoreName(e.target.value),
             },
             {
@@ -262,6 +308,19 @@ function StoreManagement() {
               type: "text",
               value: editingStoreAddress,
               onChange: (e) => setEditingStoreAddress(e.target.value),
+            },
+			{
+			  label: "Suspend",
+			  controlId: "editStoreSuspend",
+			  type: "checkbox",
+			  value: editingStoreSuspend,
+			  onChange: (e) => setEditingStoreSuspend(e.target.checked),
+			},
+			{
+	          label: "Store Image",
+              controlId: "storeImage",
+              type: "file",
+              onChange: (e) => setStoreImageFile(e.target.files[0]),
             },
           ]}
           onSave={handleUpdateStore}

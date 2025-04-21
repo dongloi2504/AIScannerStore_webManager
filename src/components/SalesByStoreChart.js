@@ -51,7 +51,7 @@ const SalesByStoreChart = ({ data, totalRevenue, average }) => {
                 angle: -90,
                 position: "insideLeft",
                 // Tăng offset để đẩy label ra xa trục hơn (sang trái hơn)
-                offset: -12,
+                offset: -14,
               }}
             />
 

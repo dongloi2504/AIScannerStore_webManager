@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getOrder, updateManager, createManager, deleteManager} from "../ServiceApi/apiOrder";
-import GenericModal from "../components/GenericModal";  
+import {
+  getOrder,
+  updateManager,
+  createManager,
+  deleteManager
+} from "../ServiceApi/apiOrder";
+import GenericModal from "../components/GenericModal";
 
 function OrderManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -19,18 +25,13 @@ function OrderManagement() {
   const [managerEmail, setManagerEmail] = useState("");
   const [password, setPassword] = useState("");
   const [filters, setFilters] = useState({
-    orderId:"",
+    orderId: "",
     total: "",
     status: "",
     createdDate: "",
   });
 
-  // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
-  const [editingManager, setEditingManager] = useState(null);
-  const [editingManagerName, setEditingManagerName] = useState("");
-  const [editingManagerPhone, setEditingManagerPhone] = useState("");
-  const [editingManagerEmail, setEditingManagerEmail] = useState("");
-  const [editingStoreId, setEditingStoreId] = useState("");
+  const navigate = useNavigate(); // ✅ Dùng để điều hướng đến trang chi tiết
 
   useEffect(() => {
     loadOrders();
@@ -101,7 +102,7 @@ function OrderManagement() {
       setManagerEmail("");
       setPassword("");
     } catch (error) {
-      console.error("Error creating :", error);
+      console.error("Error creating manager:", error);
     }
   };
 
@@ -143,36 +144,6 @@ function OrderManagement() {
     },
   ];
 
-  const handleCreateNewManager = () => {
-    setShowModal(true);
-  };
-
-  // Khi bấm "Edit", lưu manager cần chỉnh sửa và cập nhật giá trị ban đầu cho các trường
-  const handleEditManager = (manager) => {
-    setEditingManager(manager);
-    setEditingManagerName(manager.managerName);
-    setEditingManagerPhone(manager.managerPhone);
-    setEditingManagerEmail(manager.managerEmail);
-    setEditingStoreId(manager.storeId);
-  };
-
-  const handleUpdateManager = async () => {
-    try {
-      await updateManager({
-        managerId: editingManager.managerId,
-        managerName: editingManagerName,
-        managerPhone: editingManagerPhone,
-        managerEmail: editingManagerEmail,
-        storeId: editingStoreId,
-      });
-      console.log("Updated successfully");
-      setEditingManager(null);
-      loadOrders();
-    } catch (error) {
-      console.error("Error updating :", error);
-    }
-  };
-
   return (
     <div className={`page-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
       <Sidebar onToggle={setIsSidebarOpen} />
@@ -184,7 +155,7 @@ function OrderManagement() {
             { key: "orderId", label: "Order ID" },
             { key: "total", label: "Total Price" },
             { key: "status", label: "Status" },
-            { key: "createdDate", label: "Create Date"},
+            { key: "createdDate", label: "Create Date" },
           ]}
           selectedItems={selectedManagers}
           handleCheckAll={handleCheckAll}
@@ -210,11 +181,20 @@ function OrderManagement() {
               label: "Detail",
               className: "detail",
               variant: "secondary",
-              onClick: handleEditManager,
+              onClick: (order) => navigate(`/order-detail/${order.orderId}`), // ✅ điều hướng đến OrderDetail
             },
           ]}
         />
       </div>
+
+      {/* Optional: Modal tạo manager */}
+      <GenericModal
+        show={showModal}
+        title="Create Manager"
+        fields={managerFields}
+        onSave={handleCreateManager}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 }

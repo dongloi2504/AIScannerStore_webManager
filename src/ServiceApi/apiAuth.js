@@ -13,3 +13,8 @@ export function resetCustomerPassword({ attemptId, token, newPassword }) {
     newPassword,
   });
 }
+
+export async function changePasswordAdmin({staffId, oldPassword, newPassword}) {
+	return instance.post("/api/auth/admin/change-password", {staffId, oldPassword,newPassword});
+}
+		

@@ -74,4 +74,8 @@ export function createManager({ storeId, managerName, managerPhone, managerEmail
       headers: { "Content-Type": "application/json" }, 
     });
   }
+
+  export function orderdetail(id) {
+    return instance.get(`/api/order/${id}`);
+  }
   

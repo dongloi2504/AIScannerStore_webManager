@@ -18,17 +18,26 @@ export function getStores({
   storeAddress,
   pageNumber = 1,
   pageSize,
+  suspend,
 } = {}) {
+  console.log("suspended:" + suspend);
   return instance.get("/api/store", {
     params: {
       StoreId: storeId,
       StoreNameQuery: storeName,
       StoreAddressQuery: storeAddress,
+	  IsSuspended: suspend,
       PageNumber: pageNumber,
       PageSize: pageSize,
     }
   });
 }
+
+export function getSingleStore(id)
+{
+	return instance.get("/api/store/" + id);
+}
+
 // Hàm xoá store
 export function deleteStore(ids) {
   return instance.delete(`/api/store`, {
@@ -39,13 +48,14 @@ export function deleteStore(ids) {
 
 
 // Hàm cập nhật store (PUT /api/store/{id})
-export function updateStore({ storeId, storeName, storeAddress, storeCode, imageUrl }) {
+export function updateStore({ storeId, storeName, storeAddress, storeCode, imageUrl, isSuspended }) {
   return instance.put("/api/store", {
     storeId,
     storeName,
     storeAddress,
     storeCode,
     imageUrl,
+	isSuspended,
   });
 }
 
@@ -62,13 +72,28 @@ export function uploadfile(file) {
     },
   });
 }
-export function addProduct({ productName, description, categoryId, imageUrl }) {
+export function addProduct({ productName, description, categoryId, imageUrl, productCode, basePrice }) {
   return instance.post("/api/product/add", {
     productName,
     description,
     categoryId,
     imageUrl,
+	productCode,
+	basePrice
   });
+}
+
+export function updateProduct({ productId, productName, description, categoryId, imageUrl, productCode, basePrice, isSuspended }) {
+	return instance.put("/api/product", {
+	  productId,
+	  productName,
+      description,
+      categoryId,
+      imageUrl,
+	  productCode,
+	  basePrice,
+	  isSuspended
+	});
 }
 // Lấy sản phẩm thông qua các giá trị của sản phẩm
 export function getProducts({
@@ -77,6 +102,8 @@ export function getProducts({
   productNameQuery,
   descriptionQuery,
   categoryIds = [],
+  productCode = null,
+  categoryCode = null,
   productId = null, // Thêm productId vào
   minPrice = null,
   maxPrice = null,
@@ -88,6 +115,8 @@ export function getProducts({
     categoryIds,
     minPrice,
     maxPrice,
+	categoryCode,
+	productCode,
     isSuspended,
   };
 
@@ -101,7 +130,15 @@ export function getProducts({
     pageSize,
     query,
   });
-  
+}
+
+
+export function suspendProducts(ids)
+{
+	const body = {
+		items: ids,
+	}
+	return instance.delete("/api/product", {data: body});
 }
 
 export function getInventoryByStoreId(storeId, PageNumber = 1, PageSize = 8) {
