@@ -12,12 +12,14 @@ import instance from "./Customize-Axios";
     code,
     email,
     phone,
+    isSuspended
   } = {}) {
     const query = {
       name,
       code,
       email,
       phone,
+      isSuspended,
     };
     if (id) {
       query.id = id;
@@ -33,16 +35,25 @@ import instance from "./Customize-Axios";
   }
   
   // Hàm cập nhật Staff
-  export function updateStaff({ staffId, storeId, staffName, staffPhone, staffEmail, staffCode, role, }) {
-    return instance.put("/api/staff", {
-      staffId,
-      isSuspended: true,
-      storeId,
-      staffName,
-      staffPhone,
-      staffEmail,
-      staffCode,
-      role,
+  export function updateCustomer({ id, code, isSuspended = true, }) {
+    return instance.put(`/api/customer/${id}`, {
+      params: {
+        customerId: id
+      },
+      id,
+      isSuspended,
+      code,
+    });
+  }
+  //Hàm Staff Details
+  export function customerDetail(id) {
+    return instance.get(`/api/customer/${id}`);
+  }
+
+  export function deleteStaff(ids ) {
+    return instance.delete(`/api/staff`, {
+      data: [ids] ,
+      headers: { "Content-Type": "application/json" },
     });
   }
 

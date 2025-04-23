@@ -7,13 +7,13 @@ import instance from "./Customize-Axios";
     pageSize,
     sortBy,
     isDescending = true,
-    categoryId,
+    categoryCode,
     categoryNameQuery,
     descriptionQuery,
 	isSuspended,
   } = {}) {
     const query = {
-      categoryId,
+      categoryCode,
       categoryNameQuery,
       descriptionQuery,
 	  isSuspended,

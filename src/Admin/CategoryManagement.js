@@ -8,6 +8,7 @@ import { useToast } from "../Context/ToastContext";
 
 function CategoryManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { showToast } = useToast();
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,7 +25,6 @@ function CategoryManagement() {
 	isSuspended: false,
   });
   
-  const { showToast } = useToast();
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
   const [editingCategory, setEditingCategory] = useState(null);
@@ -108,6 +108,7 @@ function CategoryManagement() {
 	  maxLength: 50,
 	  required: true,
       value: categoryCode,
+      required: true,
       onChange: (e) => setCategoryCode(e.target.value),
     },
     {
@@ -124,6 +125,7 @@ function CategoryManagement() {
       controlId: "description",
       type: "text",
       value: description,
+      required: true,
       onChange: (e) => setDescription(e.target.value),
     },
   ];
