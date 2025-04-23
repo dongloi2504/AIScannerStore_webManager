@@ -10,13 +10,13 @@ import instance from "./Customize-Axios";
     categoryCode,
     categoryNameQuery,
     descriptionQuery,
-    isSuspended,
+	isSuspended,
   } = {}) {
     const query = {
       categoryCode,
       categoryNameQuery,
       descriptionQuery,
-      isSuspended,
+	  isSuspended,
   };
     return instance.post("/api/category/get", {
       pageNumber, 
@@ -28,7 +28,7 @@ import instance from "./Customize-Axios";
   }
   
   // Hàm cập nhật Category
-  export function updateCategory({ categoryId, categoryName, description, categoryCode, isSuspended,}) {
+  export function updateCategory({ categoryId, categoryName, description, categoryCode,isSuspended}) {
     return instance.put("/api/category", {
       categoryId,
       categoryName,
@@ -50,7 +50,7 @@ export function createCategory({ categoryName, description, categoryCode }) {
   // Hàm xoá Category
   export function deleteCategory(ids) {
     return instance.delete(`/api/category`, {
-      data: {ids : [ids]} ,
+      data: {ids : ids} ,
       headers: { "Content-Type": "application/json" }
     });
   }

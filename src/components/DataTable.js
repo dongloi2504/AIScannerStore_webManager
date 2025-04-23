@@ -115,6 +115,7 @@ const DataTable = ({
         </Button>
       </div>
 
+	  <div class="scroll-wrapper">
       {/* Data Table */}
       <table className="data-table">
         <thead>
@@ -196,7 +197,7 @@ const DataTable = ({
           )}
         </tbody>
       </table>
-
+      </div>
       {/* Pagination */}
       <div className="pagination">
         <div className="pagination-left">

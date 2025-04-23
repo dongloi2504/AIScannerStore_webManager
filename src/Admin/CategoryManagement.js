@@ -22,8 +22,10 @@ function CategoryManagement() {
     categoryCode: "",
     categoryNameQuery: "",
     descriptionQuery: "",
-    isSuspended:false,
+	isSuspended: false,
   });
+  
+  const { showToast } = useToast();
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
   const [editingCategory, setEditingCategory] = useState(null);
@@ -67,43 +69,35 @@ function CategoryManagement() {
   const handleDeleteSelectedCategories = async () => {
     if (selectedCategories.length === 0) return;
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedCategories.length} categori(es)?`
+      `Are you sure you want to suspend ${selectedCategories.length} categori(es)?`
     );
     if (!confirmDelete) return;
-
-    try {
-      const deletePromises = selectedCategories.map((id) => deleteCategory(id));
-      const results = await Promise.allSettled(deletePromises);
-
-      const failedDeletes = results.filter(
-        (result) => result.status === "rejected"
-      );
-
-      if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} categori(es).`);
-      }
-
-      setSelectedCategories([]);
+	deleteCategory(selectedCategories)
+	.then(res => {
+	  setSelectedCategories([]);
       loadCategories();
-    } catch (error) {
-      console.error("Error deleting categories:", error);
-    }
+	  showToast("Categori(es) suspended!","info");
+	}).catch(error => {
+		const message =
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+	})
   };
 
   const handleCreateCategory = async () => {
     try {
-      await createCategory({ categoryName, description });
+      await createCategory({ categoryCode, categoryName, description });
       setShowModal(false);
       loadCategories();
       setCategoryName("");
       setDescription("");
       setCategoryCode("");
-      showToast("Category Created!", "info");
+	  showToast("Category Created!", "info");
     } catch (error) {
       const message =
-      typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
-  showToast(message,"error");
-  throw error;
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -112,6 +106,8 @@ function CategoryManagement() {
       label: "Category Code",
       controlId: "categoryCode",
       type: "text",
+	  maxLength: 50,
+	  required: true,
       value: categoryCode,
       required: true,
       onChange: (e) => setCategoryCode(e.target.value),
@@ -121,7 +117,8 @@ function CategoryManagement() {
       controlId: "categoryName",
       type: "text",
       value: categoryName,
-      required: true,
+	  required: true,
+	  maxLength: 50,
       onChange: (e) => setCategoryName(e.target.value),
     },
     {
@@ -144,7 +141,7 @@ function CategoryManagement() {
     setEditingCategoryName(category.categoryName);
     setEditingDescription(category.description);
     setEditingCategoryCode(category.categoryCode);
-    setEditingSuspend(category.isSuspended);
+	setEditingSuspend(category.isSuspended);
   };
 
   const handleUpdateCategory = async () => {
@@ -154,16 +151,16 @@ function CategoryManagement() {
         categoryName: editingCategoryName,
         description: editingDescription,
         categoryCode: editingCategoryCode,
-        isSuspended: editingSuspend,
+		isSuspended: editingSuspend,
       });
       setEditingCategory(null);
       loadCategories();
-      showToast("Category Updated!", "info");
+	  showToast("Category updated!", "info");
     } catch (error) {
       const message =
-      typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
-  showToast(message,"error");
-  throw error;
+          typeof error.response?.data === "string" ? error.response.data : "Unexplained error";
+		showToast(message, "error");
+		throw error;
     }
   };
 
@@ -188,7 +185,7 @@ function CategoryManagement() {
             { label: "Category Name", value: filters.categoryNameQuery },
             { label: "Category Code", value: filters.categoryCode },
             { label: "Category Description", value: filters.descriptionQuery },
-            { label: "Suspend", value: filters.isSuspended, type:"checkbox", hasLabel:true },
+			{ label: "Suspend", value: filters.isSuspended, type:"checkbox", hasLabel: true }
           ]}
           setFilters={(index, value) => {
             const filterKeys = ["categoryNameQuery", "categoryCode", "descriptionQuery", "isSuspended"];
@@ -259,13 +256,13 @@ function CategoryManagement() {
               value: editingDescription,
               onChange: (e) => setEditingDescription(e.target.value),
             },
-            {
-              label: "Suspend",
-				      controlId: "editingSuspend",
-				      type: "checkbox",
-				      value: editingSuspend,
-				      onChange: (e) => setEditingSuspend(e.target.checked),
-            },
+			{
+			  label: "Suspend",
+			  controlId: "editSuspend",
+			  type: "checkbox",
+			  value: editingSuspend,
+			  onChange: (e) => setEditingSuspend(e.target.checked),
+			}
           ]}
           onSave={handleUpdateCategory}
           onClose={() => setEditingCategory(null)}

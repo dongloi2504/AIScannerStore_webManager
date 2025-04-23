@@ -119,8 +119,13 @@
 /* =============================== */
 /* 🔹 Bảng chung */
 /* =============================== */
+.scroll-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
 .data-table {
     width: 100%;
+	min-width:1000px;
     table-layout: fixed;
     border-collapse: collapse;
     background-color: #fff;
