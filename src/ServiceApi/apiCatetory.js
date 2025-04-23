@@ -7,14 +7,16 @@ import instance from "./Customize-Axios";
     pageSize,
     sortBy,
     isDescending = true,
-    categoryId,
+    categoryCode,
     categoryNameQuery,
     descriptionQuery,
+    isSuspended,
   } = {}) {
     const query = {
-      categoryId,
+      categoryCode,
       categoryNameQuery,
       descriptionQuery,
+      isSuspended,
   };
     return instance.post("/api/category/get", {
       pageNumber, 
@@ -26,13 +28,13 @@ import instance from "./Customize-Axios";
   }
   
   // Hàm cập nhật Category
-  export function updateCategory({ categoryId, categoryName, description, categoryCode,}) {
+  export function updateCategory({ categoryId, categoryName, description, categoryCode, isSuspended,}) {
     return instance.put("/api/category", {
       categoryId,
       categoryName,
       description,
       categoryCode,
-      isSuspended : true,
+      isSuspended,
     });
   }
 

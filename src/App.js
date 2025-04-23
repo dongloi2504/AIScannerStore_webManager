@@ -19,6 +19,7 @@ import LiveOrderManagement from './Staff/LiveOrderManagement';
 import Report from './Admin/Report';
 import ForgetPassword from './Authen/ForgetPassword';
 import OrderDetail from './Admin/OrderDetail';
+import CustomerDetail from './Admin/CustomerDetail';
 import ChangePassword from './Authen/ChangePassword';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
@@ -37,6 +38,7 @@ function App() {
 	const AuthorizedChangePassword = withAuthorization(ChangePassword,[Role.ALL]);
 
 	const AuthorizedOrderDetail = withAuthorization(OrderDetail,Role.ADMIN,Role.MANAGER);
+	const AuthorizedCustomerDetail = withAuthorization(CustomerDetail,Role.ADMIN);
 	return (
 		<HashRouter>
 			<Routes>
@@ -56,6 +58,7 @@ function App() {
 				<Route path="/unauthorized" element={<Unauthorized />} />
 				<Route path="/forget-password" element={<ForgetPassword/>}/>
 				<Route path="/order-detail/:id" element={<OrderDetail/>}/>
+				<Route path="/customer-detail/:id" element={<AuthorizedCustomerDetail/>}/>
 				<Route path="/change-password" element={<ChangePassword/>}/>
 			</Routes>
 		</HashRouter>

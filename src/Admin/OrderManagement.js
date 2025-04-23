@@ -25,7 +25,7 @@ function OrderManagement() {
   const [managerEmail, setManagerEmail] = useState("");
   const [password, setPassword] = useState("");
   const [filters, setFilters] = useState({
-    orderId: "",
+    orderCode: "",
     total: "",
     status: "",
     createdDate: "",
@@ -152,7 +152,7 @@ function OrderManagement() {
           title="Order Management"
           data={managers}
           columns={[
-            { key: "orderId", label: "Order ID" },
+            { key: "orderCode", label: "Order Code" },
             { key: "total", label: "Total Price" },
             { key: "status", label: "Status" },
             { key: "createdDate", label: "Create Date" },
@@ -163,13 +163,13 @@ function OrderManagement() {
           handleDeleteSelected={handleDeleteSelectedManagers}
           handleSearch={loadOrders}
           filters={[
-            { label: "Order Id", value: filters.orderId },
+            { label: "Order Code", value: filters.orderCode },
             { label: "Total Price", value: filters.total },
             { label: "Status", value: filters.status },
             { label: "Date", value: filters.createdDate },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = ["orderId", "total", "status", "createdDate"];
+            const filterKeys = ["orderCode", "total", "status", "createdDate"];
             setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
