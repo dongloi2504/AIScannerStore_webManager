@@ -17,6 +17,7 @@ import instance from "./Customize-Axios";
     maxTotalAmount = 0,
     isCorrection = true,
     isFlagged = true,
+    orderCode,
   } = {}) {
     const query = {
       customerId,
@@ -25,12 +26,10 @@ import instance from "./Customize-Axios";
       storeCode,
       storeId,
       statuses,
+      orderCode,
+      isCorrection,
+      isFlagged,
     };
-
-    // if (managerId) {
-    //   query.managerId = managerId;
-    // }
-
     return instance.post("/api/order/get",{
       pageNumber,
       pageSize,

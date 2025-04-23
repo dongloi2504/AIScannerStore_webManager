@@ -288,6 +288,7 @@ const Report = () => {
             options={[
               { label: "Change", value: "CHANGE" },
               { label: "Audit", value: "AUDIT" },
+              { label: "Order", value: "ORDER" },
             ]}
             onChange={(val) => setInventoryType(val)}
             styles={{ container: (base) => ({ ...base, minWidth: 200 }) }}
