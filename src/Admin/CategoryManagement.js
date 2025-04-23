@@ -25,7 +25,6 @@ function CategoryManagement() {
 	isSuspended: false,
   });
   
-  const { showToast } = useToast();
 
   // State cho modal chỉnh sửa (Edit) sử dụng GenericModal
   const [editingCategory, setEditingCategory] = useState(null);
