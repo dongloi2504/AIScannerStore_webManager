@@ -13,6 +13,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
 	const storedToken = localStorage.getItem('token');
+	if(isExpired(storedToken)) {
+	  localStorage.removeItem('user');
+	  localStorage.removeItem('token', token);
+	  setLoading(false);
+	  return;
+	}
     if (storedUser) {
       setUserState(JSON.parse(storedUser));
     }
@@ -32,6 +38,18 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user');
 	  localStorage.removeItem('token', token);
     }
+  };
+  
+    const isExpired = (token) => {
+	  if(!token) return false;
+	  try {
+        const decoded = jwtDecode(token);
+        const now = Date.now() / 1000; // current time in seconds
+        return decoded.exp < now;
+      } catch (err) {
+        // token is invalid or can't be decoded
+        return true;
+	  }
   };
   
   const isTokenExpired = () => {

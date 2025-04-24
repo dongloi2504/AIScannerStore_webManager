@@ -176,21 +176,22 @@ const DataTable = ({
                 {currentColumns.map((col, colIdx) => (
                   <td key={colIdx}>{item[col.key]}</td>
                 ))}
-                {actions.length !== 0 && (
-                  <td>
-                    {actions.map((action, actionIdx) => (
-                      <CanAccess roles={action?.roles ?? [Role.ALL]} key={actionIdx}>
-                        <Button
-                          className={`action-btn ${action.className}`}
-                          variant={action.variant}
-                          onClick={() => action.onClick(item)}
-                        >
-                          {action.label}
-                        </Button>
-                      </CanAccess>
-                    ))}
-                  </td>
-                )}
+				{actions.length != 0 ?
+                <td>
+                  {actions.map((action, actionIdx) => (
+				    <CanAccess roles={action?.roles ?? [Role.ALL]}>
+                    <Button
+                      key={actionIdx}
+                      className={`action-btn ${action.className}`}
+                      variant={action.variant}
+                      onClick={() => action.onClick(item)}
+					  disabled={typeof action.disabled === 'function' ? action.disabled(item) : !!action.disabled}
+                    >
+                      {action.label}
+                    </Button>
+					</CanAccess>
+                  ))}
+                </td> : ""}
               </tr>
             ))
           )}
