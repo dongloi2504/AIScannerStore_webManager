@@ -43,15 +43,12 @@ import instance from "./Customize-Axios";
     });
   }
   
-  // Hàm cập nhật Manager
-  export function updateManager({ managerId, storeId, managerName, managerPhone, managerEmail }) {
-    return instance.put("/api/store-manager", {
-      managerId,
-      // isSuspended: true,
-      storeId,
-      managerName,
-      managerPhone,
-      managerEmail,
+  // Hàm cập nhật Order
+  export function updateOrder({ fixedOrderId, staffId, items }) {
+    return instance.post("/api/order/correction", {
+      fixedOrderId,
+      staffId,
+      items,
     });
   }
 

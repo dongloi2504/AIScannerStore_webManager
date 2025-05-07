@@ -21,14 +21,20 @@ instance.interceptors.request.use(
   }
 );
 
-// Response Interceptor: chỉ trả về data
+// Response Interceptor
 instance.interceptors.response.use(
   (response) => {
     return response.data;
   },
   (error) => {
+    if (error.response && error.response.status === 401) {
+      // 🔒 Unauthorized: maybe token expired or invalid
+      window.location.hash= '#/unauthorized';
+      // Optional: return a custom error
+      return Promise.reject({ message: "Unauthorized" });
+    }
+
     return Promise.reject(error);
   }
 );
-
 export default instance;
