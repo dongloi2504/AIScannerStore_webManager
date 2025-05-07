@@ -29,7 +29,7 @@ instance.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // 🔒 Unauthorized: maybe token expired or invalid
-      window.location.href = '/#/unauthorized';
+      window.location.hash= '#/unauthorized';
       // Optional: return a custom error
       return Promise.reject({ message: "Unauthorized" });
     }
