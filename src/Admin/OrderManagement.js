@@ -40,7 +40,7 @@ function OrderManagement() {
     isCorrection: false,
     isFlagged: false,
   });
-  
+
   // State for editing modal
   const [editingOrder, setEditingOrder] = useState(null);
   const [editingOrderItems, setEditingOrderItems] = useState(null);
@@ -63,21 +63,21 @@ function OrderManagement() {
   const navigate = useNavigate();
 
   useEffect(() => {
-	fetchProducts();
+    fetchProducts();
   }, []);
-  
+
   useEffect(() => {
     loadOrders();
   }, [currentPage]);
-  
-   const handleSearch = () => {
-	  setCurrentPage(1);
-	  if(currentPage === 1) {
-		  loadOrders();
-	  }
-   }
-  
-    const fetchProducts = async () => {
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    if (currentPage === 1) {
+      loadOrders();
+    }
+  }
+
+  const fetchProducts = async () => {
     try {
       const res = await getProducts({ pageNumber: 1, pageSize: 2147483647 });
       setProducts(res?.items || []);
@@ -87,15 +87,15 @@ function OrderManagement() {
     }
   };
   const triggerLiveOrder = (order) => {
-	getSingleOrder(order.orderId).then((data) => {
-	// Reset data of modal
-	  setEditingOrderItems(data.items.map(item => ({productId:item.productId, changeAmount:item.count})));
+    getSingleOrder(order.orderId).then((data) => {
+      // Reset data of modal
+      setEditingOrderItems(data.items.map(item => ({ productId: item.productId, changeAmount: item.count })));
       setEditingOrderId(order.orderId);
       setEditingOrderImage1(order.image1);
-	  setEditingOrderImage2(order.image2);
-	  setEditingOrderImage3(order.image3);
-	  setShowModal(true);
-	}).catch(console.error);
+      setEditingOrderImage2(order.image2);
+      setEditingOrderImage3(order.image3);
+      setShowModal(true);
+    }).catch(console.error);
   };
 
   const loadOrders = async () => {
@@ -118,25 +118,25 @@ function OrderManagement() {
   };
 
   const allOrderIds = useMemo(() => managers.map((m) => m.orderId), [managers]);
-  
+
   const handleEditOrder = async () => {
-      await updateOrder({ 
-		fixedOrderId: editingOrderId,
-		staffId: user.staffId,
-		items: editingOrderItems.map(x => ({productId: x.productId, count:x.changeAmount}))
-	  }).then(x => alert("Order edited"))
-	  .catch(e => {
-		  alert("Error when editing order:" + e);
-		  return;
-	  });
-      setShowModal(false);
-      loadOrders();
-      setEditingOrder(null);
-	  setEditingOrderId("");
-	  setEditingOrderImage1("");
-	  setEditingOrderImage2("");
-	  setEditingOrderImage3("");
-	  setEditingOrderItems([{productId:"", changeAmount:0}]);
+    await updateOrder({
+      fixedOrderId: editingOrderId,
+      staffId: user.staffId,
+      items: editingOrderItems.map(x => ({ productId: x.productId, count: x.changeAmount }))
+    }).then(x => alert("Order edited"))
+      .catch(e => {
+        alert("Error when editing order:" + e);
+        return;
+      });
+    setShowModal(false);
+    loadOrders();
+    setEditingOrder(null);
+    setEditingOrderId("");
+    setEditingOrderImage1("");
+    setEditingOrderImage2("");
+    setEditingOrderImage3("");
+    setEditingOrderItems([{ productId: "", changeAmount: 0 }]);
   };
 
   const handleCheckAll = (e) => {
@@ -194,6 +194,24 @@ function OrderManagement() {
       console.error("Error creating manager:", error);
     }
   };
+  const formatPrice = (price) => {
+    if (typeof price !== "number") return price;
+    return price.toLocaleString("vi-VN") + " đ";
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}/${date.getFullYear()}, ${date
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+          .getSeconds()
+          .toString()
+          .padStart(2, "0")}`;
+  };
 
   const managerFields = [
     {
@@ -239,7 +257,11 @@ function OrderManagement() {
       <div className="content">
         <DataTable
           title="Order Management"
-          data={managers}
+          data={managers.map((m) => ({
+            ...m,
+            total: formatPrice(m.total),
+            createdDate: formatDateTime(m.createdDate),
+          }))}
           columns={[
             { key: "orderCode", label: "Order Code" },
             { key: "total", label: "Total Price" },
@@ -250,7 +272,7 @@ function OrderManagement() {
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
           handleDeleteSelected={handleDeleteSelectedManagers}
-          handleSearch={handleSearch}
+          handleSearch={loadOrders}
           filters={[
             { label: "Order Code", value: filters.orderCode },
             { label: "Customer Code", value: filters.customerCode },
@@ -322,14 +344,14 @@ function OrderManagement() {
               variant: "secondary",
               onClick: (order) => navigate(`/order-detail/${order.orderId}`),
             },
-			{
-			  label: "Edit",
-			  className: "detail",
-			  variant: "danger",
-			  onClick: triggerLiveOrder,
-			  disabled: (item) => (item.status !== 'PAID'),
-			  roles: [Role.MANAGER, Role.ADMIN],
-			},
+            {
+              label: "Edit",
+              className: "detail",
+              variant: "danger",
+              onClick: triggerLiveOrder,
+              disabled: (item) => (item.status !== 'PAID'),
+              roles: [Role.MANAGER, Role.ADMIN],
+            },
           ]}
         />
       </div>
@@ -338,16 +360,16 @@ function OrderManagement() {
       {showModal && (
         <LiveOrderEditModal
           show={showModal}
-		  onSave={handleEditOrder}
-		  onClose={() => {setShowModal(false);}}
-		  productChanges={editingOrderItems}
-		  setProductChanges={setEditingOrderItems}
-		  products={products}
-		  loading={loading}
-		  orderId={editingOrderId}
-		  image1={editingOrderImage1}
-		  image2={editingOrderImage2}
-		  image3={editingOrderImage3}
+          onSave={handleEditOrder}
+          onClose={() => { setShowModal(false); }}
+          productChanges={editingOrderItems}
+          setProductChanges={setEditingOrderItems}
+          products={products}
+          loading={loading}
+          orderId={editingOrderId}
+          image1={editingOrderImage1}
+          image2={editingOrderImage2}
+          image3={editingOrderImage3}
         />
       )}
     </div>
