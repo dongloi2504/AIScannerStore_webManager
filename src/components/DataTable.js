@@ -104,9 +104,12 @@ const DataTable = ({
               <input
                 type={filter.type ?? "text"}
                 placeholder={`Enter ${filter.label}`}
-                value={filter.value}
+                checked={filter.type === "checkbox" ? filter.value : undefined}
+                value={filter.type === "checkbox" ? undefined : filter.value}
                 onChange={(e) =>
-                  setFilters(index, filter.type === "checkbox" ? e.target.checked : e.target.value)
+                  filter.onChange
+                    ? filter.onChange(e)
+                    : setFilters(index, filter.type === "checkbox" ? e.target.checked : e.target.value)
                 }
               />
             )}
@@ -117,87 +120,94 @@ const DataTable = ({
         </Button>
       </div>
 
-	  <div class="scroll-wrapper">
-      {/* Data Table */}
-      <table className="data-table">
-        <thead>
-          <tr>
-            {extraButtons.length !== 0 && (
-              <th>
-                <input
-                  type="checkbox"
-                  onChange={handleCheckAll}
-                  checked={isAllChecked}
-                  aria-label="Select All"
-                />
-              </th>
-            )}
-            {currentColumns.map((col, idx) => (
-              <th key={idx}>{col.label}</th>
-            ))}
-            {actions.length !== 0 && <th>Action</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.length === 0 ? (
+      <div className="scroll-wrapper">
+        <table className="data-table">
+          <thead>
             <tr>
-              <td
-                colSpan={
-                  currentColumns.length +
-                  (extraButtons.length !== 0 ? 1 : 0) +
-                  (actions.length !== 0 ? 1 : 0)
-                }
-                style={{ textAlign: "center" }}
-              >
-                No data available
-              </td>
+              {extraButtons.length !== 0 && (
+                <th>
+                  <input
+                    type="checkbox"
+                    onChange={handleCheckAll}
+                    checked={isAllChecked}
+                    aria-label="Select All"
+                  />
+                </th>
+              )}
+              {currentColumns.map((col, idx) => (
+                <th key={idx}>{col.label}</th>
+              ))}
+              {(typeof actions === "function" || actions.length !== 0) && <th>Action</th>}
             </tr>
-          ) : (
-            currentData.map((item, idx) => (
-              <tr key={idx}>
-                {extraButtons.length !== 0 && (
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={idType.some((id) => selectedItems.includes(item[id]))}
-                      onChange={() =>
-                        handleCheckOne(
-                          idType.find((id) => item[id] !== undefined && item[id] !== null) &&
-                            (item[idType[0]] ||
-                              item[idType[1]] ||
-                              item[idType[2]] ||
-                              item[idType[3]] ||
-                              item[idType[4]])
-                        )
-                      }
-                    />
-                  </td>
-                )}
-                {currentColumns.map((col, colIdx) => (
-                  <td key={colIdx}>{item[col.key]}</td>
-                ))}
-				{actions.length != 0 ?
-                <td>
-                  {actions.map((action, actionIdx) => (
-				    <CanAccess roles={action?.roles ?? [Role.ALL]}>
-                    <Button
-                      key={actionIdx}
-                      className={`action-btn ${action.className}`}
-                      variant={action.variant}
-                      onClick={() => action.onClick(item)}
-					  disabled={typeof action.disabled === 'function' ? action.disabled(item) : !!action.disabled}
-                    >
-                      {action.label}
-                    </Button>
-					</CanAccess>
-                  ))}
-                </td> : ""}
+          </thead>
+          <tbody>
+            {currentData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={
+                    currentColumns.length +
+                    (extraButtons.length !== 0 ? 1 : 0) +
+                    (typeof actions === "function" || actions.length !== 0 ? 1 : 0)
+                  }
+                  style={{ textAlign: "center" }}
+                >
+                  No data available
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              currentData.map((item, idx) => {
+                const rowActions = typeof actions === "function" ? actions(item) : actions;
+                return (
+                  <tr key={idx}>
+                    {extraButtons.length !== 0 && (
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={idType.some((id) => selectedItems.includes(item[id]))}
+                          onChange={() =>
+                            handleCheckOne(
+                              idType.find((id) => item[id] !== undefined && item[id] !== null) &&
+                              (item[idType[0]] ||
+                                item[idType[1]] ||
+                                item[idType[2]] ||
+                                item[idType[3]] ||
+                                item[idType[4]])
+                            )
+                          }
+                        />
+                      </td>
+                    )}
+                    {currentColumns.map((col, colIdx) => (
+                      <td key={colIdx}>{item[col.key]}</td>
+                    ))}
+                    {rowActions?.length ? (
+                      <td>
+                        {rowActions.map((action, actionIdx) => (
+                          <CanAccess roles={action?.roles ?? [Role.ALL]} key={actionIdx}>
+                            <Button
+                              className={`action-btn ${action.className}`}
+                              variant={action.variant}
+                              onClick={() => action.onClick(item)}
+                              disabled={
+                                typeof action.disabled === "function"
+                                  ? action.disabled(item)
+                                  : !!action.disabled
+                              }
+                            >
+                              {action.label}
+                            </Button>
+                          </CanAccess>
+                        ))}
+                      </td>
+                    ) : null}
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
+
       {/* Pagination */}
       <div className="pagination">
         <div className="pagination-left">

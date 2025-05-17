@@ -21,6 +21,7 @@ import ForgetPassword from './Authen/ForgetPassword';
 import OrderDetail from './Admin/OrderDetail';
 import CustomerDetail from './Admin/CustomerDetail';
 import ChangePassword from './Authen/ChangePassword';
+import RequestOrder from './Admin/RequestOrder';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
 	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
@@ -34,11 +35,11 @@ function App() {
 	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
 	const AuthorizedLiveOrderEditing = withAuthorization(LiveOrderManagement, [Role.ALL]);
-	const AuthorizedReport = withAuthorization(Report,Role.ADMIN);
-	const AuthorizedChangePassword = withAuthorization(ChangePassword,[Role.ALL]);
-
-	const AuthorizedOrderDetail = withAuthorization(OrderDetail,Role.ADMIN,Role.MANAGER);
-	const AuthorizedCustomerDetail = withAuthorization(CustomerDetail,Role.ADMIN);
+	const AuthorizedReport = withAuthorization(Report, Role.ADMIN);
+	const AuthorizedChangePassword = withAuthorization(ChangePassword, [Role.ALL]);
+	const AuthorizedRequestOrder = withAuthorization(RequestOrder, Role.MANAGER);
+	const AuthorizedOrderDetail = withAuthorization(OrderDetail, Role.ADMIN, Role.MANAGER);
+	const AuthorizedCustomerDetail = withAuthorization(CustomerDetail, Role.ADMIN);
 	return (
 		<HashRouter>
 			<Routes>
@@ -56,10 +57,11 @@ function App() {
 				<Route path="/device-management" element={<AuthorizedDeviceManagementPage />} />
 				<Route path="/live-order" element={<AuthorizedLiveOrderEditing />} />
 				<Route path="/unauthorized" element={<Unauthorized />} />
-				<Route path="/forget-password" element={<ForgetPassword/>}/>
-				<Route path="/order-detail/:id" element={<OrderDetail/>}/>
-				<Route path="/customer-detail/:id" element={<AuthorizedCustomerDetail/>}/>
-				<Route path="/change-password" element={<ChangePassword/>}/>
+				<Route path="/forget-password" element={<ForgetPassword />} />
+				<Route path="/order-detail/:id" element={<OrderDetail />} />
+				<Route path="/customer-detail/:id" element={<AuthorizedCustomerDetail />} />
+				<Route path="/change-password" element={<ChangePassword />} />
+				<Route path="/request-order/:storeId" element={<AuthorizedRequestOrder />} />
 			</Routes>
 		</HashRouter>
 	);

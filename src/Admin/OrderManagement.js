@@ -1,21 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import "../Styles/GlobalStyles.css";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
-import { getProducts } from "../ServiceApi/apiAdmin";
-import LiveOrderEditModal from "../components/LiveOrderEditModal";
-import { getLiveOrder, editLiveOrder, getSingleOrder, timeoutOrder } from "../ServiceApi/apiLiveOrder";
-import {
-  getOrder,
-  updateOrder,
-  createManager,
-  deleteManager
-} from "../ServiceApi/apiOrder";
-import GenericModal from "../components/GenericModal";
 import Select from "react-select";
+import { getProducts } from "../ServiceApi/apiAdmin";
+import { getOrder, createManager, deleteManager } from "../ServiceApi/apiOrder";
 import { useAuth } from "../Authen/AuthContext";
-import { Role } from "../const/Role";
+import OrderDetailPopup from "../components/OrderDetailPopup";
+import "../Styles/GlobalStyles.css";
 
 function OrderManagement() {
   const { user } = useAuth();
@@ -25,13 +16,6 @@ function OrderManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [storeId, setStoreId] = useState("");
-  const [managerName, setManagerName] = useState("");
-  const [managerPhone, setManagerPhone] = useState("");
-  const [managerEmail, setManagerEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const [filters, setFilters] = useState({
     orderCode: "",
     customerCode: "",
@@ -40,16 +24,10 @@ function OrderManagement() {
     isCorrection: false,
     isFlagged: false,
   });
-
-  // State for editing modal
-  const [editingOrder, setEditingOrder] = useState(null);
-  const [editingOrderItems, setEditingOrderItems] = useState(null);
-  const [editingOrderId, setEditingOrderId] = useState("");
-  const [editingOrderImage1, setEditingOrderImage1] = useState("");
-  const [editingOrderImage2, setEditingOrderImage2] = useState("");
-  const [editingOrderImage3, setEditingOrderImage3] = useState("");
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   const statusOptions = [
     { label: "CREATED", value: "CREATED" },
@@ -60,8 +38,6 @@ function OrderManagement() {
     { label: "CANCELLED", value: "CANCELLED" },
   ];
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -69,13 +45,6 @@ function OrderManagement() {
   useEffect(() => {
     loadOrders();
   }, [currentPage]);
-
-  const handleSearch = () => {
-    setCurrentPage(1);
-    if (currentPage === 1) {
-      loadOrders();
-    }
-  }
 
   const fetchProducts = async () => {
     try {
@@ -86,23 +55,12 @@ function OrderManagement() {
       setProducts([]);
     }
   };
-  const triggerLiveOrder = (order) => {
-    getSingleOrder(order.orderId).then((data) => {
-      // Reset data of modal
-      setEditingOrderItems(data.items.map(item => ({ productId: item.productId, changeAmount: item.count })));
-      setEditingOrderId(order.orderId);
-      setEditingOrderImage1(order.image1);
-      setEditingOrderImage2(order.image2);
-      setEditingOrderImage3(order.image3);
-      setShowModal(true);
-    }).catch(console.error);
-  };
 
   const loadOrders = async () => {
     try {
       const response = await getOrder({
         pageNumber: currentPage,
-        pageSize: pageSize,
+        pageSize,
         customerCode: filters.customerCode,
         storeCode: filters.storeCode,
         orderCode: filters.orderCode,
@@ -119,81 +77,16 @@ function OrderManagement() {
 
   const allOrderIds = useMemo(() => managers.map((m) => m.orderId), [managers]);
 
-  const handleEditOrder = async () => {
-    await updateOrder({
-      fixedOrderId: editingOrderId,
-      staffId: user.staffId,
-      items: editingOrderItems.map(x => ({ productId: x.productId, count: x.changeAmount }))
-    }).then(x => alert("Order edited"))
-      .catch(e => {
-        alert("Error when editing order:" + e);
-        return;
-      });
-    setShowModal(false);
-    loadOrders();
-    setEditingOrder(null);
-    setEditingOrderId("");
-    setEditingOrderImage1("");
-    setEditingOrderImage2("");
-    setEditingOrderImage3("");
-    setEditingOrderItems([{ productId: "", changeAmount: 0 }]);
-  };
-
   const handleCheckAll = (e) => {
     setSelectedManagers(e.target.checked ? allOrderIds : []);
   };
 
   const handleCheckOne = (orderId) => {
     setSelectedManagers((prev) =>
-      prev.includes(orderId)
-        ? prev.filter((id) => id !== orderId)
-        : [...prev, orderId]
+      prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [...prev, orderId]
     );
   };
 
-  const handleDeleteSelectedManagers = async () => {
-    if (selectedManagers.length === 0) return;
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedManagers.length} order(s)?`
-    );
-    if (!confirmDelete) return;
-
-    try {
-      const deletePromises = selectedManagers.map((id) => deleteManager(id));
-      const results = await Promise.allSettled(deletePromises);
-      const failedDeletes = results.filter((r) => r.status === "rejected");
-
-      if (failedDeletes.length > 0) {
-        console.error(`Failed to delete ${failedDeletes.length} order(s).`);
-      }
-
-      setSelectedManagers([]);
-      loadOrders();
-    } catch (error) {
-      console.error("Error deleting orders:", error);
-    }
-  };
-
-  const handleCreateManager = async () => {
-    try {
-      await createManager({
-        storeId,
-        managerName,
-        managerPhone,
-        managerEmail,
-        password,
-      });
-      setShowModal(false);
-      loadOrders();
-      setStoreId("");
-      setManagerName("");
-      setManagerPhone("");
-      setManagerEmail("");
-      setPassword("");
-    } catch (error) {
-      console.error("Error creating manager:", error);
-    }
-  };
   const formatPrice = (price) => {
     if (typeof price !== "number") return price;
     return price.toLocaleString("vi-VN") + " đ";
@@ -205,51 +98,13 @@ function OrderManagement() {
     return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}/${date.getFullYear()}, ${date
-        .getHours()
-        .toString()
-        .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
-          .getSeconds()
-          .toString()
-          .padStart(2, "0")}`;
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date
+      .getSeconds()
+      .toString()
+      .padStart(2, "0")}`;
   };
-
-  const managerFields = [
-    {
-      label: "Store Id",
-      controlId: "storeId",
-      type: "text",
-      value: storeId,
-      onChange: (e) => setStoreId(e.target.value),
-    },
-    {
-      label: "Manager Name",
-      controlId: "managerName",
-      type: "text",
-      value: managerName,
-      onChange: (e) => setManagerName(e.target.value),
-    },
-    {
-      label: "Manager Phone",
-      controlId: "managerPhone",
-      type: "text",
-      value: managerPhone,
-      onChange: (e) => setManagerPhone(e.target.value),
-    },
-    {
-      label: "Manager Email",
-      controlId: "managerEmail",
-      type: "text",
-      value: managerEmail,
-      onChange: (e) => setManagerEmail(e.target.value),
-    },
-    {
-      label: "Password",
-      controlId: "password",
-      type: "text",
-      value: password,
-      onChange: (e) => setPassword(e.target.value),
-    },
-  ];
 
   return (
     <div className={`page-container ${isSidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
@@ -271,7 +126,7 @@ function OrderManagement() {
           selectedItems={selectedManagers}
           handleCheckAll={handleCheckAll}
           handleCheckOne={handleCheckOne}
-          handleDeleteSelected={handleDeleteSelectedManagers}
+          handleDeleteSelected={() => {}} // optional if not needed
           handleSearch={loadOrders}
           filters={[
             { label: "Order Code", value: filters.orderCode },
@@ -323,15 +178,8 @@ function OrderManagement() {
             },
           ]}
           setFilters={(index, value) => {
-            const filterKeys = [
-              "orderCode",
-              "customerCode",
-              "storeCode",
-              "status",
-              "isCorrection",
-              "isFlagged",
-            ];
-            setFilters((prev) => ({ ...prev, [filterKeys[index]]: value }));
+            const keys = ["orderCode", "customerCode", "storeCode", "status", "isCorrection", "isFlagged"];
+            setFilters((prev) => ({ ...prev, [keys[index]]: value }));
           }}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           handleNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
@@ -342,36 +190,20 @@ function OrderManagement() {
               label: "Detail",
               className: "detail",
               variant: "secondary",
-              onClick: (order) => navigate(`/order-detail/${order.orderId}`),
-            },
-            {
-              label: "Edit",
-              className: "detail",
-              variant: "danger",
-              onClick: triggerLiveOrder,
-              disabled: (item) => (item.status !== 'PAID'),
-              roles: [Role.MANAGER, Role.ADMIN],
+              onClick: (order) => {
+                setSelectedOrderId(order.orderId);
+                setShowPopup(true);
+              },
             },
           ]}
         />
-      </div>
 
-      {/* Optional: Modal tạo manager */}
-      {showModal && (
-        <LiveOrderEditModal
-          show={showModal}
-          onSave={handleEditOrder}
-          onClose={() => { setShowModal(false); }}
-          productChanges={editingOrderItems}
-          setProductChanges={setEditingOrderItems}
-          products={products}
-          loading={loading}
-          orderId={editingOrderId}
-          image1={editingOrderImage1}
-          image2={editingOrderImage2}
-          image3={editingOrderImage3}
+        <OrderDetailPopup
+          orderId={selectedOrderId}
+          show={showPopup}
+          onClose={() => setShowPopup(false)}
         />
-      )}
+      </div>
     </div>
   );
 }

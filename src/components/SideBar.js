@@ -32,8 +32,20 @@ const Sidebar = ({ onToggle }) => {
 
         {/* Menu chính */}
         <nav className="sidebar-menu">
-		  <CanAccess roles={[Role.STAFF, Role.MANAGER]}>
-		    <div className="sidebar-item">
+          <CanAccess roles={[Role.ADMIN]}>
+            <div className="sidebar-item">
+              <NavLink
+                to="/report"
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                Dashboard
+              </NavLink>
+            </div>
+          </CanAccess>
+          <CanAccess roles={[Role.STAFF, Role.MANAGER]}>
+            <div className="sidebar-item">
               <NavLink
                 to={"/store-detail/" + user.storeId}
                 className={({ isActive }) =>
@@ -43,7 +55,7 @@ const Sidebar = ({ onToggle }) => {
                 Store Detail
               </NavLink>
             </div>
-		  </CanAccess>
+          </CanAccess>
           <CanAccess roles={[Role.ADMIN]}>
             <div className="sidebar-item">
               <NavLink
@@ -122,21 +134,8 @@ const Sidebar = ({ onToggle }) => {
             </div>
           </CanAccess>
 
-          <CanAccess roles={[Role.ADMIN]}>
-            <div className="sidebar-item">
-              <NavLink
-                to="/report"
-                className={({ isActive }) =>
-                  isActive ? "sidebar-link active" : "sidebar-link"
-                }
-              >
-                Report
-              </NavLink>
-            </div>
-          </CanAccess>
-		  
-		  {/* Sidebar link for device management */}
-		  <CanAccess roles={[Role.HELPDESK]}>
+          {/* Sidebar link for device management */}
+          <CanAccess roles={[Role.HELPDESK]}>
             <div className="sidebar-item">
               <NavLink
                 to="/device-management"
@@ -145,9 +144,9 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
-		  
-		  {/* Sidebar link for live order editing */}
-		  <CanAccess roles={[Role.ALL]}>
+
+          {/* Sidebar link for live order editing */}
+          <CanAccess roles={[Role.ALL]}>
             <div className="sidebar-item">
               <NavLink
                 to="/live-order"
@@ -156,9 +155,9 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
-          
-		    {/* Sidebar link for change password */}
-		  <CanAccess roles={[Role.ALL]}>
+
+          {/* Sidebar link for change password */}
+          <CanAccess roles={[Role.ALL]}>
             <div className="sidebar-item">
               <NavLink
                 to="/change-password"
@@ -167,7 +166,16 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
-		  
+          <CanAccess roles={[Role.MANAGER]}>
+            <div className="sidebar-item">
+              <NavLink
+                to={`/request-order/${user.storeId}`}  // ✅ Thêm storeId vào URL
+                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
+              >
+                Customer Request
+              </NavLink>
+            </div>
+          </CanAccess>
           {/* Sidebar link cho Logout */}
           <div className="sidebar-item:last-child ">
             <NavLink
