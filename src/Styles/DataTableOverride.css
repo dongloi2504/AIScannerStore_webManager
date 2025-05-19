@@ -1,0 +1,8 @@
+.data-table {
+  table-layout: auto;
+}
+.data-table .status-cell {
+  width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}

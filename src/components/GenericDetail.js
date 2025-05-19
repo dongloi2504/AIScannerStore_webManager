@@ -57,11 +57,13 @@ function GenericDetail({
     <div className="page-container">
       <div className="content">
         {/* Back button */}
-        <div className="top-bar" style={{ marginBottom: "1rem" }}>
-          <Button onClick={onBack} variant="light" className="back-button">
-            Back
-          </Button>
-        </div>
+        {onBack && (
+          <div className="top-bar" style={{ marginBottom: "1rem" }}>
+            <Button onClick={onBack} variant="light" className="back-button">
+              Back
+            </Button>
+          </div>
+        )}
 
         {/* Info + Images */}
         {notFound ? (
@@ -150,9 +152,8 @@ function GenericDetail({
                         onTabChange(tab.key);
                       }
                     }}
-                    className={`tab-button ${
-                      activeTabKey === tab.key ? "active" : ""
-                    }`}
+                    className={`tab-button ${activeTabKey === tab.key ? "active" : ""
+                      }`}
                   >
                     {tab.label}
                   </button>
