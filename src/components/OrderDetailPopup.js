@@ -4,6 +4,7 @@ import Button from "react-bootstrap/Button";
 import GenericDetail from "../components/GenericDetail";
 import { orderdetail } from "../ServiceApi/apiOrder";
 import "../Styles/ImageGallery.css";
+import { Spinner } from 'react-bootstrap';
 
 function OrderDetailPopup({ orderId, show, onClose }) {
   const [order, setOrder] = useState(null);
@@ -65,7 +66,9 @@ function OrderDetailPopup({ orderId, show, onClose }) {
       </Modal.Header>
       <Modal.Body>
         {loading ? (
-          <div>Loading...</div>
+          <div className="text-center my-4">
+            <Spinner animation="border" role="status" />
+          </div>
         ) : error || !order ? (
           <GenericDetail notFound notFoundMessage={error || "Order not found!"} />
         ) : (

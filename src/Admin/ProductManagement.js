@@ -17,6 +17,7 @@ function ProductManagement() {
   // State chứa danh sách sản phẩm
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +59,7 @@ function ProductManagement() {
   // Hàm load danh sách sản phẩm từ API
   // ============================
   const loadProducts = async () => {
+    setLoading(true);
     try {
       const response = await getProducts({
         productNameQuery: filters.productName,
@@ -69,9 +71,11 @@ function ProductManagement() {
       });
       const { items, totalItem } = response;
       setProducts(items || []);
+      setLoading(false);
       setTotalPages(Math.ceil((totalItem ?? 0) / pageSize));
     } catch (error) {
       console.error("Error loading products:", error);
+      setLoading(false);
     }
   };
 
@@ -283,6 +287,7 @@ function ProductManagement() {
       <div className="content">
         <DataTable
           title="Product Management"
+          loading={loading}
           data={products}
           columns={[
             { key: "productCode", label: "Product Code" },

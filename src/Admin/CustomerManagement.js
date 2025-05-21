@@ -16,6 +16,7 @@ function CustomerManagement() {
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     name:"",
     code: "",
@@ -34,6 +35,7 @@ function CustomerManagement() {
   }, [currentPage]);
 
   const loadCustomers = async () => {
+    setLoading(true);
     try {
       const response = await getCustomer({
         pageNumber: currentPage,
@@ -44,6 +46,8 @@ function CustomerManagement() {
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
       console.error("Error fetching customers:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,6 +127,7 @@ function CustomerManagement() {
         <DataTable
           title="Customer Management"
           data={customers}
+          loading={loading}
           columns={[
             { key: "code", label: "Customer Code" },
             { key: "name", label: "Customer Name" },

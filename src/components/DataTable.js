@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import Button from "react-bootstrap/Button";
 import { Role } from "../const/Role";
 import { CanAccess } from "./CanAccess";
+import { Spinner } from 'react-bootstrap';
 
 const DataTable = ({
   title,
@@ -22,6 +23,7 @@ const DataTable = ({
   idType = ["staffId", "storeId", "productId", "categoryId", "orderId"],
   tabs = null,
   onTabChange = null,
+  loading = false
 }) => {
   const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
 
@@ -49,6 +51,8 @@ const DataTable = ({
       ),
     [currentData, selectedItems]
   );
+  const colCount = useMemo(() => currentColumns?.length + (actions?.length != 0 ? 1 : 0) + 1,
+    [currentColumns, actions]);
 
   return (
     <div className="data-table-container">
@@ -141,7 +145,19 @@ const DataTable = ({
             </tr>
           </thead>
           <tbody>
-            {currentData.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={colCount}>
+                  <div className="justify-content-center align-items-center">
+                    <Spinner
+                      animation="border"
+                      role="status"
+                      style={{ width: '1.5rem', height: '1.5rem' }}
+                    />
+                  </div>
+                </td>
+              </tr>) :
+              currentData.length === 0 ? (
               <tr>
                 <td
                   colSpan={

@@ -25,6 +25,7 @@ function StaffManagement() {
   const [staffCode, setStaffCode] = useState("");
   const [role, setRole] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     staffCode:"",
     staffName:"",
@@ -57,6 +58,7 @@ function StaffManagement() {
   }, []);
 
   const loadStaffs = async () => {
+    setLoading(true);
     try {
       const response = await getStaff({
         pageNumber: currentPage,
@@ -67,6 +69,8 @@ function StaffManagement() {
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
       console.error("Error fetching staffs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -177,6 +181,7 @@ function StaffManagement() {
       <div className="content">
         <DataTable
           title="Staff Management"
+          loading={loading}
           data={staffs.map((staff) => ({ ...staff, storeName: staff.store?.storeName ,}))}
           columns={[
             { key: "staffCode", label: "Staff Code" },

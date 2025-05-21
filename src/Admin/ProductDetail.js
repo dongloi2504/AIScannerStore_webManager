@@ -4,6 +4,7 @@ import GenericDetail from "../components/GenericDetail";
 import GenericModal from "../components/GenericModal";
 import "../Styles/Detail.css";
 import { getProducts, updateProductPricesInStore } from "../ServiceApi/apiAdmin";
+import { FullScreenModal } from "../components/FullScreenModal";
 
 function ProductDetail() {
   const { id } = useParams();
@@ -62,19 +63,18 @@ function ProductDetail() {
     }
   }, [refresh]);
 
-  if (loading) return <div>Loading...</div>;
-
-  if (!product) {
+  if (!product && !loading) {
     return (
-      <GenericDetail
-        onBack={() => navigate(-1)}
+      <FullScreenModal
+        show
+        onClose={() => navigate(-1)}
         notFound
         notFoundMessage={error || "Product not found!"}
       />
     );
   }
 
-  const productStores = product.inventories || [];
+  const productStores = product?.inventories || [];
   const totalPages = Math.ceil(productStores.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
@@ -96,11 +96,11 @@ function ProductDetail() {
   ]);
 
   const infoRows = [
-    { label: "ID", value: product.productId },
-    { label: "Product Code", value: product.productCode },
-    { label: "Name", value: product.productName },
-    { label: "Category", value: product.categoryName },
-    { label: "Description", value: product.description },
+    { label: "ID", value: product?.productId },
+    { label: "Product Code", value: product?.productCode },
+    { label: "Name", value: product?.productName },
+    { label: "Category", value: product?.categoryName },
+    { label: "Description", value: product?.description },
   ];
 
   const productData = {
@@ -127,7 +127,7 @@ function ProductDetail() {
     }
     try {
       await updateProductPricesInStore(selectedInventory.storeId, [
-        { productId: product.productId, price: Number(newPrice) },
+        { productId: product?.productId, price: Number(newPrice) },
       ]);
       alert("Price updated successfully");
       setShowPriceModal(false);
@@ -142,10 +142,12 @@ function ProductDetail() {
 
   return (
     <div className="product-detail-container">
-      <GenericDetail
-        onBack={() => navigate(-1)}
+      <FullScreenModal
+        onClose={() => navigate(-1)}
+        show
+        loading={loading}
         title="Product Detail"
-        imageUrls={[product.imageUrl].filter(Boolean)}
+        imageUrls={[product?.imageUrl].filter(Boolean)}
         infoRows={infoRows}
         productData={{
           columns: productData.columns,
@@ -174,7 +176,7 @@ function ProductDetail() {
               label: "Product Name",
               controlId: "productName",
               type: "text",
-              value: product.productName,
+              value: product?.productName,
               disabled: true,
             },
             {

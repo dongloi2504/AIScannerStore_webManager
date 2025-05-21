@@ -42,12 +42,14 @@ function StoreManagement() {
   const [editingImageURL] = useState("");
   const [editingStoreImageFile, setEditingStoreImageFile] = useState(null);
   const [editingStoreSuspend, setEditingStoreSuspend] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadStores();
   }, [currentPage]);
 
   const loadStores = async () => {
+    setLoading(true);
     try {
       const response = await getStores({
         pageNumber: currentPage,
@@ -57,8 +59,10 @@ function StoreManagement() {
 
       setStores(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching stores:", error);
+      setLoading(false);
     }
   };
 
@@ -208,6 +212,7 @@ function StoreManagement() {
       <Sidebar onToggle={setIsSidebarOpen} />
       <div className="content">
         <DataTable
+          loading={loading}
           title="Store Management"
           data={stores}
           columns={[
