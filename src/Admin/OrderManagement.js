@@ -28,6 +28,7 @@ function OrderManagement() {
 
   const [showPopup, setShowPopup] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const statusOptions = [
     { label: "CREATED", value: "CREATED" },
@@ -57,6 +58,7 @@ function OrderManagement() {
   };
 
   const loadOrders = async () => {
+    setLoading(true);
     try {
       const response = await getOrder({
         pageNumber: currentPage,
@@ -70,8 +72,10 @@ function OrderManagement() {
       });
       setManagers(response.items ?? []);
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching orders:", error);
+      setLoading(false);
     }
   };
 
@@ -112,6 +116,7 @@ function OrderManagement() {
       <div className="content">
         <DataTable
           title="Order Management"
+          loading={loading}
           data={managers.map((m) => ({
             ...m,
             total: formatPrice(m.total),

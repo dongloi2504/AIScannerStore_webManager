@@ -18,6 +18,7 @@ function CategoryManagement() {
   const [categoryName, setCategoryName] = useState("");
   const [description, setDescription] = useState("");
   const [categoryCode, setCategoryCode] = useState("");
+  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
     categoryCode: "",
     categoryNameQuery: "",
@@ -38,6 +39,7 @@ function CategoryManagement() {
   }, [currentPage]);
 
   const loadCategories = async () => {
+    setLoading(true);
     try {
       const response = await getCategory({
         pageNumber: currentPage,
@@ -48,6 +50,8 @@ function CategoryManagement() {
       setTotalPages(Math.ceil((response.totalItem ?? 0) / pageSize));
     } catch (error) {
       console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -169,6 +173,7 @@ function CategoryManagement() {
       <div className="content">
         <DataTable
           title="Category Management"
+          loading={loading}
           data={categories}
           columns={[
             { key: "categoryCode", label: "Category Code" },

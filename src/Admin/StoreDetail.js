@@ -14,12 +14,12 @@ import {
   getSingleStore,
 } from "../ServiceApi/apiAdmin";
 import { Role } from "../const/Role";
+import { FullScreenModal } from "../components/FullScreenModal";
 
 function StoreDetail() {
   const { id: storeId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [store, setStore] = useState(location.state?.store);
+  const [store, setStore] = useState(null);
   const PAGE_SIZE = 8;
 
   const [inventory, setInventory] = useState([]);
@@ -43,12 +43,19 @@ function StoreDetail() {
 
   const [inventoryPage, setInventoryPage] = useState(1);
   const [inventoryTotalPages, setInventoryTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
-	if(!store) {
-	  getSingleStore(storeId).then(res => setStore(res)).catch(console.err);
-	}
+    if (!store) {
+      setLoading(true);
+      getSingleStore(storeId).then(res => {
+        setStore(res);
+        console.log(JSON.stringify(res));
+      }).catch(console.err).finally(() => {
+        setLoading(false)
+      });
+	  }
   }, []);
   useEffect(() => {
     if (!store?.storeId) return;
@@ -222,23 +229,18 @@ function StoreDetail() {
     { key: "products", label: "Products", data: productData },
     { key: "inventory", label: "Inventory I/O", data: ioData },
   ];
-  if (!store)
-    return (
-      <GenericDetail
-        onBack={() => navigate(-1)}
-        notFound
-        notFoundMessage="Store data loading..."
-      />
-    );
-  else return (
+  return (
     <div className="store-detail-container">
-      <GenericDetail
-        onBack={() => navigate(-1)}
+      <FullScreenModal
+        show={true}
+        modalTitle={"Store Detail"}
+        loading={loading}
+        onClose={() => navigate(-1)}
         title="Store Detail"
         infoRows={infoRows}
         tabs={tabs}
         itemKey={null}
-        imageUrls={[store.imageUrl].filter(Boolean)}
+        imageUrls={[store?.imageUrl].filter(Boolean)}
         currentPage={activeTab === "products" ? productPage : inventoryPage}
         totalPages={activeTab === "products" ? productTotalPages : inventoryTotalPages}
         handlePrev={() =>
@@ -257,21 +259,21 @@ function StoreDetail() {
             variant: "primary",
             onClick: () => setShowModal(true),
             disabled: activeTab !== "products",
-			roles: [Role.ADMIN]
+			      roles: [Role.ADMIN]
           },
           {
             label: "Audit Stock",
             variant: "secondary",
             onClick: handleAuditStock,
             disabled: activeTab !== "products",
-			roles: [Role.ADMIN, Role.MANAGER],
+			      roles: [Role.ADMIN, Role.MANAGER],
           },
           {
             label: "Change Stock",
             variant: "warning",
             onClick: handleChangeStock,
             disabled: activeTab !== "products",
-			roles: [Role.ADMIN, Role.MANAGER],
+			      roles: [Role.ADMIN, Role.MANAGER],
           },
         ]}
         onTabChange={(key) => {

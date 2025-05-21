@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import GenericDetail from "../components/GenericDetail"; 
 import { customerDetail } from "../ServiceApi/apiCustomer";
 import "../Styles/ImageGallery.css";
+import { FullScreenModal } from "../components/FullScreenModal";
 
 function CustomerDetail() {
   const { id } = useParams();
@@ -33,9 +34,7 @@ function CustomerDetail() {
     loadCustomer();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-
-  if (!customer || Object.keys(customer).length === 0) {
+  if ((!customer || Object.keys(customer).length === 0) && !loading) {
     return (
       <GenericDetail
         onBack={() => navigate(-1)}
@@ -46,13 +45,12 @@ function CustomerDetail() {
   }
 
   const infoRows = [
-    { label: "Customer Id", value: customer.id },
-    { label: "Customer Name", value: customer.name },
-    { label: "Customer Code", value: customer.code },
-    { label: "Customer Email", value: customer.email|| "N/A" },
-    { label: "Customer Phone", value: customer.phoneNumber },
-    { label: "VirtualCardId", value: customer.applicationVirtualCardIdemail|| "N/A" },  
-    { label: "Created Date", value: new Date(customer.createAt).toLocaleString() },
+    { label: "Customer Id", value: customer?.id },
+    { label: "Customer Name", value: customer?.name },
+    { label: "Customer Code", value: customer?.code },
+    { label: "Customer Email", value: customer?.email|| "N/A" },
+    { label: "Customer Phone", value: customer?.phoneNumber },
+    { label: "Created Date", value: new Date(customer?.createAt).toLocaleString() },
   ];
 
 //   const productData = {
@@ -70,10 +68,12 @@ function CustomerDetail() {
 
   return (
     <div className="order-detail-container">
-      <GenericDetail
-        onBack={() => navigate(-1)}
+      <FullScreenModal
+        show
+        loading={loading}
+        onClose={() => navigate(-1)}
         title={`Customer Detail`}
-        imageUrls={[customer.imageUrl].filter(Boolean)}
+        imageUrls={[customer?.imageUrl].filter(Boolean)}
         infoRows={infoRows}
       />
     </div>
