@@ -4,11 +4,17 @@ import "../Styles/Sidebar.css";
 import { CanAccess } from "./CanAccess.js";
 import { Role } from "../const/Role.js";
 import { useAuth } from "../Authen/AuthContext";
+import useNotificationSocket from "../hooks/useNotificationSocket";
 
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { user, setAuth } = useAuth();
   const navigate = useNavigate();
+
+  // ✅ Hook kết nối WebSocket
+  useNotificationSocket(user?.staffId); // chỉ để khởi động socket
+  const { hasNotification, setHasNotification } = useAuth(); // dùng context chung
+
 
   const toggleSidebar = () => {
     const newState = !isOpen;
@@ -30,8 +36,8 @@ const Sidebar = ({ onToggle }) => {
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="sidebar-logo">{user.staffName}</div>
 
-        {/* Menu chính */}
         <nav className="sidebar-menu">
+          {/* ✅ Dashboard - KHÔNG còn dot đỏ */}
           <CanAccess roles={[Role.ADMIN]}>
             <div className="sidebar-item">
               <NavLink
@@ -44,10 +50,11 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
+
           <CanAccess roles={[Role.STAFF, Role.MANAGER]}>
             <div className="sidebar-item">
               <NavLink
-                to={"/store-detail/" + user.storeId}
+                to={`/store-detail/${user.storeId}`}
                 className={({ isActive }) =>
                   isActive ? "sidebar-link active" : "sidebar-link"
                 }
@@ -56,6 +63,7 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
+
           <CanAccess roles={[Role.ADMIN]}>
             <div className="sidebar-item">
               <NavLink
@@ -134,62 +142,69 @@ const Sidebar = ({ onToggle }) => {
             </div>
           </CanAccess>
 
-          {/* Sidebar link for device management */}
           <CanAccess roles={[Role.HELPDESK]}>
             <div className="sidebar-item">
               <NavLink
                 to="/device-management"
-                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
                 Devices
               </NavLink>
             </div>
           </CanAccess>
 
-          {/* Sidebar link for live order editing */}
           <CanAccess roles={[Role.ALL]}>
             <div className="sidebar-item">
               <NavLink
                 to="/live-order"
-                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
                 Live Orders
               </NavLink>
             </div>
           </CanAccess>
 
-          {/* Sidebar link for change password */}
           <CanAccess roles={[Role.ALL]}>
             <div className="sidebar-item">
               <NavLink
                 to="/change-password"
-                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}>
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
                 Change password
               </NavLink>
             </div>
           </CanAccess>
+
+          {/* ✅ Customer Request - CÓ dot đỏ */}
           <CanAccess roles={[Role.MANAGER]}>
             <div className="sidebar-item">
               <NavLink
-                to={`/request-order/${user.storeId}`}  // ✅ Thêm storeId vào URL
-                className={({ isActive }) => isActive ? "sidebar-link active" : "sidebar-link"}
+                to={`/request-order/${user.storeId}`}
+                className={({ isActive }) => {
+                  if (isActive) setHasNotification(false); // reset khi user click
+                  return isActive ? "sidebar-link active" : "sidebar-link";
+                }}
               >
                 Customer Request
+                {hasNotification && <span className="notif-dot" />}
               </NavLink>
             </div>
           </CanAccess>
-          {/* Sidebar link cho Logout */}
+
           <div className="sidebar-item:last-child ">
-            <NavLink
-              to="/"
-              className="sidebar-link"
-              onClick={handleLogout}
-            >
+            <NavLink to="/" className="sidebar-link" onClick={handleLogout}>
               Logout
             </NavLink>
           </div>
         </nav>
       </div>
 
-      {/* Nút Toggle */}
       <div className="sidebar-toggle" onClick={toggleSidebar}>
         <span style={{ color: "black", fontSize: "24px" }}>☰</span>
       </div>
