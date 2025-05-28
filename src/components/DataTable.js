@@ -23,7 +23,8 @@ const DataTable = ({
   idType = ["staffId", "storeId", "productId", "categoryId", "orderId"],
   tabs = null,
   onTabChange = null,
-  loading = false
+  loading = false,
+  showCheckboxes = true, // ✅ NEW PROP
 }) => {
   const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
 
@@ -51,8 +52,12 @@ const DataTable = ({
       ),
     [currentData, selectedItems]
   );
-  const colCount = useMemo(() => currentColumns?.length + (actions?.length != 0 ? 1 : 0) + 1,
-    [currentColumns, actions]);
+
+  const colCount = useMemo(() => {
+    return currentColumns?.length +
+      (typeof actions === "function" || actions.length !== 0 ? 1 : 0) +
+      (showCheckboxes ? 1 : 0); // ✅ Adjust column count
+  }, [currentColumns, actions, showCheckboxes]);
 
   return (
     <div className="data-table-container">
@@ -93,7 +98,7 @@ const DataTable = ({
         </div>
       )}
 
-      {/* Search Filters */}
+      {/* Filters */}
       <div className="search-container">
         {filters.map((filter, index) => (
           <div key={index} className="filter-item">
@@ -128,7 +133,7 @@ const DataTable = ({
         <table className="data-table">
           <thead>
             <tr>
-              {extraButtons.length !== 0 && (
+              {showCheckboxes && ( // ✅ CONDITIONAL CHECKBOX HEADER
                 <th>
                   <input
                     type="checkbox"
@@ -149,24 +154,13 @@ const DataTable = ({
               <tr>
                 <td colSpan={colCount}>
                   <div className="justify-content-center align-items-center">
-                    <Spinner
-                      animation="border"
-                      role="status"
-                      style={{ width: '1.5rem', height: '1.5rem' }}
-                    />
+                    <Spinner animation="border" role="status" style={{ width: '1.5rem', height: '1.5rem' }} />
                   </div>
                 </td>
-              </tr>) :
-              currentData.length === 0 ? (
+              </tr>
+            ) : currentData.length === 0 ? (
               <tr>
-                <td
-                  colSpan={
-                    currentColumns.length +
-                    (extraButtons.length !== 0 ? 1 : 0) +
-                    (typeof actions === "function" || actions.length !== 0 ? 1 : 0)
-                  }
-                  style={{ textAlign: "center" }}
-                >
+                <td colSpan={colCount} style={{ textAlign: "center" }}>
                   No data available
                 </td>
               </tr>
@@ -175,7 +169,7 @@ const DataTable = ({
                 const rowActions = typeof actions === "function" ? actions(item) : actions;
                 return (
                   <tr key={idx}>
-                    {extraButtons.length !== 0 && (
+                    {showCheckboxes && ( // ✅ CONDITIONAL CHECKBOX CELL
                       <td>
                         <input
                           type="checkbox"

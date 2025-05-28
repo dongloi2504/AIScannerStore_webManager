@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import GenericDetail from "../components/GenericDetail";
 import GenericModal from "../components/GenericModal";
 import ChangeStockModal from "../components/ChangeStockModal";
 import {

@@ -5,7 +5,6 @@ import { CanAccess } from "./CanAccess.js";
 import { Role } from "../const/Role.js";
 import { useAuth } from "../Authen/AuthContext";
 import useNotificationSocket from "../hooks/useNotificationSocket";
-
 const Sidebar = ({ onToggle }) => {
   const [isOpen, setIsOpen] = useState(true);
   const { user, setAuth } = useAuth();
@@ -38,7 +37,7 @@ const Sidebar = ({ onToggle }) => {
 
         <nav className="sidebar-menu">
           {/* ✅ Dashboard - KHÔNG còn dot đỏ */}
-          <CanAccess roles={[Role.ADMIN]}>
+          <CanAccess roles={[Role.ADMIN,Role.MANAGER]}>
             <div className="sidebar-item">
               <NavLink
                 to="/report"
@@ -168,15 +167,15 @@ const Sidebar = ({ onToggle }) => {
             </div>
           </CanAccess>
 
-          <CanAccess roles={[Role.ALL]}>
+          <CanAccess roles={[Role.ADMIN, Role.MANAGER]}>
             <div className="sidebar-item">
               <NavLink
-                to="/change-password"
+                to={`/promotion`}
                 className={({ isActive }) =>
                   isActive ? "sidebar-link active" : "sidebar-link"
                 }
               >
-                Change password
+                Promotion
               </NavLink>
             </div>
           </CanAccess>
@@ -196,7 +195,18 @@ const Sidebar = ({ onToggle }) => {
               </NavLink>
             </div>
           </CanAccess>
-
+          <CanAccess roles={[Role.ALL]}>
+            <div className="sidebar-item">
+              <NavLink
+                to="/change-password"
+                className={({ isActive }) =>
+                  isActive ? "sidebar-link active" : "sidebar-link"
+                }
+              >
+                Change password
+              </NavLink>
+            </div>
+          </CanAccess>
           <div className="sidebar-item:last-child ">
             <NavLink to="/" className="sidebar-link" onClick={handleLogout}>
               Logout

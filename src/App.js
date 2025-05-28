@@ -22,6 +22,7 @@ import OrderDetail from './Admin/OrderDetail';
 import CustomerDetail from './Admin/CustomerDetail';
 import ChangePassword from './Authen/ChangePassword';
 import RequestOrder from './Admin/RequestOrder';
+import PromotionManagement from './Admin/PromotionManagement';
 function App() {
 	const AuthorizedAdminLogin = withAuthorization(AdminLogin, [Role.ALL]);
 	const AuthorizedStoreManagement = withAuthorization(StoreManagement, [Role.ADMIN]);
@@ -35,11 +36,12 @@ function App() {
 	const AuthorizedInventoryHistoryPage = withAuthorization(InventoryHistoryPage, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedDeviceManagementPage = withAuthorization(DeviceManagement, [Role.HELPDESK]);
 	const AuthorizedLiveOrderEditing = withAuthorization(LiveOrderManagement, [Role.ALL]);
-	const AuthorizedReport = withAuthorization(Report, Role.ADMIN);
+	const AuthorizedReport = withAuthorization(Report, [Role.ADMIN, Role.MANAGER]);
 	const AuthorizedChangePassword = withAuthorization(ChangePassword, [Role.ALL]);
 	const AuthorizedRequestOrder = withAuthorization(RequestOrder, Role.MANAGER);
 	const AuthorizedOrderDetail = withAuthorization(OrderDetail, Role.ADMIN, Role.MANAGER);
 	const AuthorizedCustomerDetail = withAuthorization(CustomerDetail, Role.ADMIN);
+	const AuthorizedPromotionManagement = withAuthorization(PromotionManagement, [Role.ADMIN, Role.MANAGER]);
 	return (
 		<HashRouter>
 			<Routes>
@@ -62,6 +64,7 @@ function App() {
 				<Route path="/customer-detail/:id" element={<AuthorizedCustomerDetail />} />
 				<Route path="/change-password" element={<ChangePassword />} />
 				<Route path="/request-order/:storeId" element={<AuthorizedRequestOrder />} />
+				<Route path="/promotion" element={<AuthorizedPromotionManagement/>}/>
 			</Routes>
 		</HashRouter>
 	);
