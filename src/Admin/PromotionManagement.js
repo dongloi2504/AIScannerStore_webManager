@@ -49,9 +49,14 @@ export default function PromotionManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Only call fetchStores if not MANAGER
   useEffect(() => {
     fetchProducts();
-    fetchStores();
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user?.role !== Role.MANAGER) {
+      fetchStores();
+    }
   }, []);
 
   useEffect(() => {
