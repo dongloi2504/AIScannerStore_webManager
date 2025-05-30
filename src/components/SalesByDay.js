@@ -18,7 +18,7 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
         <ResponsiveContainer>
           <LineChart
             data={data}
-            margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+            margin={{ top: 20, right: 30, left: 30  , bottom: 50 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
@@ -35,7 +35,7 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
                 value: "VNĐ",
                 angle: -90,
                 position: "insideLeft",
-                offset: -14,
+                offset: -23,
               }}
             />
             <Tooltip

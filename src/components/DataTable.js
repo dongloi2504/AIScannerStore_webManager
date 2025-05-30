@@ -124,9 +124,11 @@ const DataTable = ({
             )}
           </div>
         ))}
-        <Button className="search-btn" variant="secondary" onClick={handleSearch}>
-          {filters.length > 0 ? "Search" : "Reload"}
-        </Button>
+        {filters.length > 0 && (
+          <Button className="search-btn" variant="secondary" onClick={handleSearch}>
+            Search
+          </Button>
+        )}
       </div>
 
       <div className="scroll-wrapper">

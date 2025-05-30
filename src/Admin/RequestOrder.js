@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import OrderDetailPopup from "../components/OrderDetailPopup";
@@ -11,6 +11,7 @@ import {
 import { getSingleOrder } from "../ServiceApi/apiLiveOrder";
 import { getProducts } from "../ServiceApi/apiAdmin";
 import instance from "../ServiceApi/Customize-Axios";
+import useNotificationSocket from "../hooks/useNotificationSocket";
 
 import "../Styles/GlobalStyles.css";
 import "../Styles/DataTableOverride.css";
@@ -40,16 +41,68 @@ function RequestOrder() {
     isAccepted: false,
   });
 
+  // ⚠️ Lưu currentPage vào ref để WebSocket callback luôn lấy đúng trang hiện tại
+  const currentPageRef = useRef(currentPage);
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  // ✅ WebSocket: Khi có thông báo mới → gọi lại API
+  useNotificationSocket(user?.staffId, async (message) => {
+    if (
+      message.Type === "INFO_MSG" &&
+      message.Message?.includes("requests editing order")
+    ) {
+      console.log("📩 WebSocket: có yêu cầu mới — lấy lại danh sách");
+
+      try {
+        const res = await getEditRequestsByStore({
+          storeId: user.storeId,
+          pageNumber: currentPageRef.current,
+          pageSize: 8,
+        });
+
+        const all = res?.items ?? [];
+
+        const filtered = all.filter((item) => {
+          const match =
+            item.order?.orderCode?.toLowerCase().includes(filters.orderCode.toLowerCase()) &&
+            item.customer?.name?.toLowerCase().includes(filters.customer.toLowerCase()) &&
+            item.requestContent?.toLowerCase().includes(filters.description.toLowerCase());
+
+          if (filters.isRejected) return item.status === "REJECTED" && match;
+          if (filters.isAccepted) return item.status === "ACCEPTED" && match;
+          return item.status !== "REJECTED" && item.status !== "ACCEPTED" && match;
+        });
+
+        const formatted = filtered.map((item) => ({
+          id: item.requestId,
+          orderCode: item.order?.orderCode ?? "-",
+          customerName: item.customer?.name ?? "-",
+          requestContent: item.requestContent ?? "-",
+          status: item.status ?? "-",
+          orderId: item.order?.orderId,
+          images: [item.order?.image1, item.order?.image2, item.order?.image3].filter(Boolean),
+        }));
+
+        setRequests(formatted);
+        console.log("✅ Cập nhật bảng thành công (từ WebSocket)");
+      } catch (error) {
+        console.error("❌ Lỗi khi cập nhật bảng từ WebSocket:", error);
+      }
+    }
+  });
+
   useEffect(() => {
     if (user?.storeId) {
-      fetchRequests();
+      fetchRequests(currentPage);
     }
     fetchProducts();
   }, [currentPage]);
 
   const handleSearch = () => {
     setCurrentPage(1);
-    fetchRequests();
+    fetchRequests(1);
   };
 
   const fetchProducts = async () => {
@@ -61,12 +114,12 @@ function RequestOrder() {
     }
   };
 
-  const fetchRequests = async () => {
+  const fetchRequests = async (page = 1) => {
     setLoading(true);
     try {
       const res = await getEditRequestsByStore({
         storeId: user.storeId,
-        pageNumber: currentPage,
+        pageNumber: page,
         pageSize: 8,
       });
 
@@ -121,7 +174,7 @@ function RequestOrder() {
       await instance.post("/api/order/edit-request/accept", {
         requestId: editingRequestId,
         replierId: user.staffId,
-        replyContent: "Đây là order được sữa lại của quý khách, cảm ơn ý kiến của quý khách.",
+        replyContent: "Đây là order được sửa lại của quý khách, cảm ơn ý kiến của quý khách.",
         orderCorrection: {
           fixedOrderId: editingOrderId,
           staffId: user.staffId,
@@ -130,7 +183,7 @@ function RequestOrder() {
       });
       alert("✅ Request approved!");
       setShowModal(false);
-      fetchRequests();
+      fetchRequests(currentPageRef.current);
     } catch (error) {
       console.error("❌ Approval failed:", error);
       alert("Đã xảy ra lỗi khi duyệt yêu cầu.");
@@ -226,10 +279,10 @@ function RequestOrder() {
                       requestId: item.id,
                       replierId: user?.staffId,
                       replyContent:
-                        "Xin lỗi quý khách, chúng tôi đã kiểm tra và không có gì bất thường. Mong quý khách cung cấp đầy đủ thông tin hơn.",
+                        "Xin lỗi quý khách, chúng tôi đã kiểm tra và không có gì bất thường.",
                     });
                     alert(`❌ Rejected request ${item.orderCode}`);
-                    fetchRequests();
+                    fetchRequests(currentPageRef.current);
                   } catch (err) {
                     console.error("❌ Error rejecting:", err);
                     alert("Có lỗi xảy ra khi từ chối yêu cầu.");
