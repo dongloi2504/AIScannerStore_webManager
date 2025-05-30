@@ -42,3 +42,30 @@ export function getDeviceReport({ pageNumber, pageSize, sortBy, isDescending, da
     },
   });
 }
+
+export function exportSalesReport(storeId) {
+  return instance.get(`/api/report-export/sales/${storeId}`, {
+    responseType: 'blob',
+  });
+}
+
+export function exportInventoryReport(storeId) {
+  return instance.get(`/api/report-export/inventory/${storeId}`, {
+    responseType: 'blob',
+  });
+}
+
+
+export function exportProductReport(storeId) {
+  return instance.get(`/api/report-export/product/${storeId}`, {
+    responseType: 'blob',
+  });
+}
+
+
+
+export function exportDeviceReport(storeId) {
+  return instance.get(`/api/report-export/device/${storeId}`, {
+    responseType: 'blob',
+  });
+}

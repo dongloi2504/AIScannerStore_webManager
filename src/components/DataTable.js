@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import Button from "react-bootstrap/Button";
 import { Role } from "../const/Role";
 import { CanAccess } from "./CanAccess";
-import { Spinner } from 'react-bootstrap';
+import { Spinner } from "react-bootstrap";
+import "../Styles/DataTable.css"; // ✅ Thêm nếu bạn tách CSS riêng
 
 const DataTable = ({
   title,
@@ -24,7 +25,7 @@ const DataTable = ({
   tabs = null,
   onTabChange = null,
   loading = false,
-  showCheckboxes = true, // ✅ NEW PROP
+  showCheckboxes = true,
 }) => {
   const [activeTabKey, setActiveTabKey] = useState(tabs?.[0]?.key || null);
 
@@ -56,12 +57,11 @@ const DataTable = ({
   const colCount = useMemo(() => {
     return currentColumns?.length +
       (typeof actions === "function" || actions.length !== 0 ? 1 : 0) +
-      (showCheckboxes ? 1 : 0); // ✅ Adjust column count
+      (showCheckboxes ? 1 : 0);
   }, [currentColumns, actions, showCheckboxes]);
 
   return (
     <div className="data-table-container">
-      {/* Header */}
       <div className="top-bar">
         <h1 className="page-title">{title}</h1>
         <div className="button-group">
@@ -80,7 +80,6 @@ const DataTable = ({
         </div>
       </div>
 
-      {/* Tabs */}
       {tabs?.length > 0 && (
         <div className="tab-group" style={{ marginBottom: "1rem" }}>
           {tabs.map((tab) => (
@@ -98,7 +97,6 @@ const DataTable = ({
         </div>
       )}
 
-      {/* Filters */}
       <div className="search-container">
         {filters.map((filter, index) => (
           <div key={index} className="filter-item">
@@ -135,7 +133,7 @@ const DataTable = ({
         <table className="data-table">
           <thead>
             <tr>
-              {showCheckboxes && ( // ✅ CONDITIONAL CHECKBOX HEADER
+              {showCheckboxes && (
                 <th>
                   <input
                     type="checkbox"
@@ -148,7 +146,9 @@ const DataTable = ({
               {currentColumns.map((col, idx) => (
                 <th key={idx}>{col.label}</th>
               ))}
-              {(typeof actions === "function" || actions.length !== 0) && <th>Action</th>}
+              {(typeof actions === "function" || actions.length !== 0) && (
+                <th className="datatable-action-col">Action</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -156,7 +156,7 @@ const DataTable = ({
               <tr>
                 <td colSpan={colCount}>
                   <div className="justify-content-center align-items-center">
-                    <Spinner animation="border" role="status" style={{ width: '1.5rem', height: '1.5rem' }} />
+                    <Spinner animation="border" role="status" style={{ width: "1.5rem", height: "1.5rem" }} />
                   </div>
                 </td>
               </tr>
@@ -171,7 +171,7 @@ const DataTable = ({
                 const rowActions = typeof actions === "function" ? actions(item) : actions;
                 return (
                   <tr key={idx}>
-                    {showCheckboxes && ( // ✅ CONDITIONAL CHECKBOX CELL
+                    {showCheckboxes && (
                       <td>
                         <input
                           type="checkbox"
@@ -193,7 +193,7 @@ const DataTable = ({
                       <td key={colIdx}>{item[col.key]}</td>
                     ))}
                     {rowActions?.length ? (
-                      <td>
+                      <td className="datatable-action-col">
                         {rowActions.map((action, actionIdx) => (
                           <CanAccess roles={action?.roles ?? [Role.ALL]} key={actionIdx}>
                             <Button
@@ -220,7 +220,6 @@ const DataTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="pagination">
         <div className="pagination-left">
           <Button onClick={handlePrev} disabled={currentPage === 1}>

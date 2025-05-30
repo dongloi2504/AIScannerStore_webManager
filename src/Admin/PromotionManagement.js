@@ -20,10 +20,12 @@ import {
   putPromotionOrder,
   putPromotionDeposit,
 } from "../ServiceApi/apiPromotion";
+import { useAuth } from "../Authen/AuthContext"; // ✅ Sử dụng useAuth
 
 export default function PromotionManagement() {
   const { showToast } = useToast();
-
+  const { user } = useAuth(); // ✅ Dùng useAuth thay vì localStorage
+  const isManager = user?.role === Role.MANAGER;
   const [productPromotions, setProductPromotions] = useState([]);
   const [orderPromotions, setOrderPromotions] = useState([]);
   const [depositPromotions, setDepositPromotions] = useState([]);
@@ -49,11 +51,8 @@ export default function PromotionManagement() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Only call fetchStores if not MANAGER
   useEffect(() => {
     fetchProducts();
-
-    const user = JSON.parse(localStorage.getItem("user"));
     if (user?.role !== Role.MANAGER) {
       fetchStores();
     }
@@ -65,7 +64,7 @@ export default function PromotionManagement() {
 
   const fetchProducts = async () => {
     try {
-      const res = await getProducts({ pageNumber: 1, pageSize: 9999, isSuspended: false });
+      const res = await getProducts({ pageNumber: 1, pageSize: 9999, isSuspended: false, storeId: isManager ? user.storeId : undefined, });
       setProducts(res.items || []);
     } catch (error) {
       const message = error?.response?.data || "Failed to load products";
@@ -85,6 +84,9 @@ export default function PromotionManagement() {
 
   const fetchPromotions = async (type) => {
     setLoading(true);
+
+    const isManager = user?.role === Role.MANAGER; // 👈 Đặt ngoài try/catch
+
     try {
       let fetchFn;
       if (type === "order") fetchFn = getPromotionOrders;
@@ -96,9 +98,11 @@ export default function PromotionManagement() {
         isSuspended: filters.isSuspended,
         pageNumber: currentPage,
         pageSize,
+        StoreId: isManager ? user.storeId : undefined, // ✅ dùng ở đây
       });
 
       const items = res.items || [];
+
       const formatted = items.map((item) => ({
         id: item.id,
         code: item.code,
@@ -284,33 +288,41 @@ export default function PromotionManagement() {
               },
             ]}
             extraButtons={[
-              {
-                label: "Create Product Promotion",
-                variant: "primary",
-                onClick: () => {
-                  setPromotionType("product");
-                  setIsCreating(true);
-                },
-                roles: [Role.ADMIN],
-              },
-              {
-                label: "Create Order Promotion",
-                variant: "primary",
-                onClick: () => {
-                  setPromotionType("order");
-                  setIsCreating(true);
-                },
-                roles: [Role.ADMIN],
-              },
-              {
-                label: "Create Deposit Promotion",
-                variant: "primary",
-                onClick: () => {
-                  setPromotionType("deposit");
-                  setIsCreating(true);
-                },
-                roles: [Role.ADMIN],
-              },
+              ...(user?.role !== Role.MANAGER || user?.role === Role.MANAGER
+                ? [
+                  {
+                    label: "Create Product Promotion",
+                    variant: "primary",
+                    onClick: () => {
+                      setPromotionType("product");
+                      setIsCreating(true);
+                    },
+                    roles: [Role.ADMIN, Role.MANAGER],
+                  },
+                  {
+                    label: "Create Order Promotion",
+                    variant: "primary",
+                    onClick: () => {
+                      setPromotionType("order");
+                      setIsCreating(true);
+                    },
+                    roles: [Role.ADMIN, Role.MANAGER],
+                  },
+                ]
+                : []),
+              ...(user?.role === Role.ADMIN
+                ? [
+                  {
+                    label: "Create Deposit Promotion",
+                    variant: "primary",
+                    onClick: () => {
+                      setPromotionType("deposit");
+                      setIsCreating(true);
+                    },
+                    roles: [Role.ADMIN],
+                  },
+                ]
+                : []),
             ]}
           />
         </div>
@@ -346,6 +358,7 @@ export default function PromotionManagement() {
           promotion={detailData}
           show={Boolean(detailData)}
           onClose={handleCloseDetail}
+          products={products}
         />
       )}
 

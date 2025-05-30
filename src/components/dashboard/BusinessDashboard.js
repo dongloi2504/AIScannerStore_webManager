@@ -6,7 +6,16 @@ import OrderStatusByHour from "./widgets/OrderStatusByHour";
 import RevenueSummary from "./widgets/RevenueSummary";
 import PendingRequests from "./widgets/PendingRequests";
 import SalesByDay from "../SalesByDay";
-import { getStoreDashboardReport, getProductReport, getSalesReport, getDeviceReport } from "../../ServiceApi/apiReport";
+import {
+  getStoreDashboardReport,
+  getProductReport,
+  getSalesReport,
+  getDeviceReport,
+  exportSalesReport,
+  exportProductReport,
+  exportInventoryReport,
+  exportDeviceReport
+} from "../../ServiceApi/apiReport";
 import { getInventoryHistoryByStoreId } from "../../ServiceApi/apiAdmin";
 import DataTable from "../DataTable";
 import OrderStatusChart from "./widgets/OrderStatusChart";
@@ -98,6 +107,36 @@ const BusinessDashboard = ({ storeId }) => {
       console.error("Failed to fetch sales report", err);
     }
   };
+  const handleExportSales = async () => {
+    try {
+      const response = await exportSalesReport(storeId);
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `sales_report_${storeId}.xlsx`); // hoặc .csv tùy định dạng file server trả về
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Failed to export sales report", err);
+    }
+  };
+
+  const handleExportGeneric = async (exportFunc, fileName) => {
+    try {
+      const response = await exportFunc(storeId);
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${fileName}_${storeId}_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(`Failed to export ${fileName}`, err);
+    }
+  };
+
 
   const fetchProductReport = async () => {
     if (!storeId) return;
@@ -253,52 +292,90 @@ const BusinessDashboard = ({ storeId }) => {
       )}
 
       {activeTab === "product" && (
-        <DataTable
-          title="Product Report"
-          data={productReportData}
-          loading={productLoading}
-          columns={[
-            { key: "productCode", label: "Product Code" },
-            { key: "productName", label: "Product Name" },
-            { key: "categoryName", label: "Category Name" },
-            { key: "avgCountPerOrder", label: "Average Count/Order" },
-            { key: "successOrderCount", label: "Success Order Count" },
-            { key: "correctionOrderCount", label: "Correction Order Count" },
-            { key: "totalRevenue", label: "Total Revenue" },
-          ]}
-          currentPage={productPageNumber}
-          totalPages={productTotalPages}
-          handlePrev={() => setProductPageNumber((p) => Math.max(p - 1, 1))}
-          handleNext={() => setProductPageNumber((p) => Math.min(p + 1, productTotalPages))}
-          showCheckboxes={false}
-        />
+        <>
+          <div style={{ textAlign: "right", marginBottom: "10px" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => handleExportGeneric(exportProductReport, "product_report")}
+            >
+              Export Product Report
+            </button>
+          </div>
+          <DataTable
+            title="Product Report"
+            data={productReportData}
+            loading={productLoading}
+            columns={[
+              { key: "productCode", label: "Product Code" },
+              { key: "productName", label: "Product Name" },
+              { key: "categoryName", label: "Category Name" },
+              { key: "avgCountPerOrder", label: "Average Count/Order" },
+              { key: "successOrderCount", label: "Success Order Count" },
+              { key: "correctionOrderCount", label: "Correction Order Count" },
+              { key: "totalRevenue", label: "Total Revenue" },
+            ]}
+            currentPage={productPageNumber}
+            totalPages={productTotalPages}
+            handlePrev={() => setProductPageNumber((p) => Math.max(p - 1, 1))}
+            handleNext={() => setProductPageNumber((p) => Math.min(p + 1, productTotalPages))}
+            showCheckboxes={false}
+          />
+        </>
       )}
+
 
       {activeTab === "inventory" && (
-        <DataTable
-          title="Inventory I/O"
-          data={inventoryHistoryData}
-          loading={inventoryLoading}
-          columns={[
-            { key: "staff", label: "Staff" },
-            { key: "type", label: "Type" },
-            { key: "date", label: "Date" },
-            { key: "action", label: "Action" },
-          ]}
-          currentPage={inventoryPageNumber}
-          totalPages={inventoryTotalPages}
-          handlePrev={() => setInventoryPageNumber((p) => Math.max(p - 1, 1))}
-          handleNext={() => setInventoryPageNumber((p) => Math.min(p + 1, inventoryTotalPages))}
-          showCheckboxes={false}
-        />
+        <>
+          <div style={{ textAlign: "right", marginBottom: "10px" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => handleExportGeneric(exportInventoryReport, "inventory_report")}
+            >
+              Export Inventory Report
+            </button>
+          </div>
+          <DataTable
+            title="Inventory I/O"
+            data={inventoryHistoryData}
+            loading={inventoryLoading}
+            columns={[
+              { key: "staff", label: "Staff" },
+              { key: "type", label: "Type" },
+              { key: "date", label: "Date" },
+              { key: "action", label: "Action" },
+            ]}
+            currentPage={inventoryPageNumber}
+            totalPages={inventoryTotalPages}
+            handlePrev={() => setInventoryPageNumber((p) => Math.max(p - 1, 1))}
+            handleNext={() => setInventoryPageNumber((p) => Math.min(p + 1, inventoryTotalPages))}
+            showCheckboxes={false}
+          />
+        </>
       )}
 
+
       {activeTab === "sales" && (
-        <SalesByDay data={salesData} totalRevenue={totalRevenue} average={average} />
+        <>
+          <div style={{ textAlign: "right", marginBottom: "10px" }}>
+            <button className="btn btn-primary" onClick={handleExportSales}>
+              Export Sales Report
+            </button>
+          </div>
+          <SalesByDay data={salesData} totalRevenue={totalRevenue} average={average} />
+        </>
       )}
 
       {activeTab === "devices" && (
         <>
+          <div style={{ textAlign: "right", marginBottom: "10px" }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => handleExportGeneric(exportDeviceReport, "device_report")}
+            >
+              Export Device Report
+            </button>
+          </div>
+
           <div className="row">
             <DevicesActive count={deviceCount} />
             {statusSummary && (
@@ -343,7 +420,7 @@ const BusinessDashboard = ({ storeId }) => {
                 cancelledOrderCount: formatCount(cancelledOrderCount, cancelledOrderPercentage),
                 correctionOrderCount: formatCount(correctionOrderCount, correctionOrderPercentage),
                 editOrderCount: formatCount(editOrderCount, editOrderPercentage),
-                totalRevenue: `${totalRevenue?.toLocaleString("vi-VN")}₫` || "0₫",
+                totalRevenue: `${(totalRevenue || 0).toLocaleString("vi-VN")}₫`,
               };
             })}
             columns={[
@@ -364,6 +441,8 @@ const BusinessDashboard = ({ storeId }) => {
           />
         </>
       )}
+
+
       {selectedInventoryNoteId && (
         <InventoryHistoryModal
           noteId={selectedInventoryNoteId}

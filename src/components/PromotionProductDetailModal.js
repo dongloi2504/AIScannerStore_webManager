@@ -1,8 +1,12 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 
-export default function PromotionProductDetailModal({ promotion, show, onClose }) {
+export default function PromotionProductDetailModal({ promotion, show, onClose, products = [] }) {
   if (!promotion) return null;
+
+  const productId = promotion.detail.productId;
+  const product = products.find((p) => p.productId === productId);
+  const productName = product ? product.productName : productId || "Unknown";
 
   return (
     <Modal show={show} onHide={onClose} centered>
@@ -17,6 +21,7 @@ export default function PromotionProductDetailModal({ promotion, show, onClose }
           {promotion.detail.amount}
           {promotion.detail.isPercentage ? "%" : ""}
         </p>
+        <p><strong>Product:</strong> {productName}</p>
         <p><strong>Min Count Per Order:</strong> {promotion.detail.minCountPerOrder}</p>
         <p><strong>Applied Store ID:</strong> {promotion.detail.appliedStoreId || "All"}</p>
         <p><strong>Start Hour:</strong> {promotion.detail.startHour}</p>

@@ -1,0 +1,13 @@
+/* Cột Action cần rộng đủ để hiển thị 3 nút */
+.datatable-action-col {
+  min-width: 260px !important;
+  white-space: nowrap;
+}
+
+.datatable-action-col button {
+  margin-right: 4px;
+}
+.data-table {
+  table-layout: auto !important;
+  width: 100%;
+}

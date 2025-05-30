@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form, Spinner, Row, Col } from "react-bootstrap";
 import Select from "react-select";
 
@@ -9,12 +9,13 @@ const getAvailableRules = (type) => {
     ...(type === "deposit" ? [{ key: "minimumDeposit", label: "Minimum Deposit" }] : []),
     { key: "timeDate", label: "Time (Date)" },
     ...(type !== "deposit" ? [{ key: "timeHour", label: "Time (Hour)" }] : []),
-    // Removed "appliedDayOfWeek" from rules
   ];
   return rules;
 };
 
 function CreatePromotionModal({ show, onClose, onSave, products, stores, loading, promotionType }) {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [formData, setFormData] = useState({
     name: "",
     amount: 0.1,
@@ -30,6 +31,16 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
 
   const [ruleList, setRuleList] = useState([]);
   const formRef = useRef(null);
+
+  useEffect(() => {
+    console.log("👤 User from useAuth:", user);
+    if (user?.role === "STORE_MANAGER" && promotionType !== "deposit") {
+      setFormData((prev) => ({
+        ...prev,
+        appliedStoreId: user?.storeId || "",
+      }));
+    }
+  }, [promotionType, user]);
 
   const handleChange = (key, value) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -135,6 +146,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       </Modal.Header>
       <Modal.Body>
         <Form ref={formRef}>
+          {/* Common fields */}
           <Row className="mb-3">
             <Col md={6}>
               <Form.Label>Promotion Name</Form.Label>
@@ -154,7 +166,6 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
                 value={formData.priority === null ? "" : formData.priority}
                 disabled={formData.priority === null}
                 onChange={(e) => handleChange("priority", Number(e.target.value))}
-                isInvalid={formData.priority !== null && formData.priority === ""}
               />
             </Col>
             <Col md={6} className="d-flex align-items-end">
@@ -170,7 +181,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
           <Row className="mb-3">
             <Col md={6}>
               <Form.Label>Amount</Form.Label>
-              <Form.Control type="number" step="0.01" value={formData.amount} onChange={(e) => handleChange("amount", e.target.value)} required min="0" />
+              <Form.Control type="number" step="0.01" min={0} value={formData.amount} onChange={(e) => handleChange("amount", e.target.value)} required />
             </Col>
             <Col md={6} className="d-flex align-items-end">
               <Form.Check
@@ -182,38 +193,38 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
             </Col>
           </Row>
 
+          {/* Deposit-specific fields */}
           {promotionType === "deposit" && (
-            <>
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Label>Bonus Wallet LifeTime (Hours)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    value={formData.bonusWalletLifeTimeInHours || ""}
-                    onChange={(e) => handleChange("bonusWalletLifeTimeInHours", Number(e.target.value))}
-                  />
-                </Col>
-                <Col md={6}>
-                  <Form.Label>Applied Day of Week</Form.Label>
-                  <Select
-                    options={dayOptions}
-                    value={formData.appliedDayOfWeek}
-                    onChange={(opt) => handleChange("appliedDayOfWeek", opt)}
-                    placeholder="Select day"
-                  />
-                </Col>
-              </Row>
-            </>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Label>Bonus Wallet LifeTime (Hours)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  value={formData.bonusWalletLifeTimeInHours || ""}
+                  onChange={(e) => handleChange("bonusWalletLifeTimeInHours", Number(e.target.value))}
+                />
+              </Col>
+              <Col md={6}>
+                <Form.Label>Applied Day of Week</Form.Label>
+                <Select
+                  options={dayOptions}
+                  value={formData.appliedDayOfWeek}
+                  onChange={(opt) => handleChange("appliedDayOfWeek", opt)}
+                  placeholder="Select day"
+                />
+              </Col>
+            </Row>
           )}
 
-          {promotionType !== "deposit" && (
+          {/* Store selection (only for non-deposit + not manager) */}
+          {promotionType !== "deposit" && user?.role === "ADMIN" && (
             <Row className="mb-3">
               <Col md={6}>
                 <Form.Label>Store</Form.Label>
                 <Select
                   options={storeOptions}
-                  value={formData.appliedStoreId === null ? null : storeOptions.find((opt) => opt.value === formData.appliedStoreId)}
+                  value={storeOptions.find((opt) => opt.value === formData.appliedStoreId)}
                   onChange={(opt) => handleChange("appliedStoreId", opt?.value)}
                   placeholder="Select store"
                   isDisabled={formData.appliedStoreId === null}
@@ -230,6 +241,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
             </Row>
           )}
 
+          {/* Product-specific */}
           {promotionType === "product" && (
             <Form.Group className="mb-3">
               <Form.Label>Product</Form.Label>
@@ -273,24 +285,20 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
               {rule.key === "timeDate" && (
                 <Row>
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Start Date & Time</Form.Label>
-                      <Form.Control
-                        type="datetime-local"
-                        value={rule.startAt || ""}
-                        onChange={(e) => handleRuleChange(index, "startAt", e.target.value)}
-                      />
-                    </Form.Group>
+                    <Form.Label>Start Date & Time</Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      value={rule.startAt || ""}
+                      onChange={(e) => handleRuleChange(index, "startAt", e.target.value)}
+                    />
                   </Col>
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>End Date & Time</Form.Label>
-                      <Form.Control
-                        type="datetime-local"
-                        value={rule.endAt || ""}
-                        onChange={(e) => handleRuleChange(index, "endAt", e.target.value)}
-                      />
-                    </Form.Group>
+                    <Form.Label>End Date & Time</Form.Label>
+                    <Form.Control
+                      type="datetime-local"
+                      value={rule.endAt || ""}
+                      onChange={(e) => handleRuleChange(index, "endAt", e.target.value)}
+                    />
                   </Col>
                 </Row>
               )}
@@ -298,24 +306,20 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
               {rule.key === "timeHour" && (
                 <Row>
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Start Hour</Form.Label>
-                      <Form.Control
-                        type="time"
-                        value={rule.startHour || ""}
-                        onChange={(e) => handleRuleChange(index, "startHour", e.target.value)}
-                      />
-                    </Form.Group>
+                    <Form.Label>Start Hour</Form.Label>
+                    <Form.Control
+                      type="time"
+                      value={rule.startHour || ""}
+                      onChange={(e) => handleRuleChange(index, "startHour", e.target.value)}
+                    />
                   </Col>
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>End Hour</Form.Label>
-                      <Form.Control
-                        type="time"
-                        value={rule.endHour || ""}
-                        onChange={(e) => handleRuleChange(index, "endHour", e.target.value)}
-                      />
-                    </Form.Group>
+                    <Form.Label>End Hour</Form.Label>
+                    <Form.Control
+                      type="time"
+                      value={rule.endHour || ""}
+                      onChange={(e) => handleRuleChange(index, "endHour", e.target.value)}
+                    />
                   </Col>
                 </Row>
               )}
@@ -323,15 +327,13 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
               {(rule.key === "minOrderTotal" || rule.key === "minCountPerOrder" || rule.key === "minimumDeposit") && (
                 <Row>
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Value</Form.Label>
-                      <Form.Control
-                        type="number"
-                        value={rule.value}
-                        onChange={(e) => handleRuleChange(index, "value", e.target.value)}
-                        placeholder="Enter value"
-                      />
-                    </Form.Group>
+                    <Form.Label>Value</Form.Label>
+                    <Form.Control
+                      type="number"
+                      value={rule.value}
+                      onChange={(e) => handleRuleChange(index, "value", e.target.value)}
+                      placeholder="Enter value"
+                    />
                   </Col>
                 </Row>
               )}

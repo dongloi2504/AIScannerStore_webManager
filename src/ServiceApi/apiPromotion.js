@@ -1,6 +1,7 @@
 import instance from "./Customize-Axios";
 
 export function getPromotionProducts({
+    StoreId,
     code,
     isSuspended,
     startAt,
@@ -12,6 +13,7 @@ export function getPromotionProducts({
 } = {}) {
     return instance.get("/api/promotion/product", {
         params: {
+            StoreId: StoreId,
             Code: code,
             IsSuspended: isSuspended,
             StartAt: startAt,
@@ -25,6 +27,7 @@ export function getPromotionProducts({
 }
 
 export function getPromotionOrders({
+    StoreId,
     code,
     isSuspended,
     startAt,
@@ -36,6 +39,7 @@ export function getPromotionOrders({
 } = {}) {
     return instance.get("/api/promotion/order", {
         params: {
+            StoreId:  StoreId,
             Code: code,
             IsSuspended: isSuspended,
             StartAt: startAt,
