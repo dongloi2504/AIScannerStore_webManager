@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Modal, Button, Form, Spinner, Row, Col } from "react-bootstrap";
 import Select from "react-select";
+import { useAuth } from "../Authen/AuthContext"; // ✅ sử dụng useAuth
 
 const getAvailableRules = (type) => {
   const rules = [
@@ -14,7 +15,7 @@ const getAvailableRules = (type) => {
 };
 
 function CreatePromotionModal({ show, onClose, onSave, products, stores, loading, promotionType }) {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const { user } = useAuth(); // ✅ dùng useAuth để lấy user
 
   const [formData, setFormData] = useState({
     name: "",
@@ -32,9 +33,9 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
   const [ruleList, setRuleList] = useState([]);
   const formRef = useRef(null);
 
+  // ✅ Auto-assign storeId if role is MANAGER
   useEffect(() => {
-    console.log("👤 User from useAuth:", user);
-    if (user?.role === "STORE_MANAGER" && promotionType !== "deposit") {
+    if (user?.role === "MANAGER" && promotionType !== "deposit") {
       setFormData((prev) => ({
         ...prev,
         appliedStoreId: user?.storeId || "",
@@ -63,8 +64,8 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
   };
 
   const availableRules = getAvailableRules(promotionType);
-  const usedRuleKeys = ruleList.map(r => r.key);
-  const ruleOptions = availableRules.filter(r => !usedRuleKeys.includes(r.key));
+  const usedRuleKeys = ruleList.map((r) => r.key);
+  const ruleOptions = availableRules.filter((r) => !usedRuleKeys.includes(r.key));
   const dayOptions = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => ({ label: d, value: d }));
 
   const handleSubmit = async () => {
@@ -217,14 +218,14 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
             </Row>
           )}
 
-          {/* Store selection (only for non-deposit + not manager) */}
+          {/* Store selection (only for ADMIN) */}
           {promotionType !== "deposit" && user?.role === "ADMIN" && (
             <Row className="mb-3">
               <Col md={6}>
                 <Form.Label>Store</Form.Label>
                 <Select
                   options={storeOptions}
-                  value={storeOptions.find((opt) => opt.value === formData.appliedStoreId)}
+                  value={formData.appliedStoreId === null ? null : storeOptions.find((opt) => opt.value === formData.appliedStoreId)}
                   onChange={(opt) => handleChange("appliedStoreId", opt?.value)}
                   placeholder="Select store"
                   isDisabled={formData.appliedStoreId === null}
@@ -260,6 +261,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
             <Form.Control as="textarea" rows={3} value={formData.description} onChange={(e) => handleChange("description", e.target.value)} />
           </Form.Group>
 
+          {/* Rules section */}
           <hr />
           <h5>Promotion Rules</h5>
 
