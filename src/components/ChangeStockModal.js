@@ -36,7 +36,6 @@ function ChangeStockModal({
   };
 
   const handleClose = () => {
-    // reset product list and image
     setProductChanges([{ productId: "", changeAmount: 0 }]);
     setImageFile(null);
     onClose();
@@ -44,7 +43,7 @@ function ChangeStockModal({
 
   const isSaveDisabled =
     productChanges.length === 0 ||
-    productChanges.some((p) => !p.productId || Number(p.changeAmount) === 0);
+    productChanges.some((p) => !p.productId || Number(p.changeAmount) <= 0);
 
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
@@ -102,10 +101,11 @@ function ChangeStockModal({
                 <Form.Label>{index === 0 ? "Change Amount" : ""}</Form.Label>
                 <Form.Control
                   type="number"
+                  min="1"
                   value={change.changeAmount}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "" || val === "-" || !isNaN(Number(val))) {
+                    if (/^\d*$/.test(val)) {
                       handleAmountChange(index, val);
                     }
                   }}

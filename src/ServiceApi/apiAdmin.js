@@ -228,9 +228,30 @@ export function AuditInventory({
   });
 }
 
-export function getInventoryHistoryByStoreId({ storeId, PageNumber = 1, PageSize = 8 }) {
+export function getInventoryHistoryByStoreId({
+  storeId,
+  type,
+  staffCode,
+  staffName,
+  dateFrom,
+  dateTo,
+  pageNumber = 1,
+  pageSize = 8,
+  sortBy = "createTime",
+  isDescending = true,
+}) {
   return instance.get(`/api/inventory/history/store/${storeId}`, {
-    params: { PageNumber, PageSize },
+    params: {
+      Type: type,
+      StaffCode: staffCode,
+      StaffName: staffName,
+      DateFrom: dateFrom,
+      DateTo: dateTo,
+      PageNumber: pageNumber,
+      PageSize: pageSize,
+      SortBy: sortBy,
+      IsDescending: isDescending,
+    },
   });
 }
 
@@ -284,4 +305,12 @@ export function getStockFlowReport({
       Type: type,
     },
   });
+}
+
+export function inventoryInbound(data) {
+  return instance.post("/api/inventory/inbound", data);
+}
+
+export function inventoryOutbound(data) {
+  return instance.post("/api/inventory/outbound", data);
 }

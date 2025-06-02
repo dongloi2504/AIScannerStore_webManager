@@ -1,8 +1,11 @@
+// ⚠️ File: RequestOrder.jsx (đã tích hợp DescriptionModal khi Reject)
+
 import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "../components/SideBar";
 import DataTable from "../components/DataTable";
 import OrderDetailPopup from "../components/OrderDetailPopup";
 import LiveOrderEditModal from "../components/LiveOrderEditModal";
+import DescriptionModal from "../components/DescriptionModal"; // ✨ New
 import { useAuth } from "../Authen/AuthContext";
 import {
   getEditRequestsByStore,
@@ -33,6 +36,10 @@ function RequestOrder() {
   const [editingImages, setEditingImages] = useState([]);
   const [products, setProducts] = useState([]);
 
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectingRequestId, setRejectingRequestId] = useState(null);
+  const [rejectingOrderCode, setRejectingOrderCode] = useState("");
+
   const [filters, setFilters] = useState({
     orderCode: "",
     customer: "",
@@ -41,20 +48,16 @@ function RequestOrder() {
     isAccepted: false,
   });
 
-  // ⚠️ Lưu currentPage vào ref để WebSocket callback luôn lấy đúng trang hiện tại
   const currentPageRef = useRef(currentPage);
   useEffect(() => {
     currentPageRef.current = currentPage;
   }, [currentPage]);
 
-  // ✅ WebSocket: Khi có thông báo mới → gọi lại API
   useNotificationSocket(user?.staffId, async (message) => {
     if (
       message.Type === "INFO_MSG" &&
       message.Message?.includes("requests editing order")
     ) {
-      console.log("📩 WebSocket: có yêu cầu mới — lấy lại danh sách");
-
       try {
         const res = await getEditRequestsByStore({
           storeId: user.storeId,
@@ -63,7 +66,6 @@ function RequestOrder() {
         });
 
         const all = res?.items ?? [];
-
         const filtered = all.filter((item) => {
           const match =
             item.order?.orderCode?.toLowerCase().includes(filters.orderCode.toLowerCase()) &&
@@ -86,7 +88,6 @@ function RequestOrder() {
         }));
 
         setRequests(formatted);
-        console.log("✅ Cập nhật bảng thành công (từ WebSocket)");
       } catch (error) {
         console.error("❌ Lỗi khi cập nhật bảng từ WebSocket:", error);
       }
@@ -99,11 +100,6 @@ function RequestOrder() {
     }
     fetchProducts();
   }, [currentPage]);
-
-  const handleSearch = () => {
-    setCurrentPage(1);
-    fetchRequests(1);
-  };
 
   const fetchProducts = async () => {
     try {
@@ -124,7 +120,6 @@ function RequestOrder() {
       });
 
       const all = res?.items ?? [];
-
       const filtered = all.filter((item) => {
         const match =
           item.order?.orderCode?.toLowerCase().includes(filters.orderCode.toLowerCase()) &&
@@ -213,11 +208,7 @@ function RequestOrder() {
               value: filters.isRejected,
               hasLabel: true,
               onChange: (e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  isRejected: e.target.checked,
-                  isAccepted: false,
-                })),
+                setFilters((prev) => ({ ...prev, isRejected: e.target.checked, isAccepted: false })),
             },
             {
               label: "Only Accepted",
@@ -225,18 +216,17 @@ function RequestOrder() {
               value: filters.isAccepted,
               hasLabel: true,
               onChange: (e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  isAccepted: e.target.checked,
-                  isRejected: false,
-                })),
+                setFilters((prev) => ({ ...prev, isAccepted: e.target.checked, isRejected: false })),
             },
           ]}
           setFilters={(index, value) => {
             const keys = ["orderCode", "customer", "description"];
             setFilters((prev) => ({ ...prev, [keys[index]]: value }));
           }}
-          handleSearch={handleSearch}
+          handleSearch={() => {
+            setCurrentPage(1);
+            fetchRequests(1);
+          }}
           currentPage={currentPage}
           totalPages={totalPages}
           handlePrev={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -270,23 +260,10 @@ function RequestOrder() {
               {
                 label: "Reject",
                 variant: "danger",
-                onClick: async () => {
-                  const confirm = window.confirm(`Reject request ${item.orderCode}?`);
-                  if (!confirm) return;
-
-                  try {
-                    await rejectEditRequest({
-                      requestId: item.id,
-                      replierId: user?.staffId,
-                      replyContent:
-                        "Xin lỗi quý khách, chúng tôi đã kiểm tra và không có gì bất thường.",
-                    });
-                    alert(`❌ Rejected request ${item.orderCode}`);
-                    fetchRequests(currentPageRef.current);
-                  } catch (err) {
-                    console.error("❌ Error rejecting:", err);
-                    alert("Có lỗi xảy ra khi từ chối yêu cầu.");
-                  }
+                onClick: () => {
+                  setRejectingRequestId(item.id);
+                  setRejectingOrderCode(item.orderCode);
+                  setShowRejectModal(true);
                 },
               },
             ];
@@ -294,11 +271,7 @@ function RequestOrder() {
           loading={loading}
         />
 
-        <OrderDetailPopup
-          orderId={selectedOrderId}
-          show={showPopup}
-          onClose={() => setShowPopup(false)}
-        />
+        <OrderDetailPopup orderId={selectedOrderId} show={showPopup} onClose={() => setShowPopup(false)} />
 
         {showModal && (
           <LiveOrderEditModal
@@ -315,6 +288,30 @@ function RequestOrder() {
             image3={editingImages[2]}
           />
         )}
+
+        <DescriptionModal
+          show={showRejectModal}      // ✅ react-bootstrap dùng `show`
+          onClose={() => {
+            setShowRejectModal(false);
+            setRejectingRequestId(null);
+          }}
+          onSave={async (desc) => {
+            try {
+              await rejectEditRequest({
+                requestId: rejectingRequestId,
+                replierId: user?.staffId,
+                replyContent: desc,
+              });
+              alert(`❌ Đã từ chối request ${rejectingOrderCode}`);
+              setShowRejectModal(false);
+              setRejectingRequestId(null);
+              fetchRequests(currentPageRef.current);
+            } catch (err) {
+              console.error("❌ Error rejecting:", err);
+              alert("Có lỗi xảy ra khi từ chối yêu cầu.");
+            }
+          }}
+        />
       </div>
     </div>
   );

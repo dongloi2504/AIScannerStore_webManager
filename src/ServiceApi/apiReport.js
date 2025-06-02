@@ -4,7 +4,18 @@ export function getStoreDashboardReport(storeId) {
 }
 
 
-export function getProductReport({ pageNumber, pageSize, sortBy, isDescending, dateFrom, dateTo, storeId }) {
+export function getProductReport({
+  pageNumber,
+  pageSize,
+  sortBy,
+  isDescending,
+  dateFrom,
+  dateTo,
+  storeId,
+  productName,
+  productCode,
+  categoryName,
+}) {
   return instance.post("/api/report/product/get", {
     pageNumber,
     pageSize,
@@ -13,8 +24,11 @@ export function getProductReport({ pageNumber, pageSize, sortBy, isDescending, d
     query: {
       dateFrom,
       dateTo,
-      storeId
-    }
+      storeId,
+      productName,
+      productCode,
+      categoryName,
+    },
   });
 }
 
@@ -22,8 +36,8 @@ export function getSalesReport({ storeId, productId, dateFrom, dateTo }) {
   return instance.get("/api/report/sales", {
     params: {
       StoreId: storeId,
-      ProductId: productId, 
-      DateFrom: dateFrom,   
+      ProductId: productId,
+      DateFrom: dateFrom,
       DateTo: dateTo,
     },
   });

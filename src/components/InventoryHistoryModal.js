@@ -43,10 +43,10 @@ const InventoryHistoryModal = ({ noteId, storeId, onClose }) => {
     : [];
 
   const tableData = {
-    columns: ["Product ID", "Product Name", "Before", "Change", "After"],
+    columns: ["Product Code", "Product Name", "Before", "Change", "After"],
     rows:
       detail?.items?.map((item) => [
-        item.productInfo?.productId || "-",
+        item.productInfo?.productCode || "-",
         item.productInfo?.productName || "-",
         item.beforeChange ?? "-",
         item.stockChange > 0 ? `+${item.stockChange}` : item.stockChange,

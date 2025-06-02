@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import GenericModal from "../components/GenericModal";
 import ChangeStockModal from "../components/ChangeStockModal";
+import InventoryHistoryModal from "../components/InventoryHistoryModal";
 import {
   getInventoryByStoreId,
   updateProductPricesInStore,
   getProducts,
-  ChangeInventory,
+  inventoryInbound,
+  inventoryOutbound,
   AuditInventory,
   uploadfileIO,
   getInventoryHistoryByStoreId,
@@ -35,6 +37,9 @@ function StoreDetail() {
   const [changeStockLoading, setChangeStockLoading] = useState(false);
   const [modalMode, setModalMode] = useState("change");
 
+  const [stockAction, setStockAction] = useState("in"); // "in" or "out"
+  const [showInventoryDetail, setShowInventoryDetail] = useState(null);
+
   const [activeTab, setActiveTab] = useState("products");
 
   const [productPage, setProductPage] = useState(1);
@@ -44,18 +49,21 @@ function StoreDetail() {
   const [inventoryTotalPages, setInventoryTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     if (!store) {
       setLoading(true);
-      getSingleStore(storeId).then(res => {
-        setStore(res);
-        console.log(JSON.stringify(res));
-      }).catch(console.err).finally(() => {
-        setLoading(false)
-      });
-	  }
+      getSingleStore(storeId)
+        .then((res) => {
+          setStore(res);
+          console.log(JSON.stringify(res));
+        })
+        .catch(console.err)
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   }, []);
+
   useEffect(() => {
     if (!store?.storeId) return;
     fetchProducts();
@@ -131,8 +139,9 @@ function StoreDetail() {
     }
   };
 
-  const handleChangeStock = () => {
+  const handleChangeStock = (type) => {
     setModalMode("change");
+    setStockAction(type);
     setShowChangeStockModal(true);
   };
 
@@ -168,7 +177,9 @@ function StoreDetail() {
       imageUrl,
       items: productChanges.map((p) => ({
         productId: p.productId,
-        changeAmount: Number(p.changeAmount),
+        changeAmount: stockAction === "out"
+          ? -Math.abs(Number(p.changeAmount))
+          : Math.abs(Number(p.changeAmount)),
       })),
     };
 
@@ -176,7 +187,11 @@ function StoreDetail() {
       if (modalMode === "audit") {
         await AuditInventory({ ...payload, description: "Audit from frontend" });
       } else {
-        await ChangeInventory(payload);
+        if (stockAction === "out") {
+          await inventoryOutbound(payload);
+        } else {
+          await inventoryInbound(payload);
+        }
       }
       fetchInventory(productPage);
       fetchInventoryHistory(inventoryPage);
@@ -184,7 +199,7 @@ function StoreDetail() {
       setImageFile(null);
       setProductChanges([{ productId: "", changeAmount: 0 }]);
     } catch (err) {
-      console.error(`❌ Failed to ${modalMode === "audit" ? "audit" : "change"} stock:`, err);
+      console.error(`❌ Failed to ${modalMode === "audit" ? "audit" : stockAction} stock:`, err);
     } finally {
       setChangeStockLoading(false);
     }
@@ -216,10 +231,7 @@ function StoreDetail() {
       {
         label: "Detail",
         variant: "secondary",
-        onClick: () =>
-          navigate(`/inventory-history/${item.inventoryNoteId}`, {
-            state: { store },
-          }),
+        onClick: () => setShowInventoryDetail(item.inventoryNoteId),
       },
     ]),
   };
@@ -228,6 +240,7 @@ function StoreDetail() {
     { key: "products", label: "Products", data: productData },
     { key: "inventory", label: "Inventory I/O", data: ioData },
   ];
+
   return (
     <div className="store-detail-container">
       <FullScreenModal
@@ -258,26 +271,32 @@ function StoreDetail() {
             variant: "primary",
             onClick: () => setShowModal(true),
             disabled: activeTab !== "products",
-			      roles: [Role.ADMIN]
+            roles: [Role.ADMIN],
           },
           {
             label: "Audit Stock",
             variant: "secondary",
             onClick: handleAuditStock,
             disabled: activeTab !== "products",
-			      roles: [Role.ADMIN, Role.MANAGER],
+            roles: [Role.ADMIN, Role.MANAGER],
           },
           {
-            label: "Change Stock",
-            variant: "warning",
-            onClick: handleChangeStock,
+            label: "Stock In",
+            variant: "success",
+            onClick: () => handleChangeStock("in"),
             disabled: activeTab !== "products",
-			      roles: [Role.ADMIN, Role.MANAGER],
+            roles: [Role.ADMIN, Role.MANAGER],
+          },
+          {
+            label: "Stock Out",
+            variant: "danger",
+            onClick: () => handleChangeStock("out"),
+            disabled: activeTab !== "products",
+            roles: [Role.ADMIN, Role.MANAGER],
           },
         ]}
         onTabChange={(key) => {
           setActiveTab(key);
-          // Reset page to 1 when switching tab
           if (key === "products") setProductPage(1);
           if (key === "inventory") setInventoryPage(1);
         }}
@@ -303,7 +322,12 @@ function StoreDetail() {
               controlId: "price",
               type: "number",
               value: newPrice,
-              onChange: (e) => setNewPrice(e.target.value),
+              onChange: (e) => {
+                const val = e.target.value;
+                if (!val || (/^\d+$/.test(val) && Number(val) >= 0)) {
+                  setNewPrice(val);
+                }
+              },
             },
           ]}
         />
@@ -314,8 +338,8 @@ function StoreDetail() {
           show={showChangeStockModal}
           onClose={() => {
             setShowChangeStockModal(false);
-            setProductChanges([{ productId: "", changeAmount: 0 }]); 
-            setImageFile(null); 
+            setProductChanges([{ productId: "", changeAmount: 0 }]);
+            setImageFile(null);
           }}
           onSave={handleSubmitChangeStock}
           products={products}
@@ -325,6 +349,14 @@ function StoreDetail() {
           setImageFile={setImageFile}
           loading={changeStockLoading}
           mode={modalMode}
+        />
+      )}
+
+      {showInventoryDetail && (
+        <InventoryHistoryModal
+          noteId={showInventoryDetail}
+          storeId={store?.storeId}
+          onClose={() => setShowInventoryDetail(null)}
         />
       )}
     </div>
