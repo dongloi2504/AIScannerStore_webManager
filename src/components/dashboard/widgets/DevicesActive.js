@@ -18,7 +18,7 @@ const DevicesActive = ({ count = 0 }) => {
           }}
         >
           <img
-            src="/pos.png"
+            src="./pos.png"
             alt="Devices"
             style={{ width: "7rem", height: "7rem", objectFit: "contain" }}
           />

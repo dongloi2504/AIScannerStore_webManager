@@ -18,7 +18,7 @@ const OrdersToday = ({ count = 0 }) => {
           }}
         >
           <img
-            src="/order.png"
+            src="./order.png"
             alt="Orders"
             style={{ width: "5.5rem", height: "5.5rem", objectFit: "contain" }}
           />

@@ -16,7 +16,7 @@ const PendingRequests = ({ count = 0 }) => {
           }}
         >
           <img
-            src="/report_icon.png"
+            src="./report_icon.png"
             alt="Pending"
             style={{
               width: "20rem",
