@@ -33,11 +33,9 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
   const [ruleList, setRuleList] = useState([]);
   const formRef = useRef(null);
 
-  // ✅ Auto-assign storeId if role is MANAGER
   useEffect(() => {
-      console.log("User object:", user);
     if (user?.role === "STORE_MANAGER" && promotionType !== "deposit") {
-      console.log("Auto-assigning storeId to:", user.storeId);
+
       setFormData((prev) => ({
         ...prev,
         appliedStoreId: user?.storeId || "",
@@ -95,10 +93,26 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       return;
     }
 
+    const amountNumber = Number(formData.amount);
+    if (!formData.amount && formData.amount !== 0) {
+      alert("Amount is required");
+      return;
+    }
+    console.log("Amount:", formData.amount, "IsPercentage:", formData.isPercentage);
+    if (isNaN(amountNumber) || amountNumber <= 0) {
+      alert("Amount must be a valid number greater than 0");
+      return;
+    }
+
+    if (formData.isPercentage && amountNumber > 99) {
+      alert("Percentage discount cannot exceed 99%");
+      return;
+    }
+
     const payload = {
       detail: {
         name: formData.name,
-        amount: Number(formData.amount),
+        amount: amountNumber,
         isPercentage: formData.isPercentage,
         appliedStoreId: promotionType === "deposit" ? null : formData.appliedStoreId,
       },
@@ -138,6 +152,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       console.error("Unexpected error in onSave:", err);
     }
   };
+
 
   const productOptions = products.map((p) => ({ label: p.productName, value: p.productId }));
   const storeOptions = stores.map((s) => ({ label: s.storeName, value: s.storeId }));
@@ -184,7 +199,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
           <Row className="mb-3">
             <Col md={6}>
               <Form.Label>Amount</Form.Label>
-              <Form.Control type="number" step="0.01" min={0} value={formData.amount} onChange={(e) => handleChange("amount", e.target.value)} required />
+              <Form.Control type="number" step="0.01" min={0} max={formData.isPercentage ? 99 : undefined} value={formData.amount} onChange={(e) => handleChange("amount", Number(e.target.value))} required />
             </Col>
             <Col md={6} className="d-flex align-items-end">
               <Form.Check
