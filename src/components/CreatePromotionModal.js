@@ -85,6 +85,11 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       return;
     }
 
+    if (formData.priority !== null && formData.priority < 0) {
+      alert("Priority cannot be negative");
+      return;
+    }
+
     if (
       promotionType === "deposit" &&
       (isNaN(formData.bonusWalletLifeTimeInHours) || formData.bonusWalletLifeTimeInHours < 1)
@@ -98,7 +103,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       alert("Amount is required");
       return;
     }
-    console.log("Amount:", formData.amount, "IsPercentage:", formData.isPercentage);
+
     if (isNaN(amountNumber) || amountNumber <= 0) {
       alert("Amount must be a valid number greater than 0");
       return;
@@ -107,6 +112,17 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
     if (formData.isPercentage && amountNumber > 99) {
       alert("Percentage discount cannot exceed 99%");
       return;
+    }
+
+    // Check negative values in rules
+    for (const rule of ruleList) {
+      if (rule.key === "minCountPerOrder") {
+        const val = Number(rule.value);
+        if (isNaN(val) || val < 0) {
+          alert("Minimum count per order cannot be negative");
+          return;
+        }
+      }
     }
 
     const payload = {
@@ -152,7 +168,6 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
       console.error("Unexpected error in onSave:", err);
     }
   };
-
 
   const productOptions = products.map((p) => ({ label: p.productName, value: p.productId }));
   const storeOptions = stores.map((s) => ({ label: s.storeName, value: s.storeId }));
