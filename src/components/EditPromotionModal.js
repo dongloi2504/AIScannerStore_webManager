@@ -96,12 +96,42 @@ function EditPromotionModal({ show, onClose, onSave, initialData, products, stor
             return;
         }
 
+        const amountNumber = Number(formData.amount);
+
+        if (!formData.amount && formData.amount !== 0) {
+            alert("Amount is required");
+            return;
+        }
+
+        if (isNaN(amountNumber) || amountNumber <= 0) {
+            alert("Amount must be a valid number greater than 0");
+            return;
+        }
+
+        if (formData.isPercentage && amountNumber > 99) {
+            alert("Percentage discount cannot exceed 99%");
+            return;
+        }
+
+        if (formData.priority !== null && formData.priority < 0) {
+            alert("Priority cannot be negative");
+            return;
+        }
+
+        for (const rule of ruleList) {
+            const val = Number(rule.value);
+            if ((rule.key === "minCountPerOrder" || rule.key === "minimumDeposit") && (isNaN(val) || val < 0)) {
+                alert(`Rule "${rule.key}" cannot be negative`);
+                return;
+            }
+        }
+
         const payload = {
             ...initialData,
             detail: {
                 ...initialData.detail,
                 name: formData.name,
-                amount: Number(formData.amount),
+                amount: amountNumber,
                 isPercentage: formData.isPercentage,
                 appliedStoreId: promotionType === "deposit" ? null : formData.appliedStoreId,
             },
