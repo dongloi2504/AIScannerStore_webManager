@@ -50,7 +50,17 @@ export default function PromotionManagement() {
   const [detailData, setDetailData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-
+const getErrorMessage = (error, fallback = "Unexpected error") => {
+  const data = error?.response?.data;
+  if (typeof data === "string") return data;
+  if (data?.message) return data.message;
+  if (data?.title) return data.title;
+  if (data?.errors) {
+    const firstKey = Object.keys(data.errors)[0];
+    return data.errors[firstKey]?.[0] || fallback;
+  }
+  return fallback;
+};
   useEffect(() => {
     fetchProducts();
     if (user?.role !== Role.MANAGER) {
@@ -67,8 +77,7 @@ export default function PromotionManagement() {
       const res = await getProducts({ pageNumber: 1, pageSize: 9999, isSuspended: false, storeId: isManager ? user.storeId : undefined, });
       setProducts(res.items || []);
     } catch (error) {
-      const message = error?.response?.data || "Failed to load products";
-      showToast(message, "error");
+      showToast(getErrorMessage(error, "Failed to load products"), "error");
     }
   };
 
@@ -77,8 +86,7 @@ export default function PromotionManagement() {
       const res = await getStores({ pageNumber: 1, pageSize: 9999, suspend: false });
       setStores(res.items || []);
     } catch (error) {
-      const message = error?.response?.data || "Failed to load stores";
-      showToast(message, "error");
+      showToast(getErrorMessage(error, "Failed to load products"), "error");
     }
   };
 
@@ -120,8 +128,7 @@ export default function PromotionManagement() {
       setRawPromotions(items);
       setTotalPages(Math.ceil((res.totalItem || 0) / pageSize));
     } catch (error) {
-      const message = error?.response?.data || `Failed to load ${type} promotions`;
-      showToast(message, "error");
+        showToast(getErrorMessage(error, `Failed to load ${type} promotions`), "error");
     } finally {
       setLoading(false);
     }
@@ -158,8 +165,7 @@ export default function PromotionManagement() {
       fetchPromotions(activeTab);
       return true;
     } catch (error) {
-      const message = error?.response?.data || "Failed to create promotion";
-      showToast(message, "error");
+     showToast(getErrorMessage(error, "Failed to create promotion"), "error");
     }
   };
 
@@ -172,8 +178,7 @@ export default function PromotionManagement() {
       showToast("Promotion updated successfully", "success");
       fetchPromotions(activeTab);
     } catch (error) {
-      const message = error?.response?.data || "Failed to update promotion";
-      showToast(message, "error");
+       showToast(getErrorMessage(error, "Failed to update promotion"), "error");
     } finally {
       handleCloseEdit();
     }
@@ -196,8 +201,7 @@ export default function PromotionManagement() {
       );
       fetchPromotions(activeTab);
     } catch (error) {
-      const message = error?.response?.data || "Failed to update promotion";
-      showToast(message, "error");
+     showToast(getErrorMessage(error, "Failed to update promotion"), "error");
     }
   };
 

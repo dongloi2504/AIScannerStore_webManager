@@ -35,7 +35,9 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
 
   // ✅ Auto-assign storeId if role is MANAGER
   useEffect(() => {
-    if (user?.role === "MANAGER" && promotionType !== "deposit") {
+      console.log("User object:", user);
+    if (user?.role === "STORE_MANAGER" && promotionType !== "deposit") {
+      console.log("Auto-assigning storeId to:", user.storeId);
       setFormData((prev) => ({
         ...prev,
         appliedStoreId: user?.storeId || "",
