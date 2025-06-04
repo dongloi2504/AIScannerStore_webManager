@@ -22,7 +22,6 @@ const ReportDateTimePicker = ({
   const custom_index = 5;
   const [dateTimePreset, setDateTimePreset] = useState(options[0]);
   const handleDateTimeChange = (start, end) => {
-    console.log("DATEPICKER");
     setDateTimePreset(options[custom_index]);
     typeof setStartAt === "function" && setStartAt(start);
     typeof setEndAt === "function" && setEndAt(end);
@@ -31,7 +30,6 @@ const ReportDateTimePicker = ({
   const handleSelectChange = (selected) => {
     setDateTimePreset(selected);
     var timeSpan = getDateRange(selected.value);
-    console.log("PRESET" + JSON.stringify(timeSpan));
     if(selected.value === DATE_PRESETS.custom) return;
     typeof setStartAt === "function" && setStartAt(toDateTimeLocal(timeSpan.startAt));
     typeof setEndAt === "function" && setEndAt(toDateTimeLocal(timeSpan.endAt));
@@ -41,13 +39,13 @@ const ReportDateTimePicker = ({
   return (
     <>
       <div className="search-container">
-        <Form.Label>Start Date</Form.Label>
+        <Form.Label>From</Form.Label>
         <Form.Control
           type="datetime-local"
           value={startAt || ""}
           onChange={(e) => handleDateTimeChange(e.target.value, endAt)}
         />
-        <Form.Label>End Date</Form.Label>
+        <Form.Label>To</Form.Label>
         <Form.Control
           type="datetime-local"
           value={endAt || ""}

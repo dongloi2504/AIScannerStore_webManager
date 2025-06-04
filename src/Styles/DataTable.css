@@ -9,6 +9,7 @@
 }
 .data-table {
   table-layout: auto !important;
+  margin-top: 1rem;
   width: 100%;
 }
 

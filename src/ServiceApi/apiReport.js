@@ -57,29 +57,45 @@ export function getDeviceReport({ pageNumber, pageSize, sortBy, isDescending, da
   });
 }
 
-export function exportSalesReport(storeId) {
+export function exportSalesReport({storeId, dateFrom, dateTo}) {
   return instance.get(`/api/report-export/sales/${storeId}`, {
     responseType: 'blob',
+    params: {
+      dateFrom,
+      dateTo
+    }
   });
 }
 
-export function exportInventoryReport(storeId) {
+export function exportInventoryReport({storeId, dateFrom, dateTo}) {
   return instance.get(`/api/report-export/inventory/${storeId}`, {
     responseType: 'blob',
+     params: {
+      dateFrom,
+      dateTo
+    }
   });
 }
 
 
-export function exportProductReport(storeId) {
+export function exportProductReport({storeId, dateFrom, dateTo}) {
   return instance.get(`/api/report-export/product/${storeId}`, {
     responseType: 'blob',
+     params: {
+      dateFrom,
+      dateTo
+    }
   });
 }
 
 
 
-export function exportDeviceReport(storeId) {
+export function exportDeviceReport({storeId, dateFrom, dateTo}) {
   return instance.get(`/api/report-export/device/${storeId}`, {
     responseType: 'blob',
+    params: {
+      dateFrom,
+      dateTo
+    }
   });
 }
