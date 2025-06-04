@@ -86,8 +86,8 @@ function GenericDetail({
                   key={index}
                   className="detail-image-box"
                   style={{
-                    width: "300px",
-                    height: "250px",
+                    width: "400px",
+                    height: "350px",
                     overflow: "hidden",
                     borderRadius: "8px",
                     boxShadow: "0 0 6px rgba(0,0,0,0.1)",

@@ -61,14 +61,21 @@ function LiveOrderEditModal({
               <Form.Label>Order Id</Form.Label>
               <Form.Control
                 type="text"
-				disabled
+                disabled
                 value={orderId}
               />
             </Form.Group>
           </div>
-		  {/* The images */}
-		  <div className="images-container">
-		  <div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
+          {/* The images */}
+          <div
+            className="images-container"
+            style={{
+              display: "flex",
+              justifyContent: "center", // ✅ Căn giữa ngang
+              marginBottom: "20px",     // ✅ Thêm khoảng cách dưới nếu cần
+            }}
+          >
+            <div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
               {image1 && (
                 <img
                   src={image1}
@@ -77,25 +84,8 @@ function LiveOrderEditModal({
                 />
               )}
             </div>
-			<div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
-              {image2 && (
-                <img
-                  src={image2}
-                  alt="Detail image 2"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
-            </div>
-			<div className="detail-image-box" style={{ width: "300px", height: "250px" }}>
-              {image3 && (
-                <img
-                  src={image3}
-                  alt="Detail image 3"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
-            </div>
-			</div>
+
+          </div>
 
           {/* Product change rows */}
           {productChanges.map((change, index) => (

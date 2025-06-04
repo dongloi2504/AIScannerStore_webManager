@@ -17,7 +17,7 @@ function EditPromotionModal({ show, onClose, onSave, initialData, products, stor
     const [formData, setFormData] = useState({});
     const [ruleList, setRuleList] = useState([]);
     const formRef = useRef(null);
-
+    const [formErrors, setFormErrors] = useState({});
     const [appliedDay, setAppliedDay] = useState(null);
 
     useEffect(() => {
@@ -84,47 +84,53 @@ function EditPromotionModal({ show, onClose, onSave, initialData, products, stor
         setRuleList(updated);
     };
 
+
     const handleSubmit = async () => {
         const form = formRef.current;
+        const newErrors = {};
+
         if (form && !form.checkValidity()) {
             form.reportValidity();
             return;
         }
 
-        if (!initialData || !initialData.detail) {
-            console.error("initialData or initialData.detail is undefined");
-            return;
-        }
+        if (!initialData || !initialData.detail) return;
 
         const amountNumber = Number(formData.amount);
 
+        // Validate amount
         if (!formData.amount && formData.amount !== 0) {
-            alert("Amount is required");
-            return;
+            newErrors.amount = "Amount is required";
+        } else if (isNaN(amountNumber) || amountNumber <= 0) {
+            newErrors.amount = "Amount must be a valid number greater than 0";
+        } else if (formData.isPercentage && amountNumber > 99) {
+            newErrors.amount = "Percentage discount cannot exceed 99%";
         }
 
-        if (isNaN(amountNumber) || amountNumber <= 0) {
-            alert("Amount must be a valid number greater than 0");
-            return;
-        }
-
-        if (formData.isPercentage && amountNumber > 99) {
-            alert("Percentage discount cannot exceed 99%");
-            return;
-        }
-
+        // Validate priority
         if (formData.priority !== null && formData.priority < 0) {
-            alert("Priority cannot be negative");
+            newErrors.priority = "Priority cannot be negative";
+        }
+
+        // Validate rules
+        ruleList.forEach((rule, index) => {
+            const val = Number(rule.value);
+            if (
+                (rule.key === "minCountPerOrder" || rule.key === "minimumDeposit") &&
+                (isNaN(val) || val < 0)
+            ) {
+                newErrors[`rule-${index}`] = `Rule "${rule.key}" cannot be negative`;
+            }
+        });
+
+        // If any errors exist, show them
+        if (Object.keys(newErrors).length > 0) {
+            setFormErrors(newErrors);
             return;
         }
 
-        for (const rule of ruleList) {
-            const val = Number(rule.value);
-            if ((rule.key === "minCountPerOrder" || rule.key === "minimumDeposit") && (isNaN(val) || val < 0)) {
-                alert(`Rule "${rule.key}" cannot be negative`);
-                return;
-            }
-        }
+        // No errors, proceed
+        setFormErrors({});
 
         const payload = {
             ...initialData,
@@ -196,14 +202,34 @@ function EditPromotionModal({ show, onClose, onSave, initialData, products, stor
                     <Row className="mb-3">
                         <Col md={6}>
                             <Form.Label>Priority</Form.Label>
-                            <Form.Control type="number" value={formData.priority === null ? "" : formData.priority} onChange={(e) => handleChange("priority", Number(e.target.value))} />
+                            <Form.Control
+                                type="number"
+                                value={formData.priority === null ? "" : formData.priority}
+                                onChange={(e) => handleChange("priority", Number(e.target.value))}
+                                isInvalid={formErrors.priority}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Priority cannot be negative
+                            </Form.Control.Feedback>
                         </Col>
                     </Row>
 
                     <Row className="mb-3">
                         <Col md={6}>
                             <Form.Label>Amount</Form.Label>
-                            <Form.Control type="number" step="0.01" value={formData.amount || 0} onChange={(e) => handleChange("amount", e.target.value)} required min="0" />
+                            <Form.Control
+                                type="number"
+                                step="0.01"
+                                value={formData.amount || ""}
+                                onChange={(e) => handleChange("amount", e.target.value)}
+                                required
+                                min="0"
+                                max={formData.isPercentage ? 99 : undefined}
+                                isInvalid={formErrors.amount}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {formData.isPercentage ? "Value must be ≤ 99%" : "Amount must be greater than 0"}
+                            </Form.Control.Feedback>
                         </Col>
                         <Col md={6} className="d-flex align-items-end">
                             <Form.Check type="checkbox" label="Is Percentage?" checked={formData.isPercentage || false} onChange={(e) => handleChange("isPercentage", e.target.checked)} />

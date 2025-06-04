@@ -35,28 +35,40 @@ function OrderDetailPopup({ orderId, show, onClose }) {
     }
   };
 
-  const galleryImages = [order?.image1, order?.image2, order?.image3].filter(Boolean);
+  const galleryImages = [order?.image1].filter(Boolean);
 
   const infoRows = order ? [
     { label: "Order Code", value: order.orderCode },
     { label: "Device Code", value: order.device?.deviceCode || "N/A" },
     { label: "Store Code", value: order.device?.store?.storeCode || "N/A" },
+    { label: "Total Before Discount", value: `${(order.totalBeforeDiscount || order.total + order.discount || 0).toLocaleString()}₫` },
+    { label: "Order Discount", value: `${(order.orderDiscount || 0).toLocaleString()}₫` },
     { label: "Total", value: `${order.total.toLocaleString()}₫` },
     { label: "Status", value: order.status },
     { label: "Created Date", value: new Date(order.createdDate).toLocaleString() },
   ] : [];
 
   const productData = order ? {
-    columns: ["Product Name", "Category", "Count", "Unit Price", "Total"],
+    columns: [
+      "Product Name",
+      "Category",
+      "Count",
+      "Unit Price",
+      "Total Before",
+      "Discount",
+      "Total"
+    ],
     rows: order.items?.length > 0
       ? order.items.map((item) => [
-          item.productName,
-          item.categoryName,
-          item.count,
-          `${item.unitPrice.toLocaleString()}₫`,
-          `${item.total.toLocaleString()}₫`,
-        ])
-      : [["No products", "", "", "", ""]],
+        item.productName,
+        item.categoryName,
+        item.count,
+        `${item.unitPrice.toLocaleString()}₫`,
+        `${(item.totalBeforeDiscount || 0).toLocaleString()}₫`,
+        `${(item.discount || 0).toLocaleString()}₫`,
+        `${item.total.toLocaleString()}₫`,
+      ])
+      : [["No products", "", "", "", "","", ""]],
   } : { columns: [], rows: [] };
 
   return (

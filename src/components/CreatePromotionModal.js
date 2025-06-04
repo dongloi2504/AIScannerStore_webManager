@@ -29,8 +29,8 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
     appliedDayOfWeek: promotionType === "deposit" ? { label: "SUN", value: "SUN" } : null,
     productId: ""
   });
-
   const [ruleList, setRuleList] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
   const formRef = useRef(null);
 
   useEffect(() => {
@@ -67,63 +67,64 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
   const usedRuleKeys = ruleList.map((r) => r.key);
   const ruleOptions = availableRules.filter((r) => !usedRuleKeys.includes(r.key));
   const dayOptions = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((d) => ({ label: d, value: d }));
-
   const handleSubmit = async () => {
     const form = formRef.current;
+    const errors = {};
+
     if (form && !form.checkValidity()) {
       form.reportValidity();
       return;
     }
 
+    const amountNumber = Number(formData.amount);
+
+    // Validate Store
     if (promotionType !== "deposit" && formData.appliedStoreId !== null && !formData.appliedStoreId) {
-      alert("Please select a store or check All Store");
-      return;
+      errors.appliedStoreId = "Please select a store or check All Store";
     }
 
-    if (formData.priority !== null && formData.priority === "") {
-      alert("Please set priority or check Highest Priority");
-      return;
+    // Validate Priority
+    if (formData.priority === "") {
+      errors.priority = "Please set priority or check Highest Priority";
+    } else if (formData.priority !== null && formData.priority < 0) {
+      errors.priority = "Priority cannot be negative";
     }
 
-    if (formData.priority !== null && formData.priority < 0) {
-      alert("Priority cannot be negative");
-      return;
-    }
 
+    // Validate Bonus Wallet Lifetime
     if (
       promotionType === "deposit" &&
       (isNaN(formData.bonusWalletLifeTimeInHours) || formData.bonusWalletLifeTimeInHours < 1)
     ) {
-      alert("Time to use bonus wallet must be longer than 1 hour");
-      return;
+      errors.bonusWalletLifeTimeInHours = "Time to use bonus wallet must be at least 1 hour";
     }
 
-    const amountNumber = Number(formData.amount);
+    // Validate Amount
     if (!formData.amount && formData.amount !== 0) {
-      alert("Amount is required");
-      return;
+      errors.amount = "Amount is required";
+    } else if (isNaN(amountNumber) || amountNumber <= 0) {
+      errors.amount = "Amount must be a valid number greater than 0";
+    } else if (formData.isPercentage && amountNumber > 99) {
+      errors.amount = "Percentage discount cannot exceed 99%";
     }
 
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      alert("Amount must be a valid number greater than 0");
-      return;
-    }
-
-    if (formData.isPercentage && amountNumber > 99) {
-      alert("Percentage discount cannot exceed 99%");
-      return;
-    }
-
-    // Check negative values in rules
-    for (const rule of ruleList) {
-      if (rule.key === "minCountPerOrder") {
-        const val = Number(rule.value);
-        if (isNaN(val) || val < 0) {
-          alert("Minimum count per order cannot be negative");
-          return;
-        }
+    // Validate Rule Values
+    ruleList.forEach((rule, index) => {
+      const val = Number(rule.value);
+      if (
+        (rule.key === "minCountPerOrder" || rule.key === "minimumDeposit") &&
+        (isNaN(val) || val < 0)
+      ) {
+        errors[`rule-${index}`] = `Value for rule "${rule.key}" cannot be negative`;
       }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
     }
+
+    setFormErrors({}); // Clear if no errors
 
     const payload = {
       detail: {
@@ -169,6 +170,7 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
     }
   };
 
+
   const productOptions = products.map((p) => ({ label: p.productName, value: p.productId }));
   const storeOptions = stores.map((s) => ({ label: s.storeName, value: s.storeId }));
 
@@ -197,9 +199,12 @@ function CreatePromotionModal({ show, onClose, onSave, products, stores, loading
               <Form.Control
                 type="number"
                 value={formData.priority === null ? "" : formData.priority}
-                disabled={formData.priority === null}
                 onChange={(e) => handleChange("priority", Number(e.target.value))}
+                isInvalid={!!formErrors.priority}
               />
+              <Form.Control.Feedback type="invalid">
+                {formErrors.priority}
+              </Form.Control.Feedback>
             </Col>
             <Col md={6} className="d-flex align-items-end">
               <Form.Check
