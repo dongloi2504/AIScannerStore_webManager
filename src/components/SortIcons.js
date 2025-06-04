@@ -1,19 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 
 
-const SortIcons = ({ field, currentField, isDescending, onChange, onClear }) => {
+const SortIcons = ({ field, currentField, isDescending, onChange, onClear, setCurrentField }) => {
     const isActive = currentField === field;
-
     const handleToggle = () => {
         if (!isActive) {
+            typeof setCurrentField === "function" && setCurrentField(field);
             onChange(false); // tăng dần
         } else if (!isDescending) {
             onChange(true); // giảm dần
         } else {
             // 🛡 Kiểm tra tồn tại rồi mới gọi
-            if (typeof onClear === "function") {
-                onClear(); // tắt sort
-            }
+            typeof setCurrentField === "function" && setCurrentField(null);
+            typeof onClear === "function" && onClear(); // tắt sort
         }
     };
 

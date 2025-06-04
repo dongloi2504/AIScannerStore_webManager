@@ -301,8 +301,8 @@ const BusinessDashboard = ({ storeId }) => {
         pageSize: inventoryPageSize,
         staffName: inventoryFilters.staffName,
         type: inventoryFilters.type,
-        dateFrom: from,
-        dateTo: to,
+        dateFrom: from ?? startAt,
+        dateTo: to ?? endAt,
       });
       const formatted = res?.items.map((item) => ({
         staff: item.staff?.staffName || "system",
@@ -444,7 +444,27 @@ const BusinessDashboard = ({ storeId }) => {
               { key: "productCode", label: "Product Code" },
               { key: "productName", label: "Product Name" },
               { key: "categoryName", label: "Category Name" },
-              { key: "avgCountPerOrder", label: "Average Count/Order" },
+              { key: "avgCountPerOrder",
+                label: (
+                   <span>
+                    Average Count/Order
+                    <SortIcons
+                      field="averageCountPerOrder"
+                      currentField={sortField}
+                      isDescending={isDescending}
+                      onChange={(desc) => {
+                        setSortField("averageCountPerOrder");
+                        setIsDescending(desc);
+                        setProductPageNumber(1);
+                      }}
+                      onClear={() => {
+                        setSortField(null);
+                        setIsDescending(true);
+                        setProductPageNumber(1);
+                      }}
+                    />
+                  </span>
+                )},
               {
                 key: "successOrderCount",
                 label: (
@@ -461,7 +481,7 @@ const BusinessDashboard = ({ storeId }) => {
                       }}
                       onClear={() => {
                         setSortField(null);
-                        setIsDescending(null);
+                        setIsDescending(true);
                         setProductPageNumber(1);
                       }}
                     />
@@ -474,7 +494,7 @@ const BusinessDashboard = ({ storeId }) => {
                   <span>
                     Correction Order Count
                     <SortIcons
-                      field="correctionOrderPercentage"
+                      field="correctionOrderCount"
                       currentField={sortField}
                       isDescending={isDescending}
                       onChange={(desc) => {
@@ -484,7 +504,7 @@ const BusinessDashboard = ({ storeId }) => {
                       }}
                       onClear={() => {
                         setSortField(null);
-                        setIsDescending(null);
+                        setIsDescending(true);
                         setProductPageNumber(1);
                       }}
                     />
@@ -507,7 +527,7 @@ const BusinessDashboard = ({ storeId }) => {
                       }}
                       onClear={() => {
                         setSortField(null);
-                        setIsDescending(null);
+                        setIsDescending(true);
                         setProductPageNumber(1);
                       }}
                     />
@@ -901,14 +921,13 @@ const BusinessDashboard = ({ storeId }) => {
                       <SortIcons
                         field="editOrderCount"
                         currentField={deviceSortField}
+                        setCurrentField={setDeviceSortField}
                         isDescending={deviceIsDescending}
                         onChange={(desc) => {
-                          setDeviceSortField("editOrderCount");
                           setDeviceIsDescending(desc);
                           setDevicePageNumber(1);
                         }}
                         onClear={() => {
-                          setDeviceSortField(null);
                           setDeviceIsDescending(true);
                           setDevicePageNumber(1);
                         }}
