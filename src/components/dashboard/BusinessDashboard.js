@@ -91,6 +91,11 @@ const BusinessDashboard = ({ storeId }) => {
   }, [deviceSortField, deviceIsDescending, devicePageNumber, activeTab]);
 
   useEffect(() => {
+    if (activeTab === "product") {
+      fetchProductReport();
+    }
+  }, [activeTab, sortField, isDescending, productPageNumber]);
+  useEffect(() => {
     if (!storeId) return;
     fetchData(true);
     fetchProductDropdown();
@@ -120,11 +125,11 @@ const BusinessDashboard = ({ storeId }) => {
     }
   };
   useEffect(() => {
-    if (activeTab === "product") fetchProductReport();
-    if (activeTab === "sales") fetchSalesData();
-    if (activeTab === "devices") fetchDeviceReport();
-  }, [activeTab, productPageNumber, devicePageNumber]);
-
+    if (activeTab === "sales") {
+      fetchSalesData();
+    }
+  }, [activeTab]);
+  
   useEffect(() => {
     if (activeTab === "inventory") {
       fetchInventoryHistory();
@@ -437,13 +442,11 @@ const BusinessDashboard = ({ storeId }) => {
                         setSortField("successOrderCount");
                         setIsDescending(desc);
                         setProductPageNumber(1);
-                        fetchProductReport();
                       }}
                       onClear={() => {
                         setSortField(null);
                         setIsDescending(null);
                         setProductPageNumber(1);
-                        fetchProductReport();
                       }}
                     />
                   </span>
@@ -462,13 +465,11 @@ const BusinessDashboard = ({ storeId }) => {
                         setSortField("correctionOrderCount");
                         setIsDescending(desc);
                         setProductPageNumber(1);
-                        fetchProductReport();
                       }}
                       onClear={() => {
                         setSortField(null);
                         setIsDescending(null);
                         setProductPageNumber(1);
-                        fetchProductReport();
                       }}
                     />
                   </span>
@@ -486,12 +487,12 @@ const BusinessDashboard = ({ storeId }) => {
                       onChange={(desc) => {
                         setSortField("totalRevenue");
                         setIsDescending(desc);
-                        fetchProductReport();
+                        setProductPageNumber(1);
                       }}
                       onClear={() => {
                         setSortField(null);
                         setIsDescending(null);
-                        fetchProductReport();
+                        setProductPageNumber(1);
                       }}
                     />
                   </span>
