@@ -6,9 +6,11 @@ import OrderStatusByHour from "./widgets/OrderStatusByHour";
 import RevenueSummary from "./widgets/RevenueSummary";
 import PendingRequests from "./widgets/PendingRequests";
 import SalesByDay from "../SalesByDay";
+import ReportDateTimePicker from "../ReportDateTimePicker";
 import { getProducts } from "../../ServiceApi/apiAdmin";
 import { getCategory } from "../../ServiceApi/apiCatetory";
 import Select from "react-select";
+import { DATE_PRESETS, getDateRange, toDateTimeLocal } from "../../const/DateRange";
 import {
   getStoreDashboardReport,
   getProductReport,
@@ -70,6 +72,10 @@ const BusinessDashboard = ({ storeId }) => {
     productName: "",
     categoryName: "",
   });
+
+  const defaultTimeSpan = getDateRange(DATE_PRESETS.last_28_days);
+  const [startAt, setStartAt] = useState(toDateTimeLocal(defaultTimeSpan.startAt));
+  const [endAt, setEndAt] = useState(toDateTimeLocal(defaultTimeSpan.endAt));
   const [inventoryFilters, setInventoryFilters] = useState({
     staffName: "",
     type: "",
@@ -169,9 +175,9 @@ const BusinessDashboard = ({ storeId }) => {
     }
   };
 
-  const fetchSalesData = async () => {
+  const fetchSalesData = async (start, end) => {
     try {
-      const res = await getSalesReport({ storeId });
+      const res = await getSalesReport({ storeId, dateFrom:start ?? startAt, dateTo:end ?? endAt });
       const formatted = res.sales.map((item) => ({
         date: new Date(item.date).toLocaleDateString("vi-VN"),
         revenue: item.revenue,
@@ -183,6 +189,14 @@ const BusinessDashboard = ({ storeId }) => {
       console.error("Failed to fetch sales report", err);
     }
   };
+
+  const onDateTimeChange = async (start, end) => {
+    await fetchSalesData(start, end);
+  };
+  const onSelectChange = async (value) => {
+    let timespan = getDateRange(value);
+    await fetchSalesData(timespan.startAt, timespan.endAt);
+  }
   const handleExportSales = async () => {
     try {
       const response = await exportSalesReport(storeId);
@@ -445,7 +459,7 @@ const BusinessDashboard = ({ storeId }) => {
                       currentField={sortField}
                       isDescending={isDescending}
                       onChange={(desc) => {
-                        setSortField("correctionOrderPercentage");
+                        setSortField("correctionOrderCount");
                         setIsDescending(desc);
                         setProductPageNumber(1);
                         fetchProductReport();
@@ -667,6 +681,14 @@ const BusinessDashboard = ({ storeId }) => {
                 Export Sales Report
               </button>
             </div>
+            <ReportDateTimePicker 
+              endAt={endAt}
+              setEndAt={setEndAt}
+              setStartAt={setStartAt}
+              startAt={startAt}
+              onDatePickerChange={onDateTimeChange}
+              onPresetChange={onSelectChange}
+            />
             <SalesByDay data={salesData} totalRevenue={totalRevenue} average={average} />
           </>
         )

@@ -8,6 +8,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import ReportDateTimePicker from "./ReportDateTimePicker";
 
 const SalesByDay = ({ data, totalRevenue, average }) => {
   // Dữ liệu giả định đã được xử lý định dạng (ví dụ: date đã là "dd/MM/yyyy")
@@ -24,7 +25,7 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
             <XAxis
               dataKey="date"
               label={{
-                value: "Ngày",
+                value: "Date",
                 position: "insideBottomRight",
                 offset: -5,
               }}
@@ -57,26 +58,18 @@ const SalesByDay = ({ data, totalRevenue, average }) => {
         </ResponsiveContainer>
       </div>
       {/* Hiển thị Total Revenue và Average bên dưới biểu đồ */}
-      <div style={{ textAlign: "center", marginTop: "1rem" }}>
-        <div>
-          <strong>Total Revenue: </strong>
-          <span>
-            {Number(totalRevenue).toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })}
-          </span>
-        </div>
-        <div>
-          <strong>Average: </strong>
-          <span>
-            {Number(average).toLocaleString("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            })}
-          </span>
-        </div>
+      <div className="dashboard-widget">
+      <h3>Revenue Summary</h3>
+      <div className="revenue-row">
+        <span>Total Revenue</span>
+        <strong>{totalRevenue.toLocaleString()}₫</strong>
       </div>
+      <div className="divider" />
+      <div className="revenue-row">
+        <span>Average Revenue per Day</span>
+        <strong>{average.toLocaleString()}₫</strong>
+      </div>
+    </div>
     </div>
   );
 };

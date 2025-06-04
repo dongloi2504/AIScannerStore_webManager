@@ -72,12 +72,12 @@ const OrderStatusChart = () => {
               textAnchor="end"
               interval={0}
               height={70}
-              label={{ value: "Ngày", position: "insideBottom", offset: -40 }}
+              label={{ value: "Date", position: "insideBottom", offset: -40 }}
             />
             <YAxis
               allowDecimals={false}
               label={{
-                value: "Số lượng đơn",
+                value: "Order Count",
                 angle: -90,
                 position: "insideLeft",
                 offset: 10,
