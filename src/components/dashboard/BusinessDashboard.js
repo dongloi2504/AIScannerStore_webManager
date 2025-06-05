@@ -73,7 +73,12 @@ const BusinessDashboard = ({ storeId }) => {
     productName: "",
     categoryName: "",
   });
-
+  const [exportLoading, setExportLoading] = useState({
+    sales: false,
+    product: false,
+    inventory: false,
+    device: false,
+  });
   const defaultTimeSpan = getDateRange(DATE_PRESETS.last_28_days);
   const [startAt, setStartAt] = useState(toDateTimeLocal(defaultTimeSpan.startAt));
   const [endAt, setEndAt] = useState(toDateTimeLocal(defaultTimeSpan.endAt));
@@ -130,7 +135,7 @@ const BusinessDashboard = ({ storeId }) => {
       fetchSalesData();
     }
   }, [activeTab]);
-  
+
   useEffect(() => {
     if (activeTab === "inventory") {
       fetchInventoryHistory();
@@ -183,7 +188,7 @@ const BusinessDashboard = ({ storeId }) => {
 
   const fetchSalesData = async (start, end) => {
     try {
-      const res = await getSalesReport({ storeId, dateFrom:start ?? startAt, dateTo:end ?? endAt });
+      const res = await getSalesReport({ storeId, dateFrom: start ?? startAt, dateTo: end ?? endAt });
       const formatted = res.sales.map((item) => ({
         date: new Date(item.date).toLocaleDateString("vi-VN"),
         revenue: item.revenue,
@@ -198,23 +203,22 @@ const BusinessDashboard = ({ storeId }) => {
 
 
   const onDateTimeChange = async (start, end, callback) => {
-    typeof(callback) === "function" && await callback(start,end);
+    typeof (callback) === "function" && await callback(start, end);
   }
 
   const onSelectChange = async (value, callback) => {
     let timespan = getDateRange(value);
-    typeof(callback) === "function" && await callback(timespan.startAt, timespan.endAt);
+    typeof (callback) === "function" && await callback(timespan.startAt, timespan.endAt);
   }
   const onSalesReportDateTimeChange = async (start, end) => {
     await fetchSalesData(start, end);
   };
-  const onSalesReportSelectChange = async (value) => 
-  { 
+  const onSalesReportSelectChange = async (value) => {
     await onSelectChange(value, fetchSalesData);
   };
 
   const onDeviceDateChange = async (start, end) => {
-    await onDateTimeChange(start,end, fetchDeviceReport);
+    await onDateTimeChange(start, end, fetchDeviceReport);
   }
 
   const onDeviceSelectChange = async (value) => {
@@ -222,28 +226,41 @@ const BusinessDashboard = ({ storeId }) => {
   }
 
   const handleExportSales = async () => {
+    setExportLoading((prev) => ({ ...prev, sales: true }));
     try {
-      const response = await exportSalesReport({
-        storeId,
-        dateFrom: startAt,
-        dateTo: endAt,
-      });
-      let filename = `sales_report_${storeId}.xlsx`;
-      downloadFile(response, filename);
+      const response = await exportSalesReport(storeId);
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `sales_report_${storeId}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (err) {
       console.error("Failed to export sales report", err);
+    } finally {
+      setExportLoading((prev) => ({ ...prev, sales: false }));
     }
   };
 
-  const handleExportGeneric = async (exportFunc, fileName, args) => {
+  const handleExportGeneric = async (exportFunc, fileName, key) => {
+    setExportLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      const response = await exportFunc(args);
-      let file = `${fileName}_${storeId}_${Date.now()}.xlsx`;
-      downloadFile(response, file);
+      const response = await exportFunc(storeId);
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${fileName}_${storeId}_${Date.now()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (err) {
       console.error(`Failed to export ${fileName}`, err);
+    } finally {
+      setExportLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
+
 
 
   const fetchProductReport = async () => {
@@ -429,11 +446,12 @@ const BusinessDashboard = ({ storeId }) => {
           <div style={{ textAlign: "right", marginBottom: "10px" }}>
             <button
               className="btn btn-primary"
-              onClick={() => handleExportGeneric(exportProductReport, "product_report",
-                {storeId, dateFrom:startAt, dateTo:endAt})}
+              onClick={() => handleExportGeneric(exportProductReport, "product_report", "product")}
+              disabled={exportLoading.product}
             >
-              Export Product Report
+              {exportLoading.product ? "Exporting..." : "Export Product Report"}
             </button>
+
           </div>
 
           <DataTable
@@ -444,9 +462,10 @@ const BusinessDashboard = ({ storeId }) => {
               { key: "productCode", label: "Product Code" },
               { key: "productName", label: "Product Name" },
               { key: "categoryName", label: "Category Name" },
-              { key: "avgCountPerOrder",
+              {
+                key: "avgCountPerOrder",
                 label: (
-                   <span>
+                  <span>
                     Average Count/Order
                     <SortIcons
                       field="averageCountPerOrder"
@@ -464,7 +483,8 @@ const BusinessDashboard = ({ storeId }) => {
                       }}
                     />
                   </span>
-                )},
+                )
+              },
               {
                 key: "successOrderCount",
                 label: (
@@ -592,16 +612,16 @@ const BusinessDashboard = ({ storeId }) => {
                 ),
               },
               {
-                label:"Time From",
+                label: "Time From",
                 type: "custom",
-                element:(
-                  <ReportDateTimePicker 
+                element: (
+                  <ReportDateTimePicker
                     endAt={endAt}
                     startAt={startAt}
                     setEndAt={setEndAt}
                     setStartAt={setStartAt}
-                    onDatePickerChange={() => {}}
-                    onPresetChange={() => {}}
+                    onDatePickerChange={() => { }}
+                    onPresetChange={() => { }}
                   />
                 )
               }
@@ -629,10 +649,17 @@ const BusinessDashboard = ({ storeId }) => {
           <div style={{ textAlign: "right", marginBottom: "10px" }}>
             <button
               className="btn btn-primary"
-              onClick={() => handleExportGeneric(exportInventoryReport, "inventory_report",
-                {storeId, dateFrom:startAt, dateTo:endAt})}
+              onClick={() =>
+                handleExportGeneric(
+                  exportInventoryReport,
+                  "inventory_report",
+                  "inventory",
+                  { storeId, dateFrom: startAt, dateTo: endAt }
+                )
+              }
+              disabled={exportLoading.inventory}
             >
-              Export Inventory Report
+              {exportLoading.inventory ? "Exporting..." : "Export Inventory Report"}
             </button>
           </div>
           <div style={{ display: "flex", gap: "10px", marginBottom: "1rem", alignItems: "flex-end" }}>
@@ -689,13 +716,13 @@ const BusinessDashboard = ({ storeId }) => {
                 }
               />
             </div>
-            <ReportDateTimePicker 
+            <ReportDateTimePicker
               endAt={endAt}
               startAt={startAt}
               setEndAt={setEndAt}
               setStartAt={setStartAt}
-              onDatePickerChange={() => {}}
-              onPresetChange={() => {}}
+              onDatePickerChange={() => { }}
+              onPresetChange={() => { }}
             />
             <button
               className="btn btn-secondary"
@@ -733,11 +760,15 @@ const BusinessDashboard = ({ storeId }) => {
         activeTab === "sales" && (
           <>
             <div style={{ textAlign: "right", marginBottom: "10px" }}>
-              <button className="btn btn-primary" onClick={handleExportSales}>
-                Export Sales Report
+              <button
+                className="btn btn-primary"
+                onClick={handleExportSales}
+                disabled={exportLoading.sales}
+              >
+                {exportLoading.sales ? "Exporting..." : "Export Sales Report"}
               </button>
             </div>
-            <ReportDateTimePicker 
+            <ReportDateTimePicker
               endAt={endAt}
               setEndAt={setEndAt}
               setStartAt={setStartAt}
@@ -756,15 +787,20 @@ const BusinessDashboard = ({ storeId }) => {
             <div style={{ textAlign: "right", marginBottom: "10px" }}>
               <button
                 className="btn btn-primary"
-                onClick={() => handleExportGeneric(
-                  exportDeviceReport, 
-                  "device_report", 
-                  { storeId, dateFrom: startAt, dateTo:endAt })}
+                onClick={() =>
+                  handleExportGeneric(
+                    exportDeviceReport,
+                    "device_report",
+                    "device",
+                    { storeId, dateFrom: startAt, dateTo: endAt }
+                  )
+                }
+                disabled={exportLoading.device}
               >
-                Export Device Report
+                {exportLoading.device ? "Exporting..." : "Export Device Report"}
               </button>
             </div>
-            <ReportDateTimePicker 
+            <ReportDateTimePicker
               endAt={endAt}
               startAt={startAt}
               setEndAt={setEndAt}
