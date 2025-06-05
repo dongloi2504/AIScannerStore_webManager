@@ -50,17 +50,17 @@ export default function PromotionManagement() {
   const [detailData, setDetailData] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(false);
-const getErrorMessage = (error, fallback = "Unexpected error") => {
-  const data = error?.response?.data;
-  if (typeof data === "string") return data;
-  if (data?.message) return data.message;
-  if (data?.title) return data.title;
-  if (data?.errors) {
-    const firstKey = Object.keys(data.errors)[0];
-    return data.errors[firstKey]?.[0] || fallback;
-  }
-  return fallback;
-};
+  const getErrorMessage = (error, fallback = "Unexpected error") => {
+    const data = error?.response?.data;
+    if (typeof data === "string") return data;
+    if (data?.message) return data.message;
+    if (data?.title) return data.title;
+    if (data?.errors) {
+      const firstKey = Object.keys(data.errors)[0];
+      return data.errors[firstKey]?.[0] || fallback;
+    }
+    return fallback;
+  };
   useEffect(() => {
     fetchProducts();
     if (user?.role !== Role.MANAGER) {
@@ -128,7 +128,7 @@ const getErrorMessage = (error, fallback = "Unexpected error") => {
       setRawPromotions(items);
       setTotalPages(Math.ceil((res.totalItem || 0) / pageSize));
     } catch (error) {
-        showToast(getErrorMessage(error, `Failed to load ${type} promotions`), "error");
+      showToast(getErrorMessage(error, `Failed to load ${type} promotions`), "error");
     } finally {
       setLoading(false);
     }
@@ -165,7 +165,7 @@ const getErrorMessage = (error, fallback = "Unexpected error") => {
       fetchPromotions(activeTab);
       return true;
     } catch (error) {
-     showToast(getErrorMessage(error, "Failed to create promotion"), "error");
+      showToast(getErrorMessage(error, "Failed to create promotion"), "error");
     }
   };
 
@@ -178,7 +178,7 @@ const getErrorMessage = (error, fallback = "Unexpected error") => {
       showToast("Promotion updated successfully", "success");
       fetchPromotions(activeTab);
     } catch (error) {
-       showToast(getErrorMessage(error, "Failed to update promotion"), "error");
+      showToast(getErrorMessage(error, "Failed to update promotion"), "error");
     } finally {
       handleCloseEdit();
     }
@@ -201,7 +201,7 @@ const getErrorMessage = (error, fallback = "Unexpected error") => {
       );
       fetchPromotions(activeTab);
     } catch (error) {
-     showToast(getErrorMessage(error, "Failed to update promotion"), "error");
+      showToast(getErrorMessage(error, "Failed to update promotion"), "error");
     }
   };
 
@@ -282,13 +282,19 @@ const getErrorMessage = (error, fallback = "Unexpected error") => {
                 label: "Edit",
                 variant: "outline-warning",
                 onClick: () => handleEdit(item.id),
-                roles: [Role.ADMIN],
+                roles:
+                  activeTab === "product" || activeTab === "order"
+                    ? [Role.ADMIN, Role.MANAGER]
+                    : [Role.ADMIN],
               },
               {
                 label: item.isSuspended ? "Unsuspend" : "Suspend",
                 variant: item.isSuspended ? "outline-success" : "outline-danger",
                 onClick: () => handleToggleSuspend(item.id, item.isSuspended),
-                roles: [Role.ADMIN],
+                roles:
+                  activeTab === "product" || activeTab === "order"
+                    ? [Role.ADMIN, Role.MANAGER]
+                    : [Role.ADMIN],
               },
             ]}
             extraButtons={[
